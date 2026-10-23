@@ -1,0 +1,54 @@
+import 'package:dio/dio.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/repository/crop_repository.dart';
+
+class CropScheduleUsecases {
+  final CropRepository cropRepository;
+
+  CropScheduleUsecases(this.cropRepository);
+
+  Future<ScheduleResponseEntity> getFarmerScheduleList(
+    String farmerId,
+
+    String fromDate,
+    String toDate,
+  ) {
+    return cropRepository.getFarmerScheduleList(farmerId, fromDate, toDate);
+  }
+
+  Future<PlotResponseEntity> getPlotList(
+    String farmerId,
+
+    String plotName,
+    String cropId,
+    String startLimit,
+  ) {
+    return cropRepository.getPlotList(farmerId, plotName, cropId,startLimit);
+  }
+
+  Future<ScheduleByPlotResponseEntity> getScheduleListByPlot(
+    String farmerId,
+
+    String plotId,
+    String cropId,
+
+    String fromDate,
+    String toDate,
+    String startLimit,
+  ) {
+    return cropRepository.getScheduleListByPlot(
+      farmerId,
+      plotId,
+      cropId,
+      fromDate,
+      toDate,
+      startLimit,
+    );
+  }
+
+  Future<Response> updateScheduleStatus(String scheduleId, String farmerId) {
+    return cropRepository.updateScheduleStatus(scheduleId, farmerId);
+  }
+}
