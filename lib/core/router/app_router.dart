@@ -4,6 +4,7 @@ import 'package:farmer_consultant/features/crop_schedule/presentation/pages/crop
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot_list.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:farmer_consultant/features/login/presentation/pages/login_screen.dart';
+import 'package:farmer_consultant/features/notification/presentation/pages/notifications.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_product_entity.dart';
 import 'package:farmer_consultant/features/products/presentation/pages/product_details.dart';
@@ -29,6 +30,7 @@ class AppRouter {
   static const String productEnquiry = '/productEnquiry';
   static const String plotList = '/plotList';
   static const String cropScheduleByPlot = '/cropScheduleByPlot';
+    static const String notification = '/notification';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -103,6 +105,21 @@ class AppRouter {
           final plotId = state.extra as String? ?? '';
 
           return CropSchedulByPlot(plotId: plotId);
+        },
+      ),
+
+      
+      GoRoute(
+        path: notification,
+        name: 'notification',
+        builder: (context, state) {
+          final userId = state.extra is String
+              ? int.tryParse(state.extra as String) ?? 0
+              : state.extra is int
+              ? state.extra as int
+              : 0;
+
+          return NotificationPage(userId: userId, isLogin: true, userType: '');
         },
       ),
 

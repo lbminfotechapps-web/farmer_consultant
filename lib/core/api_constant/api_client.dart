@@ -17,4 +17,6 @@ class ApiClient {
   static const String getPlotwiseScheduleList = "/getPlotwiseScheduleList";
 
   static const String updateSchedule = "/updateSchedule";
+
+    static const String getNotificationList = "/getNotificationList";
 }
