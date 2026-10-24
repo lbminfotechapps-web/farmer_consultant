@@ -8,6 +8,7 @@ import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_event.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_state.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashboard_action.dart';
+import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashboarrd_menu.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/farmer_banner.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_event.dart';
@@ -189,64 +190,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // Smart Farming Banner
               const FarmingBanner(),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 15),
 
               // Quick Actions
+              // Row(
+              //   children: [
+              //     // Expanded(
+              //     //   child: DashboardQuickAction(
+              //     //     title: 'Crop Care',
+              //     //     icon: Icons.yard_rounded,
+              //     //     onTap: onCropCareTap ?? () {},
+              //     //   ),
+              //     // ),
+              //     // Expanded(
+              //     //   child: DashboardQuickAction(
+              //     //     title: 'Disease Check',
+              //     //     icon: Icons.health_and_safety_outlined,
+              //     //     onTap: onDiseaseCheckTap ?? () {},
+              //     //   ),
+              //     // ),
+              //     Expanded(
+              //       child: DashboardQuickAction(
+              //         title: 'Weather',
+              //         icon: Icons.wb_cloudy_outlined,
+              //         onTap:
+              //             widget.onWeatherTap ??
+              //             () {
+              //               WeatherCardDialog.show(context);
+              //             },
+              //       ),
+              //     ),
+              //     Expanded(
+              //       child: DashboardQuickAction(
+              //         title: 'My Plots',
+              //         icon: Icons.grass_rounded,
+              //         // iconColor: context.appColors.secondary,
+              //         onTap:
+              //             widget.onMyFieldsTap ??
+              //             () {
+              //               context.push(AppRouter.plotList);
+              //             },
+              //       ),
+              //     ),
+              //   ],
+              // ),
               Row(
                 children: [
-                  // Expanded(
-                  //   child: DashboardQuickAction(
-                  //     title: 'Crop Care',
-                  //     icon: Icons.yard_rounded,
-                  //     onTap: onCropCareTap ?? () {},
-                  //   ),
-                  // ),
-                  // Expanded(
-                  //   child: DashboardQuickAction(
-                  //     title: 'Disease Check',
-                  //     icon: Icons.health_and_safety_outlined,
-                  //     onTap: onDiseaseCheckTap ?? () {},
-                  //   ),
-                  // ),
-                  Expanded(
-                    child: DashboardQuickAction(
-                      title: 'Weather',
-                      icon: Icons.wb_cloudy_outlined,
-                      onTap:
-                          widget.onWeatherTap ??
-                          () {
-                            WeatherCardDialog.show(context);
-                          },
-                    ),
-                  ),
-                  Expanded(
-                    child: DashboardQuickAction(
-                      title: 'My Plots',
-                      icon: Icons.grass_rounded,
-                      // iconColor: context.appColors.secondary,
-                      onTap:
-                          widget.onMyFieldsTap ??
-                          () {
-                            context.push(AppRouter.plotList);
-                          },
+                  Icon(Icons.local_activity_outlined, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Today's Activities",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 23),
-
-              Divider(height: 1, color: context.borderColor),
-
-              const SizedBox(height: 18),
-
-              // Today's Activities Header
-              Text(
-                "Today's Activities",
-                style: context.appTextStyles.sectionTitle,
-              ),
-
-              const SizedBox(height: 13),
 
               // Crop Schedule
               BlocBuilder<CropBloc, CropState>(
@@ -277,36 +277,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
 
-              // const SizedBox(height: 10),
-
-              // // AI Diagnosis
-              // DashboardActivityCard(
-              //   title: 'AI Diagnosis',
-              //   subtitle: 'Check crop health',
-              //   icon: Icons.biotech_rounded,
-              //   iconBackground: DashboardColors.amber,
-              //   onTap: onAiDiagnosisTap ?? () {},
-              // ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 5),
 
               // Notifications
               DashboardActivityCard(
-                    title: 'Notifications',
-                    subtitle: widget.notificationCount == 0
-                        ? 'No new alerts'
-                        : '${widget.notificationCount} new alerts',
-                    icon: Icons.notifications_rounded,
+                title: 'Notifications',
+                subtitle: widget.notificationCount == 0
+                    ? 'No new alerts'
+                    : '${widget.notificationCount} new alerts',
+                icon: Icons.notifications_rounded,
 
-                    notificationCount: widget.notificationCount,
-                    onTap:
-                        widget.onNotificationTap ??
-                        () async {
-                          final String farmerId = await SecureStorage.instance
-                              .getFarmerId();
-                          if (!context.mounted) return;
-                          context.push('/notification', extra: farmerId);
-                        },
-                  )
+                notificationCount: widget.notificationCount,
+                onTap:
+                    widget.onNotificationTap ??
+                    () async {
+                      final String farmerId = await SecureStorage.instance
+                          .getFarmerId();
+                      if (!context.mounted) return;
+                      context.push('/notification', extra: farmerId);
+                    },
+              ),
+
+              Divider(height: 1, color: context.borderColor),
+
+              const SizedBox(height: 18),
+              DashboardMenu(
+                onWeatherTap:
+                    widget.onWeatherTap ??
+                    () {
+                      WeatherCardDialog.show(context);
+                    },
+
+                onMyPlotsTap:
+                    widget.onMyFieldsTap ??
+                    () {
+                      context.push(AppRouter.plotList);
+                    },
+
+                onQuickReferenceTap: () {
+                  _showMessage('Quick Reference');
+                },
+
+                onNearDealersTap: () {
+                  _showMessage('Near Dealers');
+                },
+
+                onContactUsTap: () {
+                  _showMessage('Contact Us');
+                },
+
+                onImportantLinksTap: () {
+                  _showMessage('Important Links');
+                },
+
+                onSocialMediaTap: () {
+                  _showMessage('Social Media');
+                },
+
+                onAboutUsTap: () {
+                  _showMessage('About Us');
+                },
+
+                onCropAdviceTap: () {
+                  _showMessage('Crop Advice');
+                },
+
+                onGalleryTap: () {
+                  _showMessage('Gallery');
+                },
+              ),
+
+              // Today's Activities Header
+
               // BlocBuilder<NotificationBloc, NotificationState>(
               //   builder: (context, state) {
               //     return DashboardActivityCard(

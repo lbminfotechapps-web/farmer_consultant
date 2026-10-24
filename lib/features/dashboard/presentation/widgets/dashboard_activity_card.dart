@@ -40,7 +40,6 @@ class DashboardActivityCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: iconBackground ?? context.appColors.primary,
                   borderRadius: BorderRadius.circular(11),
-         
                 ),
                 child: Icon(
                   icon,
@@ -53,9 +52,19 @@ class DashboardActivityCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: context.appTextStyles.cardTitle),
+                    Text(
+                      title,
+                      style: context.appTextStyles.cardTitle.copyWith(
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text(subtitle, style: context.appTextStyles.cardSubtitle),
+                    Text(
+                      subtitle,
+                      style: context.appTextStyles.cardSubtitle.copyWith(
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
               ),
