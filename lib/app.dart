@@ -19,8 +19,8 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider<ThemeCubit>.value(value: sl<ThemeCubit>()),
         BlocProvider<LoginBloc>(create: (context) => sl<LoginBloc>()),
-          BlocProvider<CropBloc>(create: (context) => sl<CropBloc>()),
-                BlocProvider<ProductBloc>(create: (context) => sl<ProductBloc>()),
+        BlocProvider<CropBloc>(create: (context) => sl<CropBloc>()),
+        BlocProvider<ProductBloc>(create: (context) => sl<ProductBloc>()),
       ],
       child: ScreenUtilPlusInit(
         minTextAdapt: true,

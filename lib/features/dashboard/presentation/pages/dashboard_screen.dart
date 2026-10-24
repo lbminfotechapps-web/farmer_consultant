@@ -9,6 +9,9 @@ import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_state.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashboard_action.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/farmer_banner.dart';
+import 'package:farmer_consultant/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:farmer_consultant/features/notification/presentation/bloc/notification_event.dart';
+import 'package:farmer_consultant/features/notification/presentation/bloc/notification_state.dart';
 import 'package:farmer_consultant/features/weather/weather_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,6 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _loadSchedules();
+      _loadNotifications();
     });
   }
 
@@ -139,6 +143,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
         fromDate: _apiFormat.format(fromDate),
         toDate: _apiFormat.format(toDate),
       ),
+    );
+  }
+
+  Future<void> _loadNotifications() async {
+    final farmerId = await SecureStorage.instance.getFarmerId();
+
+    if (!mounted) return;
+
+    final userId = int.tryParse(farmerId.trim());
+    if (userId == null) {
+      debugPrint('Invalid farmer ID: $farmerId');
+      return;
+    }
+
+    context.read<NotificationBloc>().add(
+      GetNotificationListEvent(userId: userId, isLogin: true, userType: ''),
     );
   }
 
@@ -271,15 +291,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Notifications
               DashboardActivityCard(
-                title: 'Notifications',
-                subtitle: widget.notificationCount == 0
-                    ? 'No new alerts'
-                    : '${widget.notificationCount} new alerts',
-                icon: Icons.notifications_rounded,
+                    title: 'Notifications',
+                    subtitle: widget.notificationCount == 0
+                        ? 'No new alerts'
+                        : '${widget.notificationCount} new alerts',
+                    icon: Icons.notifications_rounded,
 
-                notificationCount: widget.notificationCount,
-                onTap: widget.onNotificationTap ?? () {},
-              ),
+                    notificationCount: widget.notificationCount,
+                    onTap:
+                        widget.onNotificationTap ??
+                        () async {
+                          final String farmerId = await SecureStorage.instance
+                              .getFarmerId();
+                          if (!context.mounted) return;
+                          context.push('/notification', extra: farmerId);
+                        },
+                  )
+              // BlocBuilder<NotificationBloc, NotificationState>(
+              //   builder: (context, state) {
+              //     return DashboardActivityCard(
+              //       title: 'Notifications',
+              //       subtitle: widget.notificationCount == 0
+              //           ? 'No new alerts'
+              //           : '${widget.notificationCount} new alerts',
+              //       icon: Icons.notifications_rounded,
+
+              //       notificationCount: widget.notificationCount,
+              //       onTap:
+              //           widget.onNotificationTap ??
+              //           () async {
+              //             final String farmerId = await SecureStorage.instance
+              //                 .getFarmerId();
+              //             if (!context.mounted) return;
+              //             context.push('/notification', extra: farmerId);
+              //           },
+              //     );
+              //   },
+              // ),
             ],
           ),
         ),
