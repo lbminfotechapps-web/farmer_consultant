@@ -5,6 +5,8 @@ class LoginEntity {
   final String farmerName;
   final String mobileNo;
   final String address;
+  final String taluka;
+  final String state;
 
   const LoginEntity({
     required this.status,
@@ -13,6 +15,8 @@ class LoginEntity {
     required this.farmerName,
     required this.mobileNo,
     required this.address,
+    required this.taluka,
+    required this.state,
   });
 
   // Parse complete login API response
@@ -35,6 +39,8 @@ class LoginEntity {
       mobileNo: result['fld_mobile_no']?.toString() ?? '',
 
       address: result['fld_address']?.toString() ?? '',
+      taluka: result['taluka_name']?.toString() ?? '',
+      state: result['state_name']?.toString() ?? '',
     );
   }
 
@@ -48,6 +54,8 @@ class LoginEntity {
         'fld_farmer_name': farmerName,
         'fld_mobile_no': mobileNo,
         'fld_address': address,
+        'taluka_name':taluka,
+        'state_name':state
       },
     };
   }
@@ -60,6 +68,8 @@ class LoginEntity {
     String? farmerName,
     String? mobileNo,
     String? address,
+    String? taluka,
+     String? state,
   }) {
     return LoginEntity(
       status: status ?? this.status,
@@ -68,6 +78,8 @@ class LoginEntity {
       farmerName: farmerName ?? this.farmerName,
       mobileNo: mobileNo ?? this.mobileNo,
       address: address ?? this.address,
+      taluka: taluka??this.taluka,
+      state: state??this.state
     );
   }
 }

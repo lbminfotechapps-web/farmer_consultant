@@ -1,4 +1,4 @@
-package com.example.farmer_consultant
+package com.lbm.farmer_consultant
 
 import io.flutter.embedding.android.FlutterActivity
 
