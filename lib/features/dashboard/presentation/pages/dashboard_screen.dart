@@ -315,7 +315,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
 
                 onQuickReferenceTap: () {
-                  _showMessage('Quick Reference');
+                  context.push(AppRouter.quickReferance);
                 },
 
                 onNearDealersTap: () {
@@ -339,11 +339,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onCropAdviceTap: () {
-                  _showMessage('Crop Advice');
+                  context.push(AppRouter.cropSchedule);
                 },
 
                 onGalleryTap: () {
-                  _showMessage('Gallery');
+                  context.push(AppRouter.gallery);
                 },
               ),
 
