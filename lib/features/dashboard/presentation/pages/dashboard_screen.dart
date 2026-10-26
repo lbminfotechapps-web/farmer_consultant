@@ -323,7 +323,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onContactUsTap: () {
-                  _showMessage('Contact Us');
+                  context.push('/contactUs');
                 },
 
                 onImportantLinksTap: () {
@@ -331,11 +331,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onSocialMediaTap: () {
-                  _showMessage('Social Media');
+                   context.push('/social');
                 },
 
                 onAboutUsTap: () {
-                  _showMessage('About Us');
+               context.push('/aboutUs');
                 },
 
                 onCropAdviceTap: () {

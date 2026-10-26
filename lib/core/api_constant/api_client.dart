@@ -19,4 +19,6 @@ class ApiClient {
   static const String updateSchedule = "/updateSchedule";
 
     static const String getNotificationList = "/getNotificationList";
+      static const String organizationDetails = "/getOrganizationDetails";
+        static const String getSocialMedia = "/getSocialMedia";
 }

@@ -10,6 +10,9 @@ import 'package:farmer_consultant/features/products/domain/entity/fertilizer_pro
 import 'package:farmer_consultant/features/products/presentation/pages/product_details.dart';
 import 'package:farmer_consultant/features/products/presentation/pages/product_list.dart';
 import 'package:farmer_consultant/features/products/presentation/pages/products_screen.dart';
+import 'package:farmer_consultant/features/report/presentation/pages/about_us_page.dart';
+import 'package:farmer_consultant/features/report/presentation/pages/contact_us_page.dart';
+import 'package:farmer_consultant/features/social/presentation/pages/social_media_page.dart';
 import 'package:farmer_consultant/features/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -30,7 +33,10 @@ class AppRouter {
   static const String productEnquiry = '/productEnquiry';
   static const String plotList = '/plotList';
   static const String cropScheduleByPlot = '/cropScheduleByPlot';
-    static const String notification = '/notification';
+  static const String notification = '/notification';
+  static const String contactUs = '/contactUs';
+  static const String aboutUs = '/aboutUs';
+    static const String social = '/social';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -108,7 +114,6 @@ class AppRouter {
         },
       ),
 
-      
       GoRoute(
         path: notification,
         name: 'notification',
@@ -123,19 +128,30 @@ class AppRouter {
         },
       ),
 
-      //       GoRoute(
-      //   path: productEnquiry,
-      //   name: 'productEnquiry',
-      //   builder: (context, state) {
-      //     final extra = state.extra as Map<String, dynamic>?;
+      GoRoute(
+        path: contactUs,
+        name: 'contactUs',
+        builder: (context, state) {
+          return const ContactUsPage();
+        },
+      ),
 
-      //     final String productId = extra?['productId']?.toString() ?? '';
+        GoRoute(
+        path: aboutUs,
+        name: 'aboutUs',
+        builder: (context, state) {
+          return const AboutUsPage();
+        },
+      ),
 
-      //     final String productName = extra?['productName']?.toString() ?? '';
 
-      //     return EnquiryPage(productId: productId, productName: productName);
-      //   },
-      // ),
+       GoRoute(
+        path: social,
+        name: 'social',
+        builder: (context, state) {
+          return const SocialMediaPage();
+        },
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return HomeShell(navigationShell: navigationShell);
