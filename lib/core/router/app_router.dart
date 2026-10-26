@@ -7,6 +7,7 @@ import 'package:farmer_consultant/features/dashboard/presentation/pages/crop_sch
 import 'package:farmer_consultant/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:farmer_consultant/features/dealer/presentation/pages/DealerListScreen.dart';
 import 'package:farmer_consultant/features/gallery/presentation/pages/galleryscreen.dart';
+import 'package:farmer_consultant/features/important_links/presentation/pages/important_links_page.dart';
 import 'package:farmer_consultant/features/login/presentation/pages/login_screen.dart';
 import 'package:farmer_consultant/features/notification/presentation/pages/notifications.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
@@ -47,6 +48,7 @@ class AppRouter {
   static const String contactUs = '/contactUs';
   static const String aboutUs = '/aboutUs';
   static const String social = '/social';
+  static const String importantLink = '/importantLink';
    static const String nearealers ='/nearealers';
 
   static final GoRouter router = GoRouter(
@@ -83,6 +85,12 @@ class AppRouter {
         path: weatherreport,
         name: 'weatherreport',
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      GoRoute(
+        path: importantLink,
+        name: 'importantLink',
+        builder: (context, state) => const ImportantLinksPage(),
       ),
 
       GoRoute(

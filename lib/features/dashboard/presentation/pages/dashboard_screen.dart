@@ -327,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onImportantLinksTap: () {
-                  _showMessage('Important Links');
+                  context.push(AppRouter.importantLink);
                 },
 
                 onSocialMediaTap: () {

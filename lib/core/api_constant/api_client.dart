@@ -30,6 +30,7 @@ class ApiClient {
 
   static const String organizationDetails = "/getOrganizationDetails";
   static const String getSocialMedia = "/getSocialMedia";
+  static const String getImportantLinks = "/get_important_link";
 
   static const String nearByFarmerOutlet = "/nearByFarmerOutlet";
 }
