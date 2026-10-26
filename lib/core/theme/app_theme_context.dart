@@ -1,7 +1,6 @@
 import 'package:farmer_consultant/core/theme/app_theme_extension.dart';
 import 'package:flutter/material.dart';
 
-
 extension AppThemeContext on BuildContext {
   ThemeData get appThemeData => Theme.of(this);
 
@@ -18,7 +17,6 @@ extension AppThemeContext on BuildContext {
   // Text
   Color get primaryTextColor => appColors.onSurface;
   Color get secondaryTextColor => appTheme.textSecondary;
-
 
   Color get backgroundColor => Theme.of(this).scaffoldBackgroundColor;
 

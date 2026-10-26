@@ -4,8 +4,10 @@ import 'package:farmer_consultant/core/theme/app_theme.dart';
 import 'package:farmer_consultant/core/theme/cubit/theme_cubit.dart';
 import 'package:farmer_consultant/core/theme/cubit/theme_state.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
+import 'package:farmer_consultant/features/dashboard/presentation/home_bloc/crop_schedule_bloc.dart';
 import 'package:farmer_consultant/features/login/presentation/bloc/login_bloc.dart';
 import 'package:farmer_consultant/features/products/presentation/bloc/product_bloc.dart';
+import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/gallerybloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -21,6 +23,10 @@ class MyApp extends StatelessWidget {
         BlocProvider<LoginBloc>(create: (context) => sl<LoginBloc>()),
         BlocProvider<CropBloc>(create: (context) => sl<CropBloc>()),
         BlocProvider<ProductBloc>(create: (context) => sl<ProductBloc>()),
+        BlocProvider<GalleryBloc>(create: (context) => sl<GalleryBloc>()),
+        BlocProvider<CropScheduleBloc>(
+          create: (context) => sl<CropScheduleBloc>(),
+        ),
       ],
       child: ScreenUtilPlusInit(
         minTextAdapt: true,

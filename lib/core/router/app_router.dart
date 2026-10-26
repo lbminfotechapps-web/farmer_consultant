@@ -1,8 +1,11 @@
+import 'package:farmer_consultant/core/di/global_di.dart';
 import 'package:farmer_consultant/core/router/bottom_navigation.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/crop_schedul_by_plot.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/crop_schedule_list_page.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot_list.dart';
+import 'package:farmer_consultant/features/dashboard/presentation/pages/crop_schedule_page.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/dashboard_screen.dart';
+import 'package:farmer_consultant/features/gallery/presentation/pages/galleryscreen.dart';
 import 'package:farmer_consultant/features/login/presentation/pages/login_screen.dart';
 import 'package:farmer_consultant/features/notification/presentation/pages/notifications.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
@@ -10,8 +13,11 @@ import 'package:farmer_consultant/features/products/domain/entity/fertilizer_pro
 import 'package:farmer_consultant/features/products/presentation/pages/product_details.dart';
 import 'package:farmer_consultant/features/products/presentation/pages/product_list.dart';
 import 'package:farmer_consultant/features/products/presentation/pages/products_screen.dart';
+import 'package:farmer_consultant/features/quickchartreport/presentation/pages/quick_referance_page.dart';
+import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/gallerybloc.dart';
 import 'package:farmer_consultant/features/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -29,8 +35,11 @@ class AppRouter {
   static const String productDetails = '/productDetails';
   static const String productEnquiry = '/productEnquiry';
   static const String plotList = '/plotList';
+  static const String quickReferance = '/quickReferance';
+  static const String gallery = '/gallery';
   static const String cropScheduleByPlot = '/cropScheduleByPlot';
-    static const String notification = '/notification';
+  static const String notification = '/notification';
+  static const String cropSchedule = '/cropSchedule';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -97,6 +106,24 @@ class AppRouter {
           return PlotList();
         },
       ),
+      GoRoute(
+        path: gallery,
+        name: 'gallery',
+        builder: (context, state) {
+          return const GalleryScreen();
+        },
+      ),
+
+      GoRoute(
+        path: quickReferance,
+        name: 'quickReferance',
+        builder: (context, state) {
+          return BlocProvider<GalleryBloc>(
+            create: (_) => sl<GalleryBloc>(),
+            child: const QuickReferencePage(),
+          );
+        },
+      ),
 
       GoRoute(
         path: cropScheduleByPlot,
@@ -108,7 +135,6 @@ class AppRouter {
         },
       ),
 
-      
       GoRoute(
         path: notification,
         name: 'notification',
@@ -123,19 +149,13 @@ class AppRouter {
         },
       ),
 
-      //       GoRoute(
-      //   path: productEnquiry,
-      //   name: 'productEnquiry',
-      //   builder: (context, state) {
-      //     final extra = state.extra as Map<String, dynamic>?;
-
-      //     final String productId = extra?['productId']?.toString() ?? '';
-
-      //     final String productName = extra?['productName']?.toString() ?? '';
-
-      //     return EnquiryPage(productId: productId, productName: productName);
-      //   },
-      // ),
+      GoRoute(
+        path: cropSchedule,
+        name: 'cropSchedule',
+        builder: (context, state) {
+          return const CropScheduleAdvicePage();
+        },
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return HomeShell(navigationShell: navigationShell);
