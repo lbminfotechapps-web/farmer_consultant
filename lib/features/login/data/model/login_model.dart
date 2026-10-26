@@ -8,6 +8,8 @@ class LoginModel extends LoginEntity {
     required super.farmerName,
     required super.mobileNo,
     required super.address,
+    required super.taluka,
+    required super.state,
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,8 @@ class LoginModel extends LoginEntity {
       farmerName: result['fld_farmer_name']?.toString() ?? '',
       mobileNo: result['fld_mobile_no']?.toString() ?? '',
       address: result['fld_address']?.toString() ?? '',
+      taluka: result['taluka_name']?.toString() ?? '',
+      state: result['state_name']?.toString() ?? '',
     );
   }
 
@@ -37,6 +41,8 @@ class LoginModel extends LoginEntity {
         'fld_farmer_name': farmerName,
         'fld_mobile_no': mobileNo,
         'fld_address': address,
+        'taluka_name': taluka,
+        'state_name': state,
       },
     };
   }

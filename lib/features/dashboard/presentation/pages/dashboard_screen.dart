@@ -319,7 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onNearDealersTap: () {
-                  _showMessage('Near Dealers');
+                  context.push('/nearealers');
                 },
 
                 onContactUsTap: () {

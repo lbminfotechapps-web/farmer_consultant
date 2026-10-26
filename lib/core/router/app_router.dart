@@ -5,6 +5,7 @@ import 'package:farmer_consultant/features/crop_schedule/presentation/pages/crop
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot_list.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/crop_schedule_page.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/dashboard_screen.dart';
+import 'package:farmer_consultant/features/dealer/presentation/pages/DealerListScreen.dart';
 import 'package:farmer_consultant/features/gallery/presentation/pages/galleryscreen.dart';
 import 'package:farmer_consultant/features/important_links/presentation/pages/important_links_page.dart';
 import 'package:farmer_consultant/features/login/presentation/pages/login_screen.dart';
@@ -48,6 +49,7 @@ class AppRouter {
   static const String aboutUs = '/aboutUs';
   static const String social = '/social';
   static const String importantLink = '/importantLink';
+   static const String nearealers ='/nearealers';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -194,6 +196,16 @@ class AppRouter {
           return const SocialMediaPage();
         },
       ),
+
+       GoRoute(
+        path: nearealers,
+        name: 'nearealers',
+        builder: (context, state) {
+          return const DealerListScreen();
+        },
+      ),
+
+      
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return HomeShell(navigationShell: navigationShell);

@@ -6,6 +6,7 @@ import 'package:farmer_consultant/core/theme/cubit/theme_state.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/home_bloc/crop_schedule_bloc.dart';
 import 'package:farmer_consultant/features/important_links/presentation/bloc/important_links_bloc.dart';
+import 'package:farmer_consultant/features/dealer/presentation/bloc/dealerlist_bloc.dart';
 import 'package:farmer_consultant/features/login/presentation/bloc/login_bloc.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:farmer_consultant/features/products/presentation/bloc/product_bloc.dart';
@@ -43,6 +44,11 @@ class MyApp extends StatelessWidget {
         BlocProvider<NotificationBloc>(
           create: (context) => sl<NotificationBloc>(),
         ),
+
+   BlocProvider<DealerListBloc>(
+          create: (context) => sl<DealerListBloc>(),
+        ),
+        
       ],
       child: ScreenUtilPlusInit(
         minTextAdapt: true,
