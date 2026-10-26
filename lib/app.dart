@@ -8,6 +8,8 @@ import 'package:farmer_consultant/features/dashboard/presentation/home_bloc/crop
 import 'package:farmer_consultant/features/login/presentation/bloc/login_bloc.dart';
 import 'package:farmer_consultant/features/products/presentation/bloc/product_bloc.dart';
 import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/gallerybloc.dart';
+import 'package:farmer_consultant/features/report/presentation/bloc/organization_bloc.dart';
+import 'package:farmer_consultant/features/social/presentation/bloc/social_media_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -26,6 +28,11 @@ class MyApp extends StatelessWidget {
         BlocProvider<GalleryBloc>(create: (context) => sl<GalleryBloc>()),
         BlocProvider<CropScheduleBloc>(
           create: (context) => sl<CropScheduleBloc>(),
+        BlocProvider<OrganizationBloc>(
+          create: (context) => sl<OrganizationBloc>(),
+        ),
+        BlocProvider<SocialMediaBloc>(
+          create: (context) => sl<SocialMediaBloc>(),
         ),
       ],
       child: ScreenUtilPlusInit(

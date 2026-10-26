@@ -15,6 +15,9 @@ import 'package:farmer_consultant/features/products/presentation/pages/product_l
 import 'package:farmer_consultant/features/products/presentation/pages/products_screen.dart';
 import 'package:farmer_consultant/features/quickchartreport/presentation/pages/quick_referance_page.dart';
 import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/gallerybloc.dart';
+import 'package:farmer_consultant/features/report/presentation/pages/about_us_page.dart';
+import 'package:farmer_consultant/features/report/presentation/pages/contact_us_page.dart';
+import 'package:farmer_consultant/features/social/presentation/pages/social_media_page.dart';
 import 'package:farmer_consultant/features/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +43,9 @@ class AppRouter {
   static const String cropScheduleByPlot = '/cropScheduleByPlot';
   static const String notification = '/notification';
   static const String cropSchedule = '/cropSchedule';
+  static const String contactUs = '/contactUs';
+  static const String aboutUs = '/aboutUs';
+    static const String social = '/social';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -154,6 +160,27 @@ class AppRouter {
         name: 'cropSchedule',
         builder: (context, state) {
           return const CropScheduleAdvicePage();
+        path: contactUs,
+        name: 'contactUs',
+        builder: (context, state) {
+          return const ContactUsPage();
+        },
+      ),
+
+        GoRoute(
+        path: aboutUs,
+        name: 'aboutUs',
+        builder: (context, state) {
+          return const AboutUsPage();
+        },
+      ),
+
+
+       GoRoute(
+        path: social,
+        name: 'social',
+        builder: (context, state) {
+          return const SocialMediaPage();
         },
       ),
       StatefulShellRoute.indexedStack(

@@ -1,0 +1,54 @@
+
+import 'package:farmer_consultant/features/social/data/datasource/social_media_remote_datasource.dart';
+import 'package:farmer_consultant/features/social/data/repository/social_media_repository_impl.dart';
+import 'package:farmer_consultant/features/social/domain/repository/social_media_repository.dart';
+import 'package:farmer_consultant/features/social/domain/usecase/get_social_media.dart';
+import 'package:farmer_consultant/features/social/presentation/bloc/social_media_bloc.dart';
+import 'package:get_it/get_it.dart';
+
+import '../api_constant/dio_client.dart';
+
+final sl = GetIt.instance;
+
+Future<void> initSocialMediaDi() async {
+  // =========================
+  // DATA SOURCE
+  // =========================
+
+  sl.registerLazySingleton<SocialMediaRemoteDataSource>(
+    () => SocialMediaRemoteDataSourceImpl(
+      dioClient: sl<DioClient>(),
+    ),
+  );
+
+  // =========================
+  // REPOSITORY
+  // =========================
+
+  sl.registerLazySingleton<SocialMediaRepository>(
+    () => SocialMediaRepositoryImpl(
+      remoteDataSource:
+          sl<SocialMediaRemoteDataSource>(),
+    ),
+  );
+
+  // =========================
+  // USE CASE
+  // =========================
+
+  sl.registerLazySingleton<GetSocialMedia>(
+    () => GetSocialMedia(
+      repository: sl<SocialMediaRepository>(),
+    ),
+  );
+
+  // =========================
+  // BLOC
+  // =========================
+
+  sl.registerFactory<SocialMediaBloc>(
+    () => SocialMediaBloc(
+      getSocialMedia: sl<GetSocialMedia>(),
+    ),
+  );
+}
