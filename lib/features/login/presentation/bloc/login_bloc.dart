@@ -75,11 +75,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     try {
       final mobileNo = event.mobileNo.trim();
       final otp = event.otp.trim();
+
       if (!RegExp(r'^[0-9]{10}$').hasMatch(mobileNo) ||
           !RegExp(r'^[0-9]{4}$').hasMatch(otp)) {
         throw Exception('Enter a valid mobile number and 4-digit OTP');
       }
-      final LoginEntity response = await loginUsecase.login(mobileNo, otp);
+      final LoginEntity response = await loginUsecase.login(
+        mobileNo,
+        otp,
+
+      );
 
       if (!response.status) {
         emit(

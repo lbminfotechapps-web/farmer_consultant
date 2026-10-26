@@ -59,6 +59,8 @@ class LoginRemoteDataSource {
   Future<LoginModel> login({
     required String mobileNo,
     required String otp,
+    required String fcmId,
+    required String macAddress,
   }) async {
     try {
       final response = await dioClient.client.post(
@@ -66,11 +68,15 @@ class LoginRemoteDataSource {
         data: FormData.fromMap({
           'mobileNo': mobileNo.trim(),
           'otp': otp.trim(),
+          'fcmId': fcmId,
+          'macAddress': macAddress,
         }),
       );
 
       print('mobile no $mobileNo');
       print('otp $otp');
+      print('fcmId $fcmId');
+      print('macAddress $macAddress');
 
       if (kDebugMode) {
         debugPrint('LOGIN STATUS CODE: ${response.statusCode}');

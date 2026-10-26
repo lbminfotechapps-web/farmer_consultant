@@ -319,7 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onNearDealersTap: () {
-                  _showMessage('Near Dealers');
+                  context.push('/nearealers');
                 },
 
                 onContactUsTap: () {
@@ -331,11 +331,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
 
                 onSocialMediaTap: () {
-                   context.push('/social');
+                  context.push('/social');
                 },
 
                 onAboutUsTap: () {
-               context.push('/aboutUs');
+                  context.push('/aboutUs');
                 },
 
                 onCropAdviceTap: () {

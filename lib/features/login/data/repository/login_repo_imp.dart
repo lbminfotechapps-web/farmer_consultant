@@ -3,15 +3,11 @@ import 'package:farmer_consultant/features/login/data/datasource/auth_datasource
 import 'package:farmer_consultant/features/login/domain/entity/login_entity.dart';
 import 'package:farmer_consultant/features/login/domain/repository/login_repository.dart';
 
-
 class LoginRepoImp implements LoginRepository {
   final LoginRemoteDataSource loginRemoteDataSource;
   final SecureStorage secureStorage;
 
-  LoginRepoImp(
-    this.loginRemoteDataSource,
-    this.secureStorage,
-  );
+  LoginRepoImp(this.loginRemoteDataSource, this.secureStorage);
 
   @override
   Future<String> getOtp(String mobileNo) {
@@ -22,12 +18,15 @@ class LoginRepoImp implements LoginRepository {
   Future<LoginEntity> login(
     String mobileNo,
     String otp,
+    String fcmToken,
+    String macAddress,
   ) async {
     // Call login API
-    final LoginEntity response =
-        await loginRemoteDataSource.login(
+    final LoginEntity response = await loginRemoteDataSource.login(
       mobileNo: mobileNo,
       otp: otp,
+      fcmId: fcmToken,
+      macAddress: macAddress,
     );
 
     // Save user information only if login is successful
@@ -37,6 +36,8 @@ class LoginRepoImp implements LoginRepository {
         'fld_farmer_name': response.farmerName,
         'fld_mobile_no': response.mobileNo,
         'fld_address': response.address,
+        'taluka_name':response.taluka,
+        'state_name':response.state
       });
     }
 
