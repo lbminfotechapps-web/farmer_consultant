@@ -27,7 +27,7 @@ class ApiClient {
   static const String getCropsSchedule = '/getCropsSchedule';
   static const String imageCropscheduleUrl =
       "https://agroaicrm.com/solufine_agritech/uploads/crop_schedule/";
-    static const String getNotificationList = "/getNotificationList";
+
       static const String organizationDetails = "/getOrganizationDetails";
         static const String getSocialMedia = "/getSocialMedia";
 }
