@@ -26,7 +26,7 @@ class _HomeShellState extends State<HomeShell> {
     ),
     _NavigationItem(
       icon: Icons.inventory,
-      selectedIcon:  Icons.inventory_2_rounded,
+      selectedIcon: Icons.inventory_2_rounded,
       label: 'Products',
     ),
   ];
@@ -58,7 +58,7 @@ class _HomeShellState extends State<HomeShell> {
         top: false,
         minimum: const EdgeInsets.only(bottom: 10),
         child: Container(
-          height: 72,
+          constraints: const BoxConstraints(minHeight: 72),
           margin: const EdgeInsets.symmetric(horizontal: 16),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(

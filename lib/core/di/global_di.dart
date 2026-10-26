@@ -1,6 +1,7 @@
 import 'package:farmer_consultant/core/di/crop_di.dart';
 import 'package:farmer_consultant/core/di/crop_schedule_di.dart';
 import 'package:farmer_consultant/core/di/gallery_di.dart';
+import 'package:farmer_consultant/core/di/important_links_di.dart';
 import 'package:farmer_consultant/core/di/login_di.dart';
 import 'package:farmer_consultant/core/di/notification_di.dart';
 import 'package:farmer_consultant/core/di/organization_di.dart';
@@ -22,5 +23,6 @@ Future<void> initGlobalDi() async {
   await initGalleryDi();
   await initCropScheduleDi();
   await initSocialMediaDi();
-   OrganizationDI();
+  await initImportantLinksDi();
+  OrganizationDI();
 }
