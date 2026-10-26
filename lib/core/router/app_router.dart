@@ -45,7 +45,7 @@ class AppRouter {
   static const String cropSchedule = '/cropSchedule';
   static const String contactUs = '/contactUs';
   static const String aboutUs = '/aboutUs';
-    static const String social = '/social';
+  static const String social = '/social';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -160,6 +160,10 @@ class AppRouter {
         name: 'cropSchedule',
         builder: (context, state) {
           return const CropScheduleAdvicePage();
+        },
+      ),
+
+      GoRoute(
         path: contactUs,
         name: 'contactUs',
         builder: (context, state) {
@@ -167,7 +171,7 @@ class AppRouter {
         },
       ),
 
-        GoRoute(
+      GoRoute(
         path: aboutUs,
         name: 'aboutUs',
         builder: (context, state) {
@@ -175,8 +179,7 @@ class AppRouter {
         },
       ),
 
-
-       GoRoute(
+      GoRoute(
         path: social,
         name: 'social',
         builder: (context, state) {
