@@ -33,4 +33,5 @@ class ApiClient {
   static const String getImportantLinks = "/get_important_link";
 
   static const String nearByFarmerOutlet = "/nearByFarmerOutlet";
+  static const String getFarmerScheduleDateList = "/getFarmerScheduleDateList";
 }

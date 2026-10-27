@@ -18,6 +18,15 @@ class GetCropScheduleEvent extends CropEvent {
   List<Object?> get props => [farmerId, fromDate, toDate];
 }
 
+class GetAvailableDatesEvent extends CropEvent {
+  final String farmerId;
+
+  const GetAvailableDatesEvent(this.farmerId);
+
+  @override
+  List<Object?> get props => [farmerId];
+}
+
 class GetPlotListEvent extends CropEvent {
   final String farmerId;
   final String? plotName;

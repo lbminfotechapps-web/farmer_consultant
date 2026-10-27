@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -10,6 +11,11 @@ abstract class CropRepository {
     String fromDate,
     String toDate,
   );
+
+    Future<AvailableDatesEntity> getAvailableDates(
+    String farmerId,
+  );
+
 
   Future<PlotResponseEntity> getPlotList(
     String farmerId,

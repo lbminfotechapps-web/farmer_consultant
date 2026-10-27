@@ -9,6 +9,7 @@ import 'package:farmer_consultant/features/dealer/presentation/pages/DealerListS
 import 'package:farmer_consultant/features/gallery/presentation/pages/galleryscreen.dart';
 import 'package:farmer_consultant/features/important_links/presentation/pages/important_links_page.dart';
 import 'package:farmer_consultant/features/login/presentation/pages/login_screen.dart';
+import 'package:farmer_consultant/features/login/presentation/pages/profile_screen.dart';
 import 'package:farmer_consultant/features/notification/presentation/pages/notifications.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_product_entity.dart';
@@ -49,7 +50,7 @@ class AppRouter {
   static const String aboutUs = '/aboutUs';
   static const String social = '/social';
   static const String importantLink = '/importantLink';
-   static const String nearealers ='/nearealers';
+  static const String nearealers = '/nearealers';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -115,13 +116,6 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: plotList,
-        name: 'plotList',
-        builder: (context, state) {
-          return PlotList();
-        },
-      ),
       GoRoute(
         path: gallery,
         name: 'gallery',
@@ -197,7 +191,7 @@ class AppRouter {
         },
       ),
 
-       GoRoute(
+      GoRoute(
         path: nearealers,
         name: 'nearealers',
         builder: (context, state) {
@@ -205,7 +199,12 @@ class AppRouter {
         },
       ),
 
-      
+      GoRoute(
+        path: profile,
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return HomeShell(navigationShell: navigationShell);
@@ -226,12 +225,11 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: activity,
-                name: 'activity',
-                builder: (context, state) => const _PlaceholderScreen(
-                  title: 'Activity',
-                  icon: Icons.history_rounded,
-                ),
+                path: plotList,
+                name: 'plotList',
+                builder: (context, state) {
+                  return PlotList();
+                },
               ),
             ],
           ),
@@ -249,14 +247,7 @@ class AppRouter {
           // Tab 2: Profile
           // StatefulShellBranch(
           //   routes: [
-          //     GoRoute(
-          //       path: profile,
-          //       name: 'profile',
-          //       builder: (context, state) => const _PlaceholderScreen(
-          //         title: 'Profile',
-          //         icon: Icons.person_rounded,
-          //       ),
-          //     ),
+
           //   ],
           // ),
         ],

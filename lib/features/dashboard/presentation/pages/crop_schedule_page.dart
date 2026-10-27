@@ -38,7 +38,7 @@ class CropScheduleView extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Crop Schedule',
+        title: 'Crop Advise',
         showProfile: false,
         showNotification: false,
         showThemeButton: true,

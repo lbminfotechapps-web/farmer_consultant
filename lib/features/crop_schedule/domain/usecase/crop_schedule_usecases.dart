@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -18,6 +19,10 @@ class CropScheduleUsecases {
     return cropRepository.getFarmerScheduleList(farmerId, fromDate, toDate);
   }
 
+  Future<AvailableDatesEntity> getAvailableDates(String farmerId) {
+    return cropRepository.getAvailableDates(farmerId);
+  }
+
   Future<PlotResponseEntity> getPlotList(
     String farmerId,
 
@@ -25,7 +30,7 @@ class CropScheduleUsecases {
     String cropId,
     String startLimit,
   ) {
-    return cropRepository.getPlotList(farmerId, plotName, cropId,startLimit);
+    return cropRepository.getPlotList(farmerId, plotName, cropId, startLimit);
   }
 
   Future<ScheduleByPlotResponseEntity> getScheduleListByPlot(
