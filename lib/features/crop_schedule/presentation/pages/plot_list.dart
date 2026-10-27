@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
@@ -132,7 +133,8 @@ class _PlotListState extends State<PlotList> {
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
-        onBackTap: () => Navigator.of(context).pop(),
+        onBackTap: () =>   context.go(AppRouter.dashboard),
+        
       ),
 
       body: BlocBuilder<CropBloc, CropState>(

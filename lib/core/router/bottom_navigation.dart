@@ -20,9 +20,9 @@ class _HomeShellState extends State<HomeShell> {
       label: 'Dashboard',
     ),
     _NavigationItem(
-      icon: Icons.history_outlined,
-      selectedIcon: Icons.history_rounded,
-      label: 'Activity',
+      icon: Icons.grass_rounded,
+      selectedIcon: Icons.grass_rounded,
+      label: 'Plots',
     ),
     _NavigationItem(
       icon: Icons.inventory,

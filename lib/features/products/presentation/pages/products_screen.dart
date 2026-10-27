@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/core/theme/app_dynamic_colors.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:farmer_consultant/core/utility/custom_loader.dart';
@@ -112,6 +113,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+        final colors = Theme.of(context).colorScheme;
     return Scaffold(
       // backgroundColor: Colors.white,
       backgroundColor: context.appBackground,
@@ -128,7 +130,8 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
         title: 'Product Category',
         showNotification: false,
         showThemeButton: true,
-        onBackTap: () => Navigator.pop(context),
+        onBackTap: () =>   context.go(AppRouter.dashboard),
+        
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
@@ -161,7 +164,9 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
 
                   if (!isSearching &&
                       state.productStatus == ProductStatus.loading) {
-                    return CustomLoader(color: context.appPrimary);
+                     return Center(
+              child: CircularProgressIndicator(color: colors.primary),
+            );
                   }
 
                   if (!isSearching && state.fertilizerCategoryList.isEmpty) {

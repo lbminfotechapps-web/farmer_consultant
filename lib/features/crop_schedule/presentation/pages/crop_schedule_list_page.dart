@@ -1,4 +1,3 @@
-
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
@@ -16,6 +15,15 @@ import 'package:intl/intl.dart';
 // import '.../schedule_detail_entity.dart';
 // import '.../common_dashboard_app_bar.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+
+// Keep your project-specific imports:
+// CropBloc, CropState, CropStatus, Crop events
+// ScheduleEntity, ScheduleDetailEntity
+// CommonDashboardAppBar
+
 class CropSchedulePage extends StatefulWidget {
   final String farmerId;
 
@@ -30,110 +38,242 @@ class CropSchedulePage extends StatefulWidget {
 }
 
 class _CropSchedulePageState extends State<CropSchedulePage> {
-  final DateFormat _dateFormat = DateFormat('dd-MM-yyyy');
+  final DateFormat _apiDateFormat = DateFormat('dd-MM-yyyy');
+  final DateFormat _dayFormat = DateFormat('EEE');
+  final DateFormat _monthFormat = DateFormat('MMMM yyyy');
+  final DateFormat _headingFormat = DateFormat('dd MMMM yyyy');
 
-  late DateTime _fromDate;
-  late DateTime _toDate;
-  late DateTime _activeFromDate;
-  late DateTime _activeToDate;
+  static const int _previousDays = 30;
+  static const int _nextDays = 30;
+  static const double _dateItemExtent = 65;
 
-  bool _showFilters = false;
-  bool _filterApplied = false;
+  late final DateTime _today;
+  late DateTime _selectedDate;
+  late final List<DateTime> _calendarDates;
 
-  // Keep confirmed updates selected until the refreshed list arrives.
+  final ScrollController _dateScrollController =
+      ScrollController();
+
+  // Separate BLoC for available dates.
+  late final CropBloc _datesBloc;
+
+  Set<String> _availableDates = {};
+  bool _datesLoading = true;
+  String? _datesError;
+
   final Map<String, bool> _scheduleAnswers = {};
+
   bool _answerBusy = false;
   String? _updatingScheduleId;
-
-  Future<void> _confirmApplied(String scheduleId) async {
-    if (_answerBusy) return;
-    setState(() => _answerBusy = true);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirm products applied'),
-        content: const Text('Have you applied all products in this schedule?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    );
-    if (!mounted) return;
-    if (confirmed != true) {
-      setState(() => _answerBusy = false);
-      return;
-    }
-
-    setState(() => _updatingScheduleId = scheduleId);
-    final updateBloc = CropBloc(
-      cropScheduleUsecases: context.read<CropBloc>().cropScheduleUsecases,
-    );
-    try {
-      final completion = updateBloc.stream.firstWhere(
-        (state) =>
-            state.cropStatus == CropStatus.success ||
-            state.cropStatus == CropStatus.failure,
-      );
-      updateBloc.add(
-        UpdateScheduleStatus(farmerId: widget.farmerId, scheduleId: scheduleId),
-      );
-      final result = await completion;
-      if (!mounted) return;
-      if (result.cropStatus == CropStatus.success) {
-        setState(() => _scheduleAnswers[scheduleId] = true);
-        _loadSchedules();
-      }
-      _showMessage(
-        result.errorMessage ??
-            (result.cropStatus == CropStatus.success
-                ? 'Schedule updated successfully'
-                : 'Unable to update schedule'),
-      );
-    } finally {
-      await updateBloc.close();
-      if (mounted) {
-        setState(() {
-          _answerBusy = false;
-          _updatingScheduleId = null;
-        });
-      }
-    }
-  }
 
   @override
   void initState() {
     super.initState();
 
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
 
-    _fromDate = today;
-    _toDate = today;
-    _activeFromDate = today;
-    _activeToDate = today;
+    _today = DateTime(now.year, now.month, now.day);
+    _selectedDate = _today;
+
+    _calendarDates = List.generate(
+      _previousDays + _nextDays + 1,
+      (index) => _today.add(
+        Duration(days: index - _previousDays),
+      ),
+    );
+
+    final parentBloc = context.read<CropBloc>();
+
+    _datesBloc = CropBloc(
+      cropScheduleUsecases: parentBloc.cropScheduleUsecases,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+
+      _scrollToDate(_previousDays, animate: false);
+
+      _loadAvailableDates();
       _loadSchedules();
     });
   }
 
+  @override
+  void dispose() {
+    _dateScrollController.dispose();
+    _datesBloc.close();
+    super.dispose();
+  }
+
+  // ===================================================
+  // DATE HELPERS
+  // ===================================================
+
+  bool _isSameDay(DateTime first, DateTime second) {
+    return first.year == second.year &&
+        first.month == second.month &&
+        first.day == second.day;
+  }
+
+  String _formatApiDate(DateTime date) {
+    return _apiDateFormat.format(date);
+  }
+
+  bool _hasSchedule(DateTime date) {
+    return _availableDates.contains(
+      _formatApiDate(date),
+    );
+  }
+
+  bool _isToday(DateTime date) {
+    return _isSameDay(date, _today);
+  }
+
+  // ===================================================
+  // SCROLL CALENDAR
+  // ===================================================
+
+  void _scrollToDate(
+    int index, {
+    bool animate = true,
+  }) {
+    if (!_dateScrollController.hasClients) return;
+
+    final screenWidth = MediaQuery.sizeOf(context).width;
+
+    final availableWidth = screenWidth - 24;
+
+    final offset =
+        (index * _dateItemExtent) +
+        (_dateItemExtent / 2) -
+        (availableWidth / 2);
+
+    final maxScroll =
+        _dateScrollController.position.maxScrollExtent;
+
+    final targetOffset = offset.clamp(0.0, maxScroll);
+
+    if (animate) {
+      _dateScrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _dateScrollController.jumpTo(targetOffset);
+    }
+  }
+
+  // ===================================================
+  // AVAILABLE DATES API
+  // ===================================================
+
+  void _loadAvailableDates() {
+    if (!mounted) return;
+
+    setState(() {
+      _datesLoading = true;
+      _datesError = null;
+    });
+
+    _datesBloc.add(
+      GetAvailableDatesEvent(widget.farmerId),
+    );
+  }
+
+  void _onAvailableDatesState(CropState state) {
+    if (!mounted) return;
+
+    if (state.cropStatus == CropStatus.success) {
+      setState(() {
+        _availableDates =
+            state.availableDateList.toSet();
+
+        _datesLoading = false;
+        _datesError = null;
+      });
+
+      debugPrint(
+        'AVAILABLE DATES: $_availableDates',
+      );
+    } else if (state.cropStatus == CropStatus.failure) {
+      setState(() {
+        _datesLoading = false;
+        _datesError = state.errorMessage ??
+            'Unable to load available dates';
+      });
+
+      debugPrint('AVAILABLE DATES ERROR: $_datesError');
+    }
+  }
+
+  // ===================================================
+  // SCHEDULE API
+  // ===================================================
+
   void _loadSchedules() {
+    final selectedDate = _formatApiDate(_selectedDate);
+
+    debugPrint('===================================');
+    debugPrint('SELECTED DATE: $selectedDate');
+    debugPrint('FARMER ID: ${widget.farmerId}');
+    debugPrint('FROM DATE: $selectedDate');
+    debugPrint('TO DATE: $selectedDate');
+    debugPrint('===================================');
+
     context.read<CropBloc>().add(
       GetCropScheduleEvent(
         widget.farmerId,
-        fromDate: _dateFormat.format(_activeFromDate),
-        toDate: _dateFormat.format(_activeToDate),
+        fromDate: selectedDate,
+        toDate: selectedDate,
       ),
     );
   }
+
+  // ===================================================
+  // SELECT DATE
+  // ===================================================
+
+  void _onDateSelected(DateTime date, int index) {
+    if (_isSameDay(_selectedDate, date)) {
+      _scrollToDate(index);
+      return;
+    }
+
+    setState(() {
+      _selectedDate = date;
+    });
+
+    _scrollToDate(index);
+
+    // Request schedules for selected date only.
+    _loadSchedules();
+  }
+
+  // ===================================================
+  // GO TO TODAY
+  // ===================================================
+
+  void _goToToday() {
+    final alreadyToday = _isSameDay(
+      _selectedDate,
+      _today,
+    );
+
+    setState(() {
+      _selectedDate = _today;
+    });
+
+    _scrollToDate(_previousDays);
+
+    if (!alreadyToday) {
+      _loadSchedules();
+    }
+  }
+
+  // ===================================================
+  // REFRESH
+  // ===================================================
 
   Future<void> _refreshSchedules() async {
     final bloc = context.read<CropBloc>();
@@ -144,11 +284,117 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           state.cropStatus == CropStatus.failure,
     );
 
+    _loadAvailableDates();
     _loadSchedules();
+
     await completion;
   }
 
+  // ===================================================
+  // CONFIRM PRODUCTS APPLIED
+  // ===================================================
+
+  Future<void> _confirmApplied(String scheduleId) async {
+    if (_answerBusy) return;
+
+    setState(() {
+      _answerBusy = true;
+    });
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(
+          'Confirm products applied',
+        ),
+        content: const Text(
+          'Have you applied all products in this schedule?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, true),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (confirmed != true) {
+      setState(() {
+        _answerBusy = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _updatingScheduleId = scheduleId;
+    });
+
+    final updateBloc = CropBloc(
+      cropScheduleUsecases:
+          context.read<CropBloc>().cropScheduleUsecases,
+    );
+
+    try {
+      final completion = updateBloc.stream.firstWhere(
+        (state) =>
+            state.cropStatus == CropStatus.success ||
+            state.cropStatus == CropStatus.failure,
+      );
+
+      updateBloc.add(
+        UpdateScheduleStatus(
+          farmerId: widget.farmerId,
+          scheduleId: scheduleId,
+        ),
+      );
+
+      final result = await completion;
+
+      if (!mounted) return;
+
+      if (result.cropStatus == CropStatus.success) {
+        setState(() {
+          _scheduleAnswers[scheduleId] = true;
+        });
+
+        _loadSchedules();
+        _loadAvailableDates();
+      }
+
+      _showMessage(
+        result.errorMessage ??
+            (result.cropStatus == CropStatus.success
+                ? 'Schedule updated successfully'
+                : 'Unable to update schedule'),
+      );
+    } catch (e) {
+      if (mounted) {
+        _showMessage('Unable to update schedule: $e');
+      }
+    } finally {
+      await updateBloc.close();
+
+      if (mounted) {
+        setState(() {
+          _answerBusy = false;
+          _updatingScheduleId = null;
+        });
+      }
+    }
+  }
+
   void _showMessage(String message) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -159,264 +405,44 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       );
   }
 
-  void _toggleFilters() {
-    setState(() {
-      if (!_showFilters) {
-        _fromDate = _activeFromDate;
-        _toDate = _activeToDate;
-      }
-      _showFilters = !_showFilters;
-    });
-  }
-
-  Future<void> _pickDate(bool isFromDate) async {
-    final current = isFromDate ? _fromDate : _toDate;
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(DateTime.now().year + 5),
-      helpText: isFromDate
-          ? 'SELECT FROM DATE'
-          : 'SELECT TO DATE',
-    );
-
-    if (picked == null || !mounted) return;
-
-    setState(() {
-      if (isFromDate) {
-        _fromDate = picked;
-
-        if (_toDate.isBefore(_fromDate)) {
-          _toDate = picked;
-        }
-      } else {
-        _toDate = picked;
-      }
-    });
-  }
-
-  void _applyFilters() {
-    if (_fromDate.isAfter(_toDate)) {
-      _showMessage('From Date cannot be after To Date');
-      return;
-    }
-
-    setState(() {
-      _activeFromDate = _fromDate;
-      _activeToDate = _toDate;
-      _filterApplied = true;
-      _showFilters = false;
-    });
-
-    _loadSchedules();
-  }
-
-  void _clearFilters() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    setState(() {
-      _fromDate = today;
-      _toDate = today;
-      _activeFromDate = today;
-      _activeToDate = today;
-      _filterApplied = false;
-      _showFilters = false;
-    });
-
-    _loadSchedules();
-  }
-
-  List<ScheduleEntity> _filterByDate(
-    List<ScheduleEntity> schedules,
-  ) {
-    return schedules.where((schedule) {
-      try {
-        final date = _dateFormat.parseStrict(
-          schedule.scheduleDate.trim(),
-        );
-
-        final day = DateTime(date.year, date.month, date.day);
-
-        return !day.isBefore(_activeFromDate) &&
-            !day.isAfter(_activeToDate);
-      } catch (_) {
-        return false;
-      }
-    }).toList();
-  }
+  // ===================================================
+  // MAIN SCREEN
+  // ===================================================
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor:
+          Theme.of(context).scaffoldBackgroundColor,
+
       appBar: CommonDashboardAppBar(
         title: 'Crop Schedule',
         showProfile: false,
         showNotification: false,
-     //   showFilterButton: true,
-      //  isFilterActive: _filterApplied,
         showThemeButton: true,
         onBackTap: () => Navigator.pop(context),
-      //  onFilterTap: _toggleFilters,
       ),
-      body: BlocBuilder<CropBloc, CropState>(
-        buildWhen: (previous, current) =>
-            previous.cropStatus != current.cropStatus ||
-            previous.errorMessage != current.errorMessage ||
-            previous.sceduleentityList !=
-                current.sceduleentityList,
-        builder: (context, state) {
-          final schedules = state.cropStatus == CropStatus.success
-              ? _filterByDate(state.sceduleentityList)
-              : <ScheduleEntity>[];
 
-          return RefreshIndicator(
-            onRefresh: _refreshSchedules,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
-              children: [
-                // Always visible filter summary.
-                // _buildFilterSummary(),
-
-                // if (_showFilters) ...[
-                //   const SizedBox(height: 10),
-                //   _buildFilterCard(),
-                // ],
-
-                const SizedBox(height: 14),
-
-                if (state.cropStatus == CropStatus.initial ||
-                    state.cropStatus == CropStatus.loading)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 50),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: colors.primary,
-                      ),
-                    ),
-                  ),
-
-                if (state.cropStatus == CropStatus.failure)
-                  _buildStatusWidget(
-                    icon: Icons.error_outline_rounded,
-                    title: 'Unable to load schedules',
-                    subtitle:
-                        state.errorMessage ?? 'Something went wrong',
-                    buttonText: 'Retry',
-                    onPressed: _loadSchedules,
-                  ),
-
-                if (state.cropStatus == CropStatus.success &&
-                    schedules.isEmpty)
-                  _buildStatusWidget(
-                    icon: Icons.event_busy_outlined,
-                    title: 'No schedules found',
-                    subtitle: _filterApplied
-                        ? 'No schedules found for the selected date range.'
-                        : 'No crop schedules available for today.',
-                    buttonText: _filterApplied
-                        ? 'Show Today'
-                        : 'Refresh',
-                    onPressed:
-                        _filterApplied ? _clearFilters : _loadSchedules,
-                  ),
-
-                if (state.cropStatus == CropStatus.success &&
-                    schedules.isNotEmpty) ...[
-                  _buildListHeader(schedules),
-                  const SizedBox(height: 10),
-
-                  ...schedules.map(
-                    (schedule) => Padding(
-                      padding: const EdgeInsets.only(bottom: 9),
-                      child: _buildScheduleCard(schedule),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          );
+      body: BlocListener<CropBloc, CropState>(
+        bloc: _datesBloc,
+        listener: (context, state) {
+          _onAvailableDatesState(state);
         },
-      ),
-    );
-  }
-
-  // =====================================================
-  // COMPACT FILTER SUMMARY
-  // =====================================================
-
-  Widget _buildFilterSummary() {
-    final colors = Theme.of(context).colorScheme;
-
-    return InkWell(
-      onTap: _toggleFilters,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 11,
-        ),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.outlineVariant),
-        ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                color: colors.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.tune_rounded,
-                color: colors.primary,
-                size: 18,
-              ),
+            // Fixed horizontal calendar header.
+            _buildCalendarSection(),
+
+            Divider(
+              height: 1,
+              color: colors.outlineVariant,
             ),
 
-            const SizedBox(width: 10),
-
+            // Only schedule list scrolls vertically.
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _filterApplied
-                        ? 'Filtered Crop Schedules'
-                        : "Today's Crop Schedules",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${_dateFormat.format(_activeFromDate)}'
-                    '  →  '
-                    '${_dateFormat.format(_activeToDate)}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Icon(
-              _showFilters
-                  ? Icons.keyboard_arrow_up_rounded
-                  : Icons.keyboard_arrow_down_rounded,
-              color: colors.primary,
+              child: _buildScheduleBody(),
             ),
           ],
         ),
@@ -424,73 +450,189 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  // =====================================================
-  // FILTER CARD
-  // =====================================================
+  // ===================================================
+  // CALENDAR SECTION
+  // ===================================================
 
-  Widget _buildFilterCard() {
+  Widget _buildCalendarSection() {
     final colors = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colors.outlineVariant),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Month and Today button
           Row(
             children: [
-              Expanded(
-                child: _dateField(
-                  'From Date',
-                  _fromDate,
-                  () => _pickDate(true),
+              Container(
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.calendar_month_rounded,
+                  size: 20,
+                  color: colors.primary,
                 ),
               ),
-              const SizedBox(width: 8),
+
+              const SizedBox(width: 10),
+
               Expanded(
-                child: _dateField(
-                  'To Date',
-                  _toDate,
-                  () => _pickDate(false),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _monthFormat.format(_selectedDate),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Select a date to view schedules',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              OutlinedButton.icon(
+                onPressed: _goToToday,
+                icon: const Icon(
+                  Icons.today_rounded,
+                  size: 15,
+                ),
+                label: const Text('Today'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 34),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
+          // Horizontal date strip
+          SizedBox(
+            height: 88,
+            child: ListView.builder(
+              controller: _dateScrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _calendarDates.length,
+              itemExtent: _dateItemExtent,
+              itemBuilder: (context, index) {
+                final date = _calendarDates[index];
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 7),
+                  child: _buildDateItem(date, index),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 11),
+
+          // Calendar legend
           Row(
             children: [
-              Expanded(
-                flex: 2,
-                child: OutlinedButton(
-                  onPressed: _clearFilters,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 43),
-                  ),
-                  child: const Text('Clear'),
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              Expanded(
-                flex: 5,
-                child: FilledButton.icon(
-                  onPressed: _applyFilters,
-                  icon: const Icon(
-                    Icons.search_rounded,
-                    size: 18,
-                  ),
-                  label: const Text('Search'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 43),
+              if (_datesLoading) ...[
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.8,
+                    color: colors.primary,
                   ),
                 ),
-              ),
+                const SizedBox(width: 7),
+                Text(
+                  'Checking available schedules...',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ] else if (_datesError != null) ...[
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 14,
+                  color: colors.error,
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    'Schedule dates unavailable',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: colors.error,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: _loadAvailableDates,
+                  child: Text(
+                    'Retry',
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ] else ...[
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF22C55E),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Green dot = Schedule available',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+
+              const Spacer(),
+
+              if (_datesError == null && !_datesLoading)
+                Text(
+                  '${_availableDates.length} Dates',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
             ],
           ),
         ],
@@ -498,58 +640,83 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  Widget _dateField(
-    String label,
-    DateTime date,
-    VoidCallback onTap,
-  ) {
+  // ===================================================
+  // SINGLE DATE ITEM
+  // ===================================================
+
+  Widget _buildDateItem(DateTime date, int index) {
     final colors = Theme.of(context).colorScheme;
 
+    final selected = _isSameDay(
+      date,
+      _selectedDate,
+    );
+
+    final today = _isToday(date);
+    final hasSchedule = _hasSchedule(date);
+
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(9),
+      onTap: () => _onDateSelected(date, index),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 9,
-          vertical: 9,
-        ),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(9),
-          border: Border.all(color: colors.outlineVariant),
+          color: selected
+              ? colors.primary
+              : colors.surfaceContainerLow,
+
+          borderRadius: BorderRadius.circular(14),
+
+          border: Border.all(
+            color: selected
+                ? colors.primary
+                : today
+                    ? colors.primary.withValues(alpha: 0.6)
+                    : colors.outlineVariant,
+            width: today ? 1.3 : 0.8,
+          ),
         ),
-        child: Row(
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 15,
-              color: colors.primary,
-            ),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _dateFormat.format(date),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface,
-                    ),
-                  ),
-                ],
+            Text(
+              _dayFormat.format(date),
+              style: TextStyle(
+                fontSize: 10,
+                color: selected
+                    ? colors.onPrimary
+                    : colors.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
               ),
+            ),
+
+            const SizedBox(height: 5),
+
+            Text(
+              '${date.day}',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: selected
+                    ? colors.onPrimary
+                    : colors.onSurface,
+              ),
+            ),
+
+            const SizedBox(height: 7),
+
+            // Green dot only for API dates.
+            SizedBox(
+              width: 8,
+              height: 8,
+              child: hasSchedule
+                  ? Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF22C55E),
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                  : null,
             ),
           ],
         ),
@@ -557,9 +724,194 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  // =====================================================
+  // ===================================================
+  // SCHEDULE BODY
+  // ===================================================
+
+  Widget _buildScheduleBody() {
+    final colors = Theme.of(context).colorScheme;
+
+    return BlocBuilder<CropBloc, CropState>(
+      buildWhen: (previous, current) =>
+          previous.cropStatus != current.cropStatus ||
+          previous.errorMessage != current.errorMessage ||
+          previous.sceduleentityList !=
+              current.sceduleentityList,
+
+      builder: (context, state) {
+        final schedules =
+            state.cropStatus == CropStatus.success
+                ? state.sceduleentityList.where((schedule) {
+                    try {
+                      final date = _apiDateFormat.parseStrict(
+                        schedule.scheduleDate.trim(),
+                      );
+
+                      return _isSameDay(date, _selectedDate);
+                    } catch (_) {
+                      return false;
+                    }
+                  }).toList()
+                : <ScheduleEntity>[];
+
+        return RefreshIndicator(
+          color: colors.primary,
+          onRefresh: _refreshSchedules,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              12,
+              14,
+              12,
+              24,
+            ),
+            children: [
+              _buildSelectedDateHeader(),
+
+              const SizedBox(height: 14),
+
+              if (state.cropStatus == CropStatus.initial ||
+                  state.cropStatus == CropStatus.loading)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 60,
+                  ),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: colors.primary,
+                    ),
+                  ),
+                ),
+
+              if (state.cropStatus == CropStatus.failure)
+                _buildStatusWidget(
+                  icon: Icons.error_outline_rounded,
+                  title: 'Unable to load schedules',
+                  subtitle: state.errorMessage ??
+                      'Something went wrong',
+                  buttonText: 'Retry',
+                  onPressed: _loadSchedules,
+                ),
+
+              if (state.cropStatus == CropStatus.success &&
+                  schedules.isEmpty)
+                _buildStatusWidget(
+                  icon: Icons.event_busy_outlined,
+                  title: 'No schedules found',
+                  subtitle:
+                      'No crop schedules available for '
+                      '${_headingFormat.format(_selectedDate)}.',
+                  buttonText: 'Refresh',
+                  onPressed: _loadSchedules,
+                ),
+
+              if (state.cropStatus == CropStatus.success &&
+                  schedules.isNotEmpty) ...[
+                _buildListHeader(schedules),
+
+                const SizedBox(height: 10),
+
+                ...schedules.map(
+                  (schedule) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 9,
+                    ),
+                    child: _buildScheduleCard(schedule),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ===================================================
+  // SELECTED DATE HEADER
+  // ===================================================
+
+  Widget _buildSelectedDateHeader() {
+    final colors = Theme.of(context).colorScheme;
+    final today = _isToday(_selectedDate);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: colors.primaryContainer
+            .withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Row(
+        children: [
+          Icon(
+            Icons.event_note_rounded,
+            size: 22,
+            color: colors.primary,
+          ),
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  today
+                      ? "Today's Schedule"
+                      : 'Selected Date Schedule',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: colors.onSurface,
+                  ),
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  _headingFormat.format(_selectedDate),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          if (_hasSchedule(_selectedDate))
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 9,
+                vertical: 5,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFDCFCE7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'Available',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF166534),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ===================================================
   // LIST HEADER
-  // =====================================================
+  // ===================================================
 
   Widget _buildListHeader(
     List<ScheduleEntity> schedules,
@@ -568,7 +920,8 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
     final totalProducts = schedules.fold<int>(
       0,
-      (total, schedule) => total + schedule.details.length,
+      (total, schedule) =>
+          total + schedule.details.length,
     );
 
     return Row(
@@ -590,7 +943,8 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               Text(
                 'Schedules',
@@ -633,22 +987,34 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  // =====================================================
-  // SCHEDULE CARD - SAME STRUCTURE AS REFERENCE
-  // =====================================================
+  // ===================================================
+  // SCHEDULE CARD
+  // ===================================================
 
   Widget _buildScheduleCard(ScheduleEntity schedule) {
     final colors = Theme.of(context).colorScheme;
-    final applied = _scheduleAnswers[schedule.scheduleId] ??
+
+    final applied =
+        _scheduleAnswers[schedule.scheduleId] ??
         (schedule.status.trim() == '1');
 
     return Container(
       decoration: BoxDecoration(
         color: applied
-            ? Color.alphaBlend(colors.primary.withValues(alpha: 0.08), colors.surface)
+            ? Color.alphaBlend(
+                colors.primary.withValues(alpha: 0.08),
+                colors.surface,
+              )
             : colors.surface,
+
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: applied ? colors.primary : colors.outlineVariant),
+
+        border: Border.all(
+          color: applied
+              ? colors.primary
+              : colors.outlineVariant,
+        ),
+
         boxShadow: [
           BoxShadow(
             color: colors.shadow.withValues(alpha: 0.025),
@@ -657,23 +1023,28 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           ),
         ],
       ),
+
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: ExpansionTile(
           key: ValueKey(schedule.scheduleId),
+
           tilePadding: const EdgeInsets.symmetric(
             horizontal: 12,
-            // vertical: 2,
           ),
+
           childrenPadding: const EdgeInsets.fromLTRB(
-            12, 0, 12, 12,
+            12,
+            0,
+            12,
+            12,
           ),
+
           shape: const Border(),
           collapsedShape: const Border(),
           iconColor: colors.primary,
           collapsedIconColor: colors.onSurfaceVariant,
 
-          // Farmer name like reference page.
           title: Text(
             'Plot Name: '
             '${schedule.plotName.trim().isEmpty ? '-' : schedule.plotName}',
@@ -688,47 +1059,17 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 5,
               children: [
-                // Row(
-                //   children: [
-                //     Icon(
-                //       Icons.landscape_outlined,
-                //       size: 14,
-                //       color: colors.onSurfaceVariant,
-                //     ),
-                //     const SizedBox(width: 4),
-                //     Expanded(
-                //       child: Text(
-                //         'Plot Name: '
-                //         '${schedule.plotName.trim().isEmpty ? '#${schedule.plotRegistrationId}' : schedule.plotName}',
-                //         maxLines: 2,
-                //         overflow: TextOverflow.ellipsis,
-                //         style: TextStyle(
-                //           fontSize: 11,
-                //           color: colors.onSurfaceVariant,
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
-
-                // const SizedBox(height: 7),
-
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 5,
-                  children: [
-                    _miniChip(
-                      Icons.calendar_today_outlined,
-                      schedule.scheduleDate,
-                    ),
-                    _miniChip(
-                      Icons.inventory_2_outlined,
-                      '${schedule.details.length} Products',
-                    ),
-                  ],
+                _miniChip(
+                  Icons.calendar_today_outlined,
+                  schedule.scheduleDate,
+                ),
+                _miniChip(
+                  Icons.inventory_2_outlined,
+                  '${schedule.details.length} Products',
                 ),
               ],
             ),
@@ -737,10 +1078,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           children: [
             const Divider(height: 16),
 
-            // Consultant / doctor name.
-            _detailRow('Consultant', schedule.adminName),
-
-            // Crop Name deliberately not displayed here.
+            _detailRow(
+              'Consultant',
+              schedule.adminName,
+            ),
 
             const SizedBox(height: 8),
 
@@ -751,7 +1092,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                   color: colors.primary,
                   size: 17,
                 ),
+
                 const SizedBox(width: 6),
+
                 Text(
                   'PRODUCT DETAILS',
                   style: TextStyle(
@@ -767,7 +1110,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
             if (schedule.details.isEmpty)
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(
+                  vertical: 10,
+                ),
                 child: Text('No product details.'),
               )
             else
@@ -778,6 +1123,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
+  // ===================================================
+  // MINI CHIP
+  // ===================================================
+
   Widget _miniChip(IconData icon, String text) {
     final colors = Theme.of(context).colorScheme;
 
@@ -787,8 +1136,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        // color: colors.primaryContainer,
-        border: Border.all(color: colors.primaryContainer,),
+        border: Border.all(
+          color: colors.primaryContainer,
+        ),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -813,26 +1163,32 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  // =====================================================
-  // ONE GROUP FOR ALL PRODUCTS
-  // =====================================================
+  // ===================================================
+  // PRODUCT GROUP
+  // ===================================================
 
-  Widget _buildProductGroup(ScheduleEntity schedule) {
+  Widget _buildProductGroup(
+    ScheduleEntity schedule,
+  ) {
     final colors = Theme.of(context).colorScheme;
-
     final products = schedule.details;
 
-    final selected = _scheduleAnswers[schedule.scheduleId] ??
+    final selected =
+        _scheduleAnswers[schedule.scheduleId] ??
         (schedule.status.trim() == '1');
 
     return Container(
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: colors.outlineVariant),
+        border: Border.all(
+          color: colors.outlineVariant,
+        ),
       ),
+
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -848,10 +1204,17 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                       thickness: 1,
                       color: colors.outlineVariant,
                     ),
-                  _buildProductRow(i + 1, products[i]),
+
+                  _buildProductRow(
+                    i + 1,
+                    products[i],
+                  ),
+
                   if (products[i].remark.trim().isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(
+                        bottom: 10,
+                      ),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text.rich(
@@ -864,9 +1227,16 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                             children: [
                               const TextSpan(
                                 text: 'Remark: ',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
                               ),
-                              TextSpan(text: products[i].remark.trim()),
+                              TextSpan(
+                                text: products[i]
+                                    .remark
+                                    .trim(),
+                              ),
                             ],
                           ),
                         ),
@@ -877,19 +1247,20 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             ),
           ),
 
-          // One common Yes / No for whole schedule.
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 10,
               vertical: 7,
             ),
             decoration: BoxDecoration(
-              color: colors.primaryContainer.withValues(alpha: 0.6),
+              color: colors.primaryContainer
+                  .withValues(alpha: 0.6),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
               ),
             ),
+
             child: Row(
               children: [
                 Expanded(
@@ -926,6 +1297,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
+  // ===================================================
+  // ANSWER OPTION
+  // ===================================================
+
   Widget _answerOption({
     required String text,
     required bool value,
@@ -933,31 +1308,41 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     required String scheduleId,
   }) {
     final colors = Theme.of(context).colorScheme;
+
     final isSelected = selected == value;
 
     return InkWell(
       onTap: _answerBusy || isSelected
           ? null
           : () {
-              if (value) _confirmApplied(scheduleId);
+              if (value) {
+                _confirmApplied(scheduleId);
+              }
             },
+
       borderRadius: BorderRadius.circular(18),
+
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 4,
           vertical: 3,
         ),
+
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (value && _updatingScheduleId == scheduleId) ...[
+            if (value &&
+                _updatingScheduleId == scheduleId) ...[
               const SizedBox(
                 width: 14,
                 height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
               ),
               const SizedBox(width: 4),
             ],
+
             Icon(
               isSelected
                   ? Icons.radio_button_checked_rounded
@@ -967,7 +1352,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                   : colors.onSurfaceVariant,
               size: 19,
             ),
+
             const SizedBox(width: 4),
+
             Text(
               text,
               style: TextStyle(
@@ -986,10 +1373,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  // =====================================================
+  // ===================================================
   // PRODUCT ROW
-  // No crop name displayed inside product details.
-  // =====================================================
+  // ===================================================
 
   Widget _buildProductRow(
     int index,
@@ -998,9 +1384,13 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
+
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -1010,7 +1400,8 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: colors.primaryContainer,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius:
+                      BorderRadius.circular(6),
                 ),
                 child: Text(
                   '$index',
@@ -1041,14 +1432,17 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
               if (product.productType.isNotEmpty)
                 Container(
-                  margin: const EdgeInsets.only(left: 6),
+                  margin: const EdgeInsets.only(
+                    left: 6,
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 7,
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
                     color: colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius:
+                        BorderRadius.circular(5),
                   ),
                   child: Text(
                     product.productType,
@@ -1065,7 +1459,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           const SizedBox(height: 6),
 
           Padding(
-            padding: const EdgeInsets.only(left: 29),
+            padding: const EdgeInsets.only(
+              left: 29,
+            ),
+
             child: Row(
               children: [
                 Expanded(
@@ -1101,6 +1498,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
+  // ===================================================
+  // INLINE VALUE
+  // ===================================================
+
   Widget _inlineValue(
     String label,
     String value,
@@ -1112,7 +1513,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     return Row(
       children: [
         Icon(icon, size: 13, color: color),
+
         const SizedBox(width: 3),
+
         Text(
           '$label: ',
           style: TextStyle(
@@ -1120,6 +1523,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             color: colors.onSurfaceVariant,
           ),
         ),
+
         Expanded(
           child: Text(
             value,
@@ -1136,7 +1540,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  String _quantityText(String amount, String unit) {
+  String _quantityText(
+    String amount,
+    String unit,
+  ) {
     if (amount.trim().isEmpty) return '-';
 
     return unit.trim().isEmpty
@@ -1144,7 +1551,14 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
         : '${amount.trim()} ${unit.trim()}';
   }
 
-  Widget _detailRow(String label, String value) {
+  // ===================================================
+  // DETAIL ROW
+  // ===================================================
+
+  Widget _detailRow(
+    String label,
+    String value,
+  ) {
     if (value.trim().isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1152,9 +1566,13 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(
+        bottom: 6,
+      ),
+
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 85,
@@ -1166,6 +1584,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               ),
             ),
           ),
+
           Expanded(
             child: Text(
               value,
@@ -1181,9 +1600,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  // =====================================================
-  // ERROR / EMPTY STATE
-  // =====================================================
+  // ===================================================
+  // EMPTY / ERROR WIDGET
+  // ===================================================
 
   Widget _buildStatusWidget({
     required IconData icon,
@@ -1199,6 +1618,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
         horizontal: 20,
         vertical: 55,
       ),
+
       child: Column(
         children: [
           Container(
@@ -1237,8 +1657,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             ),
           ),
 
-          if (buttonText != null && onPressed != null) ...[
+          if (buttonText != null &&
+              onPressed != null) ...[
             const SizedBox(height: 15),
+
             FilledButton(
               onPressed: onPressed,
               child: Text(buttonText),

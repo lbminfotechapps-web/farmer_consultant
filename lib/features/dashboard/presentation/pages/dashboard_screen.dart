@@ -141,8 +141,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     context.read<CropBloc>().add(
       GetCropScheduleEvent(
         farmerId,
-        fromDate: _apiFormat.format(fromDate),
-        toDate: _apiFormat.format(toDate),
+        // fromDate: _apiFormat.format(fromDate),
+        // toDate: _apiFormat.format(toDate),
       ),
     );
   }
@@ -174,7 +174,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         notificationCount: widget.notificationCount,
         onNotificationTap: widget.onNotificationTap,
         onProfileTap: () {
-          _logout();
+          context.push('/profile');
+          // _logout();
         },
       ),
 

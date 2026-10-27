@@ -1,5 +1,6 @@
 import 'package:dio/src/response.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/crop_datasource/crop_datasource.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -26,7 +27,7 @@ class CropScheduleImp extends CropRepository {
     String cropId,
     String startLimit,
   ) {
-    return cropDatasource.getPlotList(farmerId, plotName, cropId,startLimit);
+    return cropDatasource.getPlotList(farmerId, plotName, cropId, startLimit);
   }
 
   @override
@@ -49,7 +50,15 @@ class CropScheduleImp extends CropRepository {
   }
 
   @override
-  Future<Response<dynamic>> updateScheduleStatus(String scheduleId, String farmerId) {
-   return cropDatasource.updateScheduleStatus(scheduleId, farmerId);
+  Future<Response<dynamic>> updateScheduleStatus(
+    String scheduleId,
+    String farmerId,
+  ) {
+    return cropDatasource.updateScheduleStatus(scheduleId, farmerId);
+  }
+
+  @override
+  Future<AvailableDatesEntity> getAvailableDates(String farmerId) {
+    return cropDatasource.getAvailableDates(farmerId);
   }
 }

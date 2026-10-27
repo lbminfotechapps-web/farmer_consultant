@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/api_constant/dio_client.dart';
+import 'package:farmer_consultant/features/crop_schedule/data/model/available_dates_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/plot_response_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/schedule_detail_respo_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/schedule_response_model.dart';
@@ -25,8 +26,8 @@ class CropDatasource {
       ApiClient.getFarmerScheduleList,
       data: FormData.fromMap({
         'farmerId': farmerId,
-        'fromDate': fromDate,
-        'toDate': toDate,
+        if (fromDate.trim().isNotEmpty) 'fromDate': fromDate.trim(),
+        if (toDate.trim().isNotEmpty) 'toDate': toDate.trim(),
       }),
     );
 
@@ -51,6 +52,33 @@ class CropDatasource {
     );
   }
 
+  Future<AvailableDatesModel> getAvailableDates(String farmerId) async {
+    debugPrint('farmerId datasource: $farmerId');
+
+    final response = await dioClient.client.post(
+      ApiClient.getFarmerScheduleDateList,
+      data: FormData.fromMap({'farmerId': farmerId}),
+    );
+
+    debugPrint('Schedule API response: ${response.data}');
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load schedules (${response.statusCode})');
+    }
+
+    final dynamic rawData = response.data;
+
+    final dynamic decodedData = rawData is String
+        ? jsonDecode(rawData)
+        : rawData;
+
+    if (decodedData is! Map) {
+      throw const FormatException('Invalid schedule API response');
+    }
+
+    return AvailableDatesModel.fromJson(Map<String, dynamic>.from(decodedData));
+  }
+
   Future<PlotResponseModel> getPlotList(
     String farmerId,
     String plotName,
@@ -64,13 +92,13 @@ class CropDatasource {
         'farmerId': farmerId,
         'plotName': plotName,
         'cropId': cropId,
-        'startLimit':startLimit
+        'startLimit': startLimit,
       }),
     );
     debugPrint('farmerId datasource: $farmerId');
     debugPrint('plotName: $plotName');
     debugPrint('cropId: $cropId');
-      debugPrint('startLimit: $startLimit');
+    debugPrint('startLimit: $startLimit');
 
     final dynamic rawData = response.data;
     debugPrint('Plot API response: ${rawData}');
@@ -141,7 +169,7 @@ class CropDatasource {
     try {
       final params = <String, dynamic>{
         'scheduleId': scheduleId.trim(),
-     
+
         'farmerId': farmerId.trim(),
       };
 

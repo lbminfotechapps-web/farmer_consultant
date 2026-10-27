@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -18,6 +19,7 @@ class CropBloc extends Bloc<CropEvent, CropState> {
     on<GetPlotListEvent>(_onGetPlotList);
     on<GetCropScheduleByPlotListEvent>(_onGetCropScheduleByPlot);
     on<UpdateScheduleStatus>(_onUpdateScheduleStatus);
+    on<GetAvailableDatesEvent>(_onGetAvailableDates);
   }
 
   Future<void> _onGetCropSchedule(
@@ -320,6 +322,77 @@ class CropBloc extends Bloc<CropEvent, CropState> {
         state.copyWith(
           cropStatus: CropStatus.failure,
           errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  FutureOr<void> _onGetAvailableDates(
+    GetAvailableDatesEvent event,
+    Emitter<CropState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        cropStatus: CropStatus.loading,
+        clearError: true,
+        availableDateList: [],
+      ),
+    );
+
+    try {
+      final farmerId = event.farmerId.trim();
+
+      if (farmerId.isEmpty) {
+        emit(
+          state.copyWith(
+            cropStatus: CropStatus.failure,
+            errorMessage: 'Farmer ID is required to load Available Dates.',
+          ),
+        );
+        return;
+      }
+
+      debugPrint('========== GET AVAILABLE DATES ==========');
+      debugPrint('farmerId: $farmerId');
+
+      final AvailableDatesEntity response = await cropScheduleUsecases
+          .getAvailableDates(farmerId);
+
+      debugPrint('Date status: ${response.status}');
+      debugPrint('Date message: ${response.message}');
+      debugPrint('Date count: ${response.result.length}');
+
+      if (!response.status) {
+        emit(
+          state.copyWith(
+            cropStatus: CropStatus.failure,
+            errorMessage: response.message.isNotEmpty
+                ? response.message
+                : 'Unable to fetch dates',
+            availableDateList: [],
+          ),
+        );
+        return;
+      }
+
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.success,
+          availableDateList: response.result,
+          clearError: true,
+        ),
+      );
+
+      debugPrint('Available dates loaded successfully: ${response.result}');
+    } catch (e, stackTrace) {
+      debugPrint('Available dates API error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: e.toString(),
+          availableDateList: [],
         ),
       );
     }
