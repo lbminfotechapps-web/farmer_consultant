@@ -1,18 +1,14 @@
 import 'package:farmer_consultant/core/di/crop_di.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
-import 'package:farmer_consultant/core/theme/app_theme_context.dart';
-import 'package:farmer_consultant/core/theme/typography/app_typography_extension.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_event.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_state.dart';
-import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashboard_action.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashboarrd_menu.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/farmer_banner.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_event.dart';
-import 'package:farmer_consultant/features/notification/presentation/bloc/notification_state.dart';
 import 'package:farmer_consultant/features/weather/weather_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -165,9 +161,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: context.backgroundColor,
+      backgroundColor: Color.alphaBlend(
+        colors.primary.withValues(alpha: 0.025),
+        colors.surface,
+      ),
       appBar: CommonDashboardAppBar(
+        backgroundColor: colors.surface,
         userName: widget.userName,
         location: widget.location,
         profileImage: widget.profileImage,
@@ -183,70 +184,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
         top: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(15, 8, 15, 20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Smart Farming Banner
-              const FarmingBanner(),
-
-              const SizedBox(height: 15),
-
-              // Quick Actions
-              // Row(
-              //   children: [
-              //     // Expanded(
-              //     //   child: DashboardQuickAction(
-              //     //     title: 'Crop Care',
-              //     //     icon: Icons.yard_rounded,
-              //     //     onTap: onCropCareTap ?? () {},
-              //     //   ),
-              //     // ),
-              //     // Expanded(
-              //     //   child: DashboardQuickAction(
-              //     //     title: 'Disease Check',
-              //     //     icon: Icons.health_and_safety_outlined,
-              //     //     onTap: onDiseaseCheckTap ?? () {},
-              //     //   ),
-              //     // ),
-              //     Expanded(
-              //       child: DashboardQuickAction(
-              //         title: 'Weather',
-              //         icon: Icons.wb_cloudy_outlined,
-              //         onTap:
-              //             widget.onWeatherTap ??
-              //             () {
-              //               WeatherCardDialog.show(context);
-              //             },
-              //       ),
-              //     ),
-              //     Expanded(
-              //       child: DashboardQuickAction(
-              //         title: 'My Plots',
-              //         icon: Icons.grass_rounded,
-              //         // iconColor: context.appColors.secondary,
-              //         onTap:
-              //             widget.onMyFieldsTap ??
-              //             () {
-              //               context.push(AppRouter.plotList);
-              //             },
-              //       ),
-              //     ),
-              //   ],
-              // ),
               Row(
                 children: [
-                  Icon(Icons.local_activity_outlined, size: 20),
+                  Expanded(
+                    child: Text(
+                      'Your farm, at a glance',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    "Today's Activities",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                    DateFormat('dd MMM, yyyy').format(DateTime.now()),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              const FarmingBanner(),
+              const SizedBox(height: 26),
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 9),
+                  Text(
+                    "Today's Activities",
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: colors.onSurface,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
 
               // Crop Schedule
               BlocBuilder<CropBloc, CropState>(
@@ -278,6 +267,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
 
               // const SizedBox(height: 5),
+              const SizedBox(height: 10),
 
               // Notifications
               DashboardActivityCard(
@@ -298,9 +288,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
               ),
 
-              Divider(height: 1, color: context.borderColor),
-
-              const SizedBox(height: 18),
+              const SizedBox(height: 26),
               DashboardMenu(
                 onWeatherTap:
                     widget.onWeatherTap ??
@@ -346,30 +334,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context.push(AppRouter.gallery);
                 },
               ),
-
-              // Today's Activities Header
-
-              // BlocBuilder<NotificationBloc, NotificationState>(
-              //   builder: (context, state) {
-              //     return DashboardActivityCard(
-              //       title: 'Notifications',
-              //       subtitle: widget.notificationCount == 0
-              //           ? 'No new alerts'
-              //           : '${widget.notificationCount} new alerts',
-              //       icon: Icons.notifications_rounded,
-
-              //       notificationCount: widget.notificationCount,
-              //       onTap:
-              //           widget.onNotificationTap ??
-              //           () async {
-              //             final String farmerId = await SecureStorage.instance
-              //                 .getFarmerId();
-              //             if (!context.mounted) return;
-              //             context.push('/notification', extra: farmerId);
-              //           },
-              //     );
-              //   },
-              // ),
             ],
           ),
         ),

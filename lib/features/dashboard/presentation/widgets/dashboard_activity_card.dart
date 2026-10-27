@@ -26,25 +26,30 @@ class DashboardActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: context.cardBackgroundColor,
-      borderRadius: BorderRadius.circular(13),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: context.borderColor.withValues(alpha: 0.6)),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(13),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 46,
+                height: 46,
                 decoration: BoxDecoration(
-                  color: iconBackground ?? context.appColors.primary,
+                  color:
+                      iconBackground ??
+                      context.appColors.primary.withValues(alpha: 0.09),
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Icon(
                   icon,
                   size: 22,
-                  color: iconColor ?? context.appColors.onPrimary,
+                  color: iconColor ?? context.appColors.primary,
                 ),
               ),
               const SizedBox(width: 13),
@@ -55,14 +60,15 @@ class DashboardActivityCard extends StatelessWidget {
                     Text(
                       title,
                       style: context.appTextStyles.cardTitle.copyWith(
-                        fontSize: 16,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
                       style: context.appTextStyles.cardSubtitle.copyWith(
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -77,7 +83,7 @@ class DashboardActivityCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: context.appColors.primary,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(9),
                   ),
                   child: Text(
                     notificationCount! > 99 ? '99+' : '$notificationCount',
