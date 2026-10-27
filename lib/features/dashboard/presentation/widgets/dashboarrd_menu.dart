@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class QuickAccessItem {
@@ -46,25 +45,11 @@ class DashboardMenu extends StatelessWidget {
   List<QuickAccessItem> _getMenus() {
     return [
       QuickAccessItem(
-        title: 'Weather',
-        icon: Icons.cloud_outlined,
-        iconColor: const Color(0xFF0284C7),
-        backgroundColor: const Color(0xFFE0F2FE),
-        onTap: onWeatherTap,
-      ),
-      QuickAccessItem(
         title: 'My Plots',
         icon: Icons.grass_rounded,
         iconColor: const Color(0xFF15803D),
         backgroundColor: const Color(0xFFDCFCE7),
         onTap: onMyPlotsTap,
-      ),
-      QuickAccessItem(
-        title: 'Quick Reference',
-        icon: Icons.menu_book_rounded,
-        iconColor: const Color(0xFF7C3AED),
-        backgroundColor: const Color(0xFFF3E8FF),
-        onTap: onQuickReferenceTap,
       ),
       QuickAccessItem(
         title: 'Near Dealers',
@@ -74,11 +59,18 @@ class DashboardMenu extends StatelessWidget {
         onTap: onNearDealersTap,
       ),
       QuickAccessItem(
-        title: 'Contact Us',
-        icon: Icons.support_agent_rounded,
-        iconColor: const Color(0xFF0891B2),
-        backgroundColor: const Color(0xFFCFFAFE),
-        onTap: onContactUsTap,
+        title: 'Quick Reference',
+        icon: Icons.menu_book_rounded,
+        iconColor: const Color(0xFF7C3AED),
+        backgroundColor: const Color(0xFFF3E8FF),
+        onTap: onQuickReferenceTap,
+      ),
+      QuickAccessItem(
+        title: 'Weather',
+        icon: Icons.cloud_outlined,
+        iconColor: const Color(0xFF0284C7),
+        backgroundColor: const Color(0xFFE0F2FE),
+        onTap: onWeatherTap,
       ),
       QuickAccessItem(
         title: 'Important Links',
@@ -86,6 +78,20 @@ class DashboardMenu extends StatelessWidget {
         iconColor: const Color(0xFF4F46E5),
         backgroundColor: const Color(0xFFE0E7FF),
         onTap: onImportantLinksTap,
+      ),
+      QuickAccessItem(
+        title: 'Crop Advice',
+        icon: Icons.eco_outlined,
+        iconColor: const Color(0xFF16A34A),
+        backgroundColor: const Color(0xFFDCFCE7),
+        onTap: onCropAdviceTap,
+      ),
+      QuickAccessItem(
+        title: 'Gallery',
+        icon: Icons.photo_library_outlined,
+        iconColor: const Color(0xFF9333EA),
+        backgroundColor: const Color(0xFFF3E8FF),
+        onTap: onGalleryTap,
       ),
       QuickAccessItem(
         title: 'Social Media',
@@ -102,18 +108,11 @@ class DashboardMenu extends StatelessWidget {
         onTap: onAboutUsTap,
       ),
       QuickAccessItem(
-        title: 'Crop Advice',
-        icon: Icons.eco_outlined,
-        iconColor: const Color(0xFF16A34A),
-        backgroundColor: const Color(0xFFDCFCE7),
-        onTap: onCropAdviceTap,
-      ),
-      QuickAccessItem(
-        title: 'Gallery',
-        icon: Icons.photo_library_outlined,
-        iconColor: const Color(0xFF9333EA),
-        backgroundColor: const Color(0xFFF3E8FF),
-        onTap: onGalleryTap,
+        title: 'Contact Us',
+        icon: Icons.support_agent_rounded,
+        iconColor: const Color(0xFF0891B2),
+        backgroundColor: const Color(0xFFCFFAFE),
+        onTap: onContactUsTap,
       ),
     ];
   }
@@ -130,49 +129,59 @@ class DashboardMenu extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 12),
           child: Row(
             children: [
-              Icon(
-                Icons.grid_view_rounded,
-                color: colors.primary,
-                size: 20,
-              ),
+              Icon(Icons.grid_view_rounded, color: colors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Quick Access',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: colors.onSurface,
-                    ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: colors.onSurface,
+                ),
               ),
             ],
           ),
         ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount =
-                constraints.maxWidth < 300 ? 3 : 4;
-
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: menus.length,
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 10,
-                mainAxisExtent: 103,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: 0.35),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colors.shadow.withValues(alpha: 0.04),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
               ),
-              itemBuilder: (context, index) {
-                return QuickAccessMenuItem(
-                  menu: menus[index],
-                );
-              },
-            );
-          },
+            ],
+          ),
+          child: Column(
+            children: [
+              for (var row = 0; row < 3; row++) ...[
+                if (row > 0)
+                  Divider(
+                    height: 1,
+                    indent: 12,
+                    endIndent: 12,
+                    color: colors.outlineVariant.withValues(alpha: 0.35),
+                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (var column = 0; column < 4; column++)
+                      Expanded(
+                        child: row * 4 + column < menus.length
+                            ? QuickAccessMenuItem(menu: menus[row * 4 + column])
+                            : const SizedBox.shrink(),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ),
       ],
     );
@@ -182,61 +191,58 @@ class DashboardMenu extends StatelessWidget {
 class QuickAccessMenuItem extends StatelessWidget {
   final QuickAccessItem menu;
 
-  const QuickAccessMenuItem({
-    super.key,
-    required this.menu,
-  });
+  const QuickAccessMenuItem({super.key, required this.menu});
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
     return Material(
-      color: colors.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: menu.onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 3,
-            vertical: 9,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colors.outlineVariant.withValues(
-                alpha: 0.6,
-              ),
-            ),
-          ),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 16),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 43,
-                height: 43,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: menu.backgroundColor,
-                  borderRadius: BorderRadius.circular(13),
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.lerp(menu.backgroundColor, colors.surface, 0.4)!,
+                      menu.backgroundColor,
+                    ],
+                  ),
+                  border: Border.all(
+                    color: menu.iconColor.withValues(alpha: 0.08),
+                  ),
                 ),
-                child: Icon(
-                  menu.icon,
-                  size: 23,
-                  color: menu.iconColor,
-                ),
+                child: Icon(menu.icon, size: 25, color: menu.iconColor),
               ),
-              const SizedBox(height: 7),
-              Text(
-                menu.title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.5,
-                  height: 1.15,
-                  fontWeight: FontWeight.w700,
-                  color: colors.onSurface,
+              const SizedBox(height: 9),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: 30 * MediaQuery.textScalerOf(context).scale(1),
+                ),
+                child: Text(
+                  menu.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onSurface,
+                  ),
                 ),
               ),
             ],
