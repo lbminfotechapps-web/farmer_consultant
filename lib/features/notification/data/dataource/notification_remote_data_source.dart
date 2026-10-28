@@ -28,7 +28,7 @@ class NotificationRemoteDataSourceImpl
     required int startLimit,
   }) async {
     final url = Uri.parse(
-      '${ApiClient.baseUrl}${ApiClient.getNotificationList}',
+      '${ApiClient.baseUrl}${ApiClient.getFarmerNotificationList}',
     );
 
     final requestBody = {

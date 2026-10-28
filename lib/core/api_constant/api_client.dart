@@ -22,7 +22,7 @@ class ApiClient {
   static const String updateSchedule = "/updateSchedule";
   static const String getGalleryDetails = "/getGalleryDetails";
 
-  static const String getNotificationList = "/getNotificationList";
+  static const String getFarmerNotificationList = "/getFarmerNotificationList";
 
   static const String getCropsSchedule = '/getCropsSchedule';
   static const String imageCropscheduleUrl =

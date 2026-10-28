@@ -56,6 +56,7 @@ class ScheduleByPlotResponseModel extends ScheduleByPlotResponseEntity {
               unit: detail.unit,
               waterQty: detail.waterQty,
               waterUnit: detail.waterUnit,
+              remark: detail.remark,
             );
           }).toList(),
         ).toJson();
@@ -76,6 +77,7 @@ class ScheduleDetailByPlotModel extends ScheduleDetailByPlotEntity {
     required super.unit,
     required super.waterQty,
     required super.waterUnit,
+    required super.remark,
   });
 
   factory ScheduleDetailByPlotModel.fromJson(Map<String, dynamic> json) {
@@ -90,6 +92,7 @@ class ScheduleDetailByPlotModel extends ScheduleDetailByPlotEntity {
       unit: json['fld_unit']?.toString() ?? '',
       waterQty: json['fld_water_qty']?.toString() ?? '',
       waterUnit: json['fld_water_unit']?.toString() ?? '',
+      remark: json['fld_remark']?.toString() ?? '',
     );
   }
 
@@ -105,6 +108,7 @@ class ScheduleDetailByPlotModel extends ScheduleDetailByPlotEntity {
       'fld_unit': unit,
       'fld_water_qty': waterQty,
       'fld_water_unit': waterUnit,
+      'fld_remark': remark,
     };
   }
 }
@@ -175,6 +179,7 @@ class ScheduleByPlotModel extends ScheduleByPlotEntity {
           unit: detail.unit,
           waterQty: detail.waterQty,
           waterUnit: detail.waterUnit,
+          remark: detail.remark,
         ).toJson();
       }).toList(),
     };
