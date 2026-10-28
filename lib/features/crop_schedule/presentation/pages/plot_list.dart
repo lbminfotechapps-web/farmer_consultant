@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
@@ -50,7 +51,8 @@ class _PlotListState extends State<PlotList> {
 
   void _onScroll() {
     if (_scrollController.hasClients &&
-        _scrollController.position.userScrollDirection == ScrollDirection.reverse &&
+        _scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse &&
         _scrollController.position.extentAfter < 200 &&
         _plotBloc.state.plotPaginationError == null) {
       _loadMorePlots();
@@ -81,7 +83,9 @@ class _PlotListState extends State<PlotList> {
 
       if (farmerId.isEmpty || farmerId == '0') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Farmer login information not found')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.farmerLoginMissing),
+          ),
         );
         return;
       }
@@ -92,9 +96,9 @@ class _PlotListState extends State<PlotList> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Unable to load plots: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.plotsLoadError)),
+      );
     }
   }
 
@@ -129,12 +133,12 @@ class _PlotListState extends State<PlotList> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'My Plots',
+        backgroundColor: colors.surface,
+        title: AppLocalizations.of(context)!.myPlots,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
-        onBackTap: () =>   context.go(AppRouter.dashboard),
-        
+        onBackTap: () => context.go(AppRouter.dashboard),
       ),
 
       body: BlocBuilder<CropBloc, CropState>(
@@ -156,9 +160,9 @@ class _PlotListState extends State<PlotList> {
             return _buildEmptyState(
               context,
               Icons.error_outline_rounded,
-              'Unable to load plots',
-              state.errorMessage ?? 'Something went wrong',
-              'Try Again',
+              AppLocalizations.of(context)!.unableToLoadPlots,
+              AppLocalizations.of(context)!.plotsLoadError,
+              AppLocalizations.of(context)!.retry,
               _loadPlots,
             );
           }
@@ -169,13 +173,12 @@ class _PlotListState extends State<PlotList> {
             return _buildEmptyState(
               context,
               Icons.landscape_outlined,
-              'No plots available',
-              'Your registered farmland will appear here.',
-              'Refresh',
+              AppLocalizations.of(context)!.noPlotsAvailable,
+              AppLocalizations.of(context)!.registeredFarmlandHint,
+              AppLocalizations.of(context)!.refresh,
               _loadPlots,
             );
           }
-
 
           return RefreshIndicator(
             onRefresh: _refreshPlots,
@@ -196,8 +199,8 @@ class _PlotListState extends State<PlotList> {
                     return Center(
                       child: TextButton(
                         onPressed: _loadMorePlots,
-                        child: const Text(
-                          'Unable to load more plots. Tap to retry',
+                        child: Text(
+                          AppLocalizations.of(context)!.loadMorePlotsError,
                         ),
                       ),
                     );
@@ -262,7 +265,7 @@ class _PlotListState extends State<PlotList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'My Registered Plots',
+                  AppLocalizations.of(context)!.myRegisteredPlots,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -271,7 +274,7 @@ class _PlotListState extends State<PlotList> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'Your fields and crop details',
+                  AppLocalizations.of(context)!.fieldsAndCropDetails,
                   style: TextStyle(
                     fontSize: 11,
                     color: colors.onSurfaceVariant,
@@ -287,7 +290,7 @@ class _PlotListState extends State<PlotList> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '$count Plots',
+              AppLocalizations.of(context)!.plotCount(count),
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
@@ -362,12 +365,13 @@ class _PlotCard extends StatelessWidget {
 
   const _PlotCard({required this.plot});
 
-  String _formatDate(String date, String pattern) {
+  String _formatDate(BuildContext context, String date, String pattern) {
     if (date.trim().isEmpty) return '-';
 
     try {
       return DateFormat(
         'dd MMM yyyy',
+        Localizations.localeOf(context).languageCode,
       ).format(DateFormat(pattern).parseStrict(date));
     } catch (_) {
       return date;
@@ -424,7 +428,7 @@ class _PlotCard extends StatelessWidget {
                       Text(
                         plot.plotName.isNotEmpty
                             ? plot.plotName
-                            : 'Unnamed Plot',
+                            : AppLocalizations.of(context)!.unnamedPlot,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -455,7 +459,7 @@ class _PlotCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'Schedule',
+                    AppLocalizations.of(context)!.schedule,
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -479,7 +483,7 @@ class _PlotCard extends StatelessWidget {
                 Expanded(
                   child: _PlotInfo(
                     icon: Icons.spa_outlined,
-                    label: 'CROP NAME',
+                    label: AppLocalizations.of(context)!.cropName,
                     value: plot.cropName,
                   ),
                 ),
@@ -487,8 +491,8 @@ class _PlotCard extends StatelessWidget {
                 Expanded(
                   child: _PlotInfo(
                     icon: Icons.calendar_today_outlined,
-                    label: 'SOWING DATE',
-                    value: _formatDate(plot.sowingDate, 'dd-MM-yyyy'),
+                    label: AppLocalizations.of(context)!.sowingDate,
+                    value: _formatDate(context, plot.sowingDate, 'dd-MM-yyyy'),
                   ),
                 ),
               ],

@@ -1,9 +1,13 @@
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
+import 'package:farmer_consultant/core/router/app_router.dart';
+import 'package:farmer_consultant/core/localization/language_provider.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_typography_extension.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import 'package:go_router/go_router.dart';
 
 // Add your existing imports for:
 // SecureStorage
@@ -18,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _farmerId = '';
   String _name = '';
   String _mobile = '';
   String _address = '';
@@ -27,6 +30,157 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoading = true;
   bool _addressExpanded = false;
+  bool _savingLanguage = false;
+  bool _isLoggingOut = false;
+
+  Future<void> _logout() async {
+    if (_isLoggingOut) return;
+    setState(() => _isLoggingOut = true);
+    try {
+      await SecureStorage.instance.clearUserData();
+      if (!mounted) return;
+      context.go(AppRouter.login);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.logoutError)),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoggingOut = false);
+    }
+  }
+
+  static const _languages = [
+    (code: 'en', name: 'English', subtitle: 'English'),
+    (code: 'mr', name: 'मराठी', subtitle: 'Marathi'),
+    (code: 'hi', name: 'हिन्दी', subtitle: 'Hindi'),
+  ];
+
+  Future<void> _selectLanguage() async {
+    final provider = LanguageScope.of(context);
+    final strings = AppLocalizations.of(context)!;
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.selectLanguage,
+                style: Theme.of(sheetContext).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                strings.languageHint,
+                style: Theme.of(sheetContext).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              for (final language in _languages)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Semantics(
+                    checked: language.code == provider.currentLanguageCode,
+                    inMutuallyExclusiveGroup: true,
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(
+                          color: language.code == provider.currentLanguageCode
+                              ? sheetContext.primaryColor
+                              : sheetContext.borderColor,
+                        ),
+                      ),
+                      selected: language.code == provider.currentLanguageCode,
+                      selectedTileColor:
+                          sheetContext.appColors.primaryContainer,
+                      title: Text(language.name),
+                      subtitle: language.code == 'en'
+                          ? null
+                          : Text(language.subtitle),
+                      trailing: Icon(
+                        language.code == provider.currentLanguageCode
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        color: language.code == provider.currentLanguageCode
+                            ? sheetContext.primaryColor
+                            : sheetContext.secondaryTextColor,
+                      ),
+                      onTap: () => Navigator.pop(sheetContext, language.code),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!mounted ||
+        selected == null ||
+        selected == provider.currentLanguageCode) {
+      return;
+    }
+    setState(() => _savingLanguage = true);
+    try {
+      await provider.changeLanguage(selected);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.languageSaveError),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingLanguage = false);
+    }
+  }
+
+  Widget _buildLanguageCard() {
+    final strings = AppLocalizations.of(context)!;
+    final provider = LanguageScope.of(context);
+    return ListenableBuilder(
+      listenable: provider,
+      builder: (context, child) => Material(
+        color: context.cardBackgroundColor,
+        borderRadius: BorderRadius.circular(20.r),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: context.primaryColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.translate_rounded, color: context.primaryColor),
+          ),
+          title: Text(strings.language, style: context.appTextStyles.cardTitle),
+          subtitle: Text(
+            _languages
+                .firstWhere(
+                  (language) => language.code == provider.currentLanguageCode,
+                )
+                .name,
+          ),
+          trailing: _savingLanguage
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.chevron_right_rounded),
+          onTap: _savingLanguage ? null : _selectLanguage,
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -47,7 +201,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       setState(() {
-        _farmerId = _value(userData?['fld_farmer_id']);
         _name = _value(userData?['fld_farmer_name']);
         _mobile = _value(userData?['fld_mobile_no']);
         _address = _value(userData?['fld_address']);
@@ -71,14 +224,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _display(String value) {
-    return value.trim().isEmpty ? 'Not available' : value;
+    return value.trim().isEmpty
+        ? AppLocalizations.of(context)!.notAvailable
+        : value;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonDashboardAppBar(
-        title: 'Profile',
+        title: AppLocalizations.of(context)!.profile,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -99,6 +254,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildProfileHeader(),
                     SizedBox(height: 12.h),
                     _buildDetailsCard(),
+                    SizedBox(height: 16.h),
+                    _buildLanguageCard(),
+                    SizedBox(height: 16.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _isLoggingOut ? null : _logout,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.error,
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                        ),
+                        icon: _isLoggingOut
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.logout_rounded),
+                        label: Text(AppLocalizations.of(context)!.logout),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -214,7 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Personal Information',
+            AppLocalizations.of(context)!.personalInformation,
             style: context.appTextStyles.cardTitle.copyWith(
               color: context.primaryTextColor,
             ),
@@ -225,25 +406,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // _profileItem(Icons.badge_outlined, 'Farmer ID', _farmerId),
 
           // _divider(),
-          _profileItem(Icons.person_outline_rounded, 'Full Name', _name),
+          _profileItem(
+            Icons.person_outline_rounded,
+            AppLocalizations.of(context)!.fullName,
+            _name,
+          ),
 
           _divider(),
 
-          _profileItem(Icons.phone_outlined, 'Mobile Number', _mobile),
+          _profileItem(
+            Icons.phone_outlined,
+            AppLocalizations.of(context)!.mobileNumber,
+            _mobile,
+          ),
 
           _divider(),
 
-          _profileItem(Icons.map_outlined, 'State', _state),
+          _profileItem(
+            Icons.map_outlined,
+            AppLocalizations.of(context)!.state,
+            _state,
+          ),
 
           _divider(),
 
-          _profileItem(Icons.location_city_outlined, 'Taluka', _taluka),
+          _profileItem(
+            Icons.location_city_outlined,
+            AppLocalizations.of(context)!.taluka,
+            _taluka,
+          ),
 
           _divider(),
 
           _profileItem(
             Icons.location_on_outlined,
-            'Address',
+            AppLocalizations.of(context)!.address,
             _address,
             expandable: true,
             isExpanded: _addressExpanded,

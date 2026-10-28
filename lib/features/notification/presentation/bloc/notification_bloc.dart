@@ -1,15 +1,12 @@
-
 import 'package:farmer_consultant/features/notification/domain/entity/notification.dart';
 import 'package:farmer_consultant/features/notification/domain/usecase/get_notification_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 import 'notification_event.dart';
 import 'notification_state.dart';
 
-class NotificationBloc
-    extends Bloc<NotificationEvent, NotificationState> {
+class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final GetNotificationList getNotificationList;
 
   static const int pageSize = 20;
@@ -22,22 +19,13 @@ class NotificationBloc
   bool _isLogin = false;
   String _userType = '';
 
-  NotificationBloc(
-    this.getNotificationList,
-  ) : super(
-          const NotificationInitial(),
-        ) {
-    on<GetNotificationListEvent>(
-      _onGetNotificationList,
-    );
+  NotificationBloc(this.getNotificationList)
+    : super(const NotificationInitial()) {
+    on<GetNotificationListEvent>(_onGetNotificationList);
 
-    on<LoadMoreNotificationsEvent>(
-      _onLoadMoreNotifications,
-    );
+    on<LoadMoreNotificationsEvent>(_onLoadMoreNotifications);
 
-    on<RefreshNotificationListEvent>(
-      _onRefreshNotificationList,
-    );
+    on<RefreshNotificationListEvent>(_onRefreshNotificationList);
   }
 
   Future<void> _onGetNotificationList(
@@ -55,61 +43,39 @@ class NotificationBloc
     _isRequestRunning = true;
     startLimit = 0;
 
-    emit(
-      const NotificationLoading(),
-    );
+    emit(const NotificationLoading());
 
     try {
-      debugPrint(
-        '========== NOTIFICATION FIRST LOAD ==========',
-      );
+      debugPrint('========== NOTIFICATION FIRST LOAD ==========');
 
-      final List<NotificationEntity>
-          notifications =
-          await getNotificationList(
-        userId: _userId,
-        isLogin: _isLogin,
-        userType: _userType,
-        startLimit: startLimit,
-      );
+      final List<NotificationEntity> notifications = [];
+      List<NotificationEntity> page;
+      do {
+        page = await getNotificationList(
+          userId: _userId,
+          isLogin: _isLogin,
+          userType: _userType,
+          startLimit: startLimit,
+        );
+        notifications.addAll(page);
+        startLimit += page.length;
+      } while (event.loadAll && page.length >= pageSize);
 
-      final bool hasMore =
-          notifications.length >= pageSize;
+      final bool hasMore = !event.loadAll && page.length >= pageSize;
 
-      startLimit += notifications.length;
+      debugPrint('Received: ${notifications.length}');
 
-      debugPrint(
-        'Received: ${notifications.length}',
-      );
+      debugPrint('Next startLimit: $startLimit');
 
-      debugPrint(
-        'Next startLimit: $startLimit',
-      );
-
-      emit(
-        NotificationLoaded(
-          notifications: notifications,
-          hasMore: hasMore,
-        ),
-      );
+      emit(NotificationLoaded(notifications: notifications, hasMore: hasMore));
     } catch (e, stackTrace) {
-      debugPrint(
-        '========== NOTIFICATION ERROR ==========',
-      );
+      debugPrint('========== NOTIFICATION ERROR ==========');
 
-      debugPrint(
-        'ERROR: $e',
-      );
+      debugPrint('ERROR: $e');
 
-      debugPrint(
-        'STACK TRACE: $stackTrace',
-      );
+      debugPrint('STACK TRACE: $stackTrace');
 
-      emit(
-        NotificationError(
-          message: e.toString(),
-        ),
-      );
+      emit(NotificationError(message: e.toString()));
     } finally {
       _isRequestRunning = false;
     }
@@ -125,8 +91,7 @@ class NotificationBloc
 
     final currentState = state;
 
-    if (currentState
-        is! NotificationLoaded) {
+    if (currentState is! NotificationLoaded) {
       return;
     }
 
@@ -136,38 +101,27 @@ class NotificationBloc
 
     _isRequestRunning = true;
 
-    emit(
-      currentState.copyWith(
-        isLoadingMore: true,
-      ),
-    );
+    emit(currentState.copyWith(isLoadingMore: true));
 
     try {
-      debugPrint(
-        '========== NOTIFICATION PAGINATION ==========',
-      );
+      debugPrint('========== NOTIFICATION PAGINATION ==========');
 
-      debugPrint(
-        'Current startLimit: $startLimit',
-      );
+      debugPrint('Current startLimit: $startLimit');
 
-      final List<NotificationEntity>
-          newNotifications =
+      final List<NotificationEntity> newNotifications =
           await getNotificationList(
-        userId: _userId,
-        isLogin: _isLogin,
-        userType: _userType,
-        startLimit: startLimit,
-      );
+            userId: _userId,
+            isLogin: _isLogin,
+            userType: _userType,
+            startLimit: startLimit,
+          );
 
-      final List<NotificationEntity>
-          updatedNotifications = [
+      final List<NotificationEntity> updatedNotifications = [
         ...currentState.notifications,
         ...newNotifications,
       ];
 
-      final bool hasMore =
-          newNotifications.length >= pageSize;
+      final bool hasMore = newNotifications.length >= pageSize;
 
       startLimit += newNotifications.length;
 
@@ -181,36 +135,23 @@ class NotificationBloc
         '${updatedNotifications.length}',
       );
 
-      debugPrint(
-        'Next startLimit: $startLimit',
-      );
+      debugPrint('Next startLimit: $startLimit');
 
       emit(
         NotificationLoaded(
-          notifications:
-              updatedNotifications,
+          notifications: updatedNotifications,
           hasMore: hasMore,
           isLoadingMore: false,
         ),
       );
     } catch (e, stackTrace) {
-      debugPrint(
-        '========== PAGINATION ERROR ==========',
-      );
+      debugPrint('========== PAGINATION ERROR ==========');
 
-      debugPrint(
-        'ERROR: $e',
-      );
+      debugPrint('ERROR: $e');
 
-      debugPrint(
-        'STACK TRACE: $stackTrace',
-      );
+      debugPrint('STACK TRACE: $stackTrace');
 
-      emit(
-        currentState.copyWith(
-          isLoadingMore: false,
-        ),
-      );
+      emit(currentState.copyWith(isLoadingMore: false));
     } finally {
       _isRequestRunning = false;
     }
@@ -232,13 +173,9 @@ class NotificationBloc
     startLimit = 0;
 
     try {
-      debugPrint(
-        '========== NOTIFICATION REFRESH ==========',
-      );
+      debugPrint('========== NOTIFICATION REFRESH ==========');
 
-      final List<NotificationEntity>
-          notifications =
-          await getNotificationList(
+      final List<NotificationEntity> notifications = await getNotificationList(
         userId: _userId,
         isLogin: _isLogin,
         userType: _userType,
@@ -250,27 +187,17 @@ class NotificationBloc
       emit(
         NotificationLoaded(
           notifications: notifications,
-          hasMore:
-              notifications.length >= pageSize,
+          hasMore: notifications.length >= pageSize,
         ),
       );
     } catch (e, stackTrace) {
-      debugPrint(
-        'REFRESH ERROR: $e',
-      );
+      debugPrint('REFRESH ERROR: $e');
 
-      debugPrint(
-        'STACK TRACE: $stackTrace',
-      );
+      debugPrint('STACK TRACE: $stackTrace');
 
-      emit(
-        NotificationError(
-          message: e.toString(),
-        ),
-      );
+      emit(NotificationError(message: e.toString()));
     } finally {
       _isRequestRunning = false;
     }
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 class SocialMediaCard extends StatelessWidget {
   final String title;
@@ -23,6 +24,7 @@ class SocialMediaCard extends StatelessWidget {
   });
 
   Future<void> _share(BuildContext context) async {
+    final strings = AppLocalizations.of(context)!;
     final box = context.findRenderObject() as RenderBox?;
     final origin = box != null && box.hasSize
         ? box.localToGlobal(Offset.zero) & box.size
@@ -31,13 +33,12 @@ class SocialMediaCard extends StatelessWidget {
     try {
       await SharePlus.instance.share(
         ShareParams(
-          subject: 'Connect with Solufine on $title',
-          text:
-              'Grow together with Solufine! 🌱\n\n'
-              'Connect with us on $title for farming updates, inspiration, '
-              'and the latest from Solufine:\n${link.trim()}\n\n'
-              'Explore more with the Solufine app. Download it on Google Play:\n'
-              'https://play.google.com/store/apps/details?id=com.lbm.solufine',
+          subject: strings.socialShareSubject(title),
+          text: strings.socialShareMessage(
+            title,
+            link.trim(),
+            'https://play.google.com/store/apps/details?id=com.lbm.solufine',
+          ),
           sharePositionOrigin: origin,
         ),
       );
@@ -46,7 +47,7 @@ class SocialMediaCard extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Unable to share. Please try again.',
+            AppLocalizations.of(context)!.unableToShare,
             style: AppTextStyles.body,
           ),
         ),
@@ -114,7 +115,7 @@ class SocialMediaCard extends StatelessWidget {
 
               Builder(
                 builder: (shareContext) => IconButton(
-                  tooltip: 'Share $title',
+                  tooltip: AppLocalizations.of(context)!.sharePlatform(title),
                   onPressed: () => _share(shareContext),
                   style: IconButton.styleFrom(
                     foregroundColor: iconColor,

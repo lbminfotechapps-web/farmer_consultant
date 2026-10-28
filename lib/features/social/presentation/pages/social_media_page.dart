@@ -1,4 +1,3 @@
-
 import 'package:farmer_consultant/core/di/crop_di.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
@@ -12,7 +11,7 @@ import 'package:farmer_consultant/features/social/presentation/bloc/social_media
 import 'package:farmer_consultant/features/social/presentation/widget/social_media_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/secure_storage/secure_storage.dart';
@@ -55,10 +54,11 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
   }
 
   Future<void> _openSocialLink(String link) async {
+    final strings = AppLocalizations.of(context)!;
     final cleanLink = link.trim();
 
     if (cleanLink.isEmpty) {
-      _showMessage('Social media link is not available');
+      _showMessage(strings.socialLinkUnavailable);
       return;
     }
 
@@ -66,19 +66,19 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       final uri = Uri.parse(cleanLink);
 
       if (!uri.hasScheme) {
-        _showMessage('Invalid social media URL');
+        _showMessage(strings.invalidSocialUrl);
         return;
       }
 
       final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
 
       if (!opened) {
-        _showMessage('Unable to open this link');
+        _showMessage(strings.unableToOpenLink);
       }
     } catch (e) {
       debugPrint('OPEN SOCIAL LINK ERROR = $e');
 
-      _showMessage('Unable to open link');
+      _showMessage(strings.unableToOpenLink);
     }
   }
 
@@ -97,7 +97,10 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       child: BlocConsumer<SocialMediaBloc, SocialMediaState>(
         listener: (context, state) {
           if (state.status == SocialMediaStatus.failure) {
-            _showMessage(state.errorMessage ?? 'Something went wrong');
+            _showMessage(
+              state.errorMessage ??
+                  AppLocalizations.of(context)!.somethingWentWrong,
+            );
           }
         },
         builder: (context, state) {
@@ -121,14 +124,14 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
             //   showBackButton: true,
             //   onBackTap: () => context.go(AppRouter.home),
             // ),
-    appBar: CommonDashboardAppBar(
-             backgroundColor: context.primaryColor,
-        title: 'Social Media',
-        showProfile: false,
-        showNotification: false,
-        showThemeButton: true,
-        onBackTap: () => Navigator.of(context).pop(),
-      ),
+            appBar: CommonDashboardAppBar(
+              backgroundColor: context.primaryColor,
+              title: AppLocalizations.of(context)!.socialMedia,
+              showProfile: false,
+              showNotification: false,
+              showThemeButton: true,
+              onBackTap: () => Navigator.of(context).pop(),
+            ),
             body: RefreshIndicator(
               color: context.primaryColor,
 
@@ -160,7 +163,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           SizedBox(height: 250),
           Center(
             child: Text(
-              'Social media links not available',
+              AppLocalizations.of(context)!.socialLinksUnavailable,
               style: context.appTextStyles.body.copyWith(
                 color: context.secondaryTextColor,
               ),
@@ -218,7 +221,8 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           SizedBox(height: 10),
 
           Text(
-            'Connect With Us',
+            AppLocalizations.of(context)!.connectWithUs,
+            textAlign: TextAlign.center,
             style: context.appTextStyles.pageTitle.copyWith(
               color: context.onPrimaryColor,
             ),
@@ -227,7 +231,9 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           SizedBox(height: 5),
 
           Text(
-            'Follow $appName Industries',
+            AppLocalizations.of(
+              context,
+            )!.followOrganization('$appName Industries'),
             textAlign: TextAlign.center,
             style: context.appTextStyles.body.copyWith(
               color: context.onPrimaryColor.withValues(alpha: 0.7),
@@ -251,7 +257,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
 
         Center(
           child: Text(
-            'Unable to load social media',
+            AppLocalizations.of(context)!.unableToLoadSocialMedia,
             textAlign: TextAlign.center,
             style: context.appTextStyles.headingMedium,
           ),
@@ -261,7 +267,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
 
         Center(
           child: Text(
-            error ?? 'Something went wrong',
+            error ?? AppLocalizations.of(context)!.somethingWentWrong,
             textAlign: TextAlign.center,
             style: context.appTextStyles.body.copyWith(
               color: context.secondaryTextColor,
@@ -275,7 +281,10 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           child: ElevatedButton.icon(
             onPressed: _loadSocialMedia,
             icon: const Icon(Icons.refresh),
-            label: Text('Retry', style: context.appTextStyles.button),
+            label: Text(
+              AppLocalizations.of(context)!.retry,
+              style: context.appTextStyles.button,
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.primaryColor,
               foregroundColor: context.onPrimaryColor,
@@ -287,34 +296,35 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
   }
 
   String _getSubtitle(String type) {
+    final strings = AppLocalizations.of(context)!;
     switch (type.toLowerCase()) {
       case 'facebook':
-        return 'Follow us on Facebook';
+        return strings.followUsOn('Facebook');
 
       case 'instagram':
-        return 'Follow us on Instagram';
+        return strings.followUsOn('Instagram');
 
       case 'twitter':
       case 'x':
-        return 'Follow us on Twitter / X';
+        return strings.followUsOn('Twitter / X');
 
       case 'youtube':
-        return 'Subscribe to our YouTube channel';
+        return strings.subscribeYoutube;
 
       case 'linkedin':
-        return 'Connect with us on LinkedIn';
+        return strings.connectLinkedin;
 
       case 'telegram':
-        return 'Join us on Telegram';
+        return strings.joinTelegram;
 
       case 'whatsapp':
-        return 'Chat with us on WhatsApp';
+        return strings.chatWhatsapp;
 
       case 'snapchat':
-        return 'Follow us on Snapchat';
+        return strings.followUsOn('Snapchat');
 
       default:
-        return 'Connect with us';
+        return strings.connectWithUs;
     }
   }
 

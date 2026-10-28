@@ -4,7 +4,7 @@ import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
 import 'package:farmer_consultant/features/products/presentation/widget/product_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 class ProductList extends StatelessWidget {
@@ -18,7 +18,8 @@ class ProductList extends StatelessWidget {
         backgroundColor: context.backgroundColor,
         body: Center(
           child: Text(
-            'Category Not Found',
+            AppLocalizations.of(context)!.categoryNotFound,
+            textAlign: TextAlign.center,
             style: AppTextStyles.body.copyWith(color: context.primaryTextColor),
           ),
         ),
@@ -39,14 +40,15 @@ class ProductList extends StatelessWidget {
           // ),
           CommonDashboardAppBar(
             title: category!.categoryName,
-showProfile: false,
-showNotification: false,
+            showProfile: false,
+            showNotification: false,
             onBackTap: () => Navigator.pop(context),
           ),
       body: products.isEmpty
           ? Center(
               child: Text(
-                'No products found',
+                AppLocalizations.of(context)!.noProductsFound,
+                textAlign: TextAlign.center,
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: context.secondaryTextColor,
                 ),

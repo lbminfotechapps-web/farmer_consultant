@@ -1,21 +1,16 @@
-
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/report/presentation/widgets/organization_webview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-
-
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 import '../../../../core/di/organization_di.dart';
 
 import '../bloc/organization_bloc.dart';
 import '../bloc/organization_event.dart';
 import '../bloc/organization_state.dart';
-
-
 
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
@@ -32,14 +27,14 @@ class ContactUsPage extends StatelessWidget {
         // ================================================================
         // APP BAR
         // ================================================================
-          appBar: CommonDashboardAppBar(
-             backgroundColor: context.primaryColor,
-        title: 'Contact Us',
-        showProfile: false,
-        showNotification: false,
-        showThemeButton: true,
-        onBackTap: () => Navigator.of(context).pop(),
-      ),
+        appBar: CommonDashboardAppBar(
+          backgroundColor: context.primaryColor,
+          title: AppLocalizations.of(context)!.contactUs,
+          showProfile: false,
+          showNotification: false,
+          showThemeButton: true,
+          onBackTap: () => Navigator.of(context).pop(),
+        ),
         // appBar: CustomAppBar(
         //   backgroundColor: context.primaryColor,
 
@@ -176,7 +171,8 @@ class ContactUsPage extends StatelessWidget {
           // TITLE
           // ---------------------------------------------------------------
           Text(
-            'Get In Touch',
+            AppLocalizations.of(context)!.getInTouch,
+            textAlign: TextAlign.center,
 
             style: AppTextStyles.headingMedium.copyWith(
               color: context.onPrimaryColor,
@@ -186,7 +182,8 @@ class ContactUsPage extends StatelessWidget {
           const SizedBox(height: 4),
 
           Text(
-            'We are here to help you',
+            AppLocalizations.of(context)!.hereToHelp,
+            textAlign: TextAlign.center,
 
             style: AppTextStyles.cardSubtitle.copyWith(
               color: context.onPrimaryColor.withOpacity(0.75),
@@ -280,7 +277,7 @@ class ContactUsPage extends StatelessWidget {
 
               children: [
                 Text(
-                  'Contact Information',
+                  AppLocalizations.of(context)!.contactInformation,
 
                   style: AppTextStyles.listTitle.copyWith(
                     color: context.cardTextColor,
@@ -290,7 +287,7 @@ class ContactUsPage extends StatelessWidget {
                 SizedBox(height: 2),
 
                 Text(
-                  'Tap phone, email or website to open',
+                  AppLocalizations.of(context)!.contactOpenHint,
 
                   style: AppTextStyles.caption.copyWith(
                     color: context.secondaryTextColor,
@@ -337,7 +334,8 @@ class ContactUsPage extends StatelessWidget {
           const SizedBox(height: 20),
 
           Text(
-            'Loading Contact Information...',
+            AppLocalizations.of(context)!.loadingContactInformation,
+            textAlign: TextAlign.center,
 
             style: AppTextStyles.cardTitle.copyWith(
               color: context.primaryTextColor,
@@ -347,7 +345,8 @@ class ContactUsPage extends StatelessWidget {
           const SizedBox(height: 6),
 
           Text(
-            'Please wait a moment',
+            AppLocalizations.of(context)!.pleaseWaitAMoment,
+            textAlign: TextAlign.center,
 
             style: AppTextStyles.bodySmall.copyWith(
               color: context.secondaryTextColor,
@@ -394,7 +393,7 @@ class ContactUsPage extends StatelessWidget {
             const SizedBox(height: 22),
 
             Text(
-              'Unable to Load Contact Us',
+              AppLocalizations.of(context)!.unableToLoadContactUs,
 
               textAlign: TextAlign.center,
 
@@ -406,8 +405,7 @@ class ContactUsPage extends StatelessWidget {
             const SizedBox(height: 8),
 
             Text(
-              'Something went wrong while loading '
-              'the contact information.',
+              AppLocalizations.of(context)!.contactLoadError,
 
               textAlign: TextAlign.center,
 
@@ -462,7 +460,10 @@ class ContactUsPage extends StatelessWidget {
 
                 icon: Icon(Icons.refresh_rounded, size: 20),
 
-                label: Text('Try Again', style: AppTextStyles.listTitle),
+                label: Text(
+                  AppLocalizations.of(context)!.retry,
+                  style: AppTextStyles.listTitle,
+                ),
 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.primaryColor,

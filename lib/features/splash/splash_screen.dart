@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:farmer_consultant/core/router/app_router.dart';
+import 'package:farmer_consultant/core/notification/notification_navigation_service.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/utility/appname.dart';
@@ -45,17 +45,14 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkLogin() async {
-    String destination = AppRouter.login;
     final String farmerId = await SecureStorage.instance.getFarmerId();
 
     if (!mounted) return;
 
-    // Always open home.
-    if (farmerId.isNotEmpty) {
-      destination = AppRouter.dashboard;
-    }
-
-    context.go(destination);
+    NotificationNavigationService.instance.completeAuthentication(
+      router: GoRouter.of(context),
+      farmerId: farmerId,
+    );
   }
 
   @override
@@ -89,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ],
                   image: const DecorationImage(
-                    image: AssetImage('assets/icons/logo.png'),
+                    image: AssetImage('assets/icons/logo.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),

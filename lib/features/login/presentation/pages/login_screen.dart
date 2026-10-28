@@ -1,4 +1,5 @@
-import 'package:farmer_consultant/core/router/app_router.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
+import 'package:farmer_consultant/core/notification/notification_navigation_service.dart';
 import 'package:farmer_consultant/features/login/presentation/bloc/login_bloc.dart';
 import 'package:farmer_consultant/features/login/presentation/bloc/login_event.dart';
 import 'package:farmer_consultant/features/login/presentation/bloc/login_state.dart';
@@ -77,7 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ..showSnackBar(
                     SnackBar(
                       content: Text(
-                        state.errorMessage ?? 'Failed to get OTP',
+                        state.errorMessage ??
+                            AppLocalizations.of(context)!.getOtpError,
                         style: context.appTextStyles.body.copyWith(
                           color: context.appColors.onError,
                         ),
@@ -134,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                         SizedBox(width: 8),
                                         Text(
-                                          'Login',
+                                          AppLocalizations.of(context)!.login,
                                           style: context
                                               .appTextStyles
                                               .headingMedium,
@@ -149,7 +151,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     SizedBox(height: 18),
 
                                     Text(
-                                      'Login with your mobile number',
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.loginWithMobile,
                                       style: context.appTextStyles.bodyMedium,
                                     ),
 
@@ -206,7 +210,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                               },
                                               decoration: InputDecoration(
                                                 counterText: '',
-                                                hintText: 'Enter mobile number',
+                                                hintText: AppLocalizations.of(
+                                                  context,
+                                                )!.enterMobileNumber,
                                                 hintStyle: context
                                                     .appTextStyles
                                                     .inputHint,
@@ -250,7 +256,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ).showSnackBar(
                                                     SnackBar(
                                                       content: Text(
-                                                        'Please enter valid mobile number',
+                                                        AppLocalizations.of(
+                                                          context,
+                                                        )!.invalidMobileNumber,
                                                       ),
                                                     ),
                                                   );
@@ -305,7 +313,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ),
                                                   SizedBox(width: 12),
                                                   Text(
-                                                    'Sending OTP...',
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.sendingOtp,
                                                     style: context
                                                         .appTextStyles
                                                         .buttonLarge,
@@ -313,7 +323,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 ],
                                               )
                                             : Text(
-                                                'Send OTP',
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.sendOtp,
                                                 style: context
                                                     .appTextStyles
                                                     .buttonLarge,
@@ -345,7 +357,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Column(
                                 children: [
                                   Text(
-                                    'Benefits of Farmer Consultant',
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.farmerConsultantBenefits,
                                     style: context.appTextStyles.sectionTitle,
                                   ),
                                   SizedBox(height: 15),
@@ -354,25 +368,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Expanded(
                                         child: _BenefitItem(
                                           icon: Icons.grass_rounded,
-                                          title: 'Crop\nAdvisory',
+                                          title: AppLocalizations.of(
+                                            context,
+                                          )!.cropAdvisoryBenefit,
                                         ),
                                       ),
                                       Expanded(
                                         child: _BenefitItem(
                                           icon: Icons.cloudy_snowing,
-                                          title: 'Weather\nUpdates',
+                                          title: AppLocalizations.of(
+                                            context,
+                                          )!.weatherUpdatesBenefit,
                                         ),
                                       ),
                                       Expanded(
                                         child: _BenefitItem(
                                           icon: Icons.bug_report_outlined,
-                                          title: 'Pest Disease\nAlerts',
+                                          title: AppLocalizations.of(
+                                            context,
+                                          )!.pestDiseaseAlertsBenefit,
                                         ),
                                       ),
                                       Expanded(
                                         child: _BenefitItem(
                                           icon: Icons.show_chart_rounded,
-                                          title: 'Market\nRate Info',
+                                          title: AppLocalizations.of(
+                                            context,
+                                          )!.marketRateInfoBenefit,
                                         ),
                                       ),
                                     ],
@@ -406,7 +428,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Your data is safe with us and will never be shared.',
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.dataPrivacyNotice,
                                       textAlign: TextAlign.center,
                                       style: context.appTextStyles.cardSubtitle,
                                     ),
@@ -476,7 +500,7 @@ class _LoginScreenState extends State<LoginScreen> {
           widthFactor: 0.55,
           heightFactor: 0.60,
           child: Image.asset(
-            'assets/icons/logo.png',
+            'assets/icons/logo.jpg',
             width: logoSize * 2,
             fit: BoxFit.contain,
           ),
@@ -557,9 +581,9 @@ class _OtpBottomSheetState extends State<_OtpBottomSheet> {
     final String otp = enteredOtp.trim();
 
     if (!RegExp(r'^\d{4}$').hasMatch(otp)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Please enter valid 4-digit OTP')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.invalidOtp)),
+      );
       return;
     }
 
@@ -595,7 +619,10 @@ class _OtpBottomSheetState extends State<_OtpBottomSheet> {
             // Close the bottom sheet.
             final router = GoRouter.of(context);
             Navigator.of(context).pop();
-            router.go(AppRouter.dashboard);
+            NotificationNavigationService.instance.completeAuthentication(
+              router: router,
+              farmerId: farmer.farmerId,
+            );
           }
         }
 
@@ -603,7 +630,7 @@ class _OtpBottomSheetState extends State<_OtpBottomSheet> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                state.errorMessage ?? 'Login failed',
+                state.errorMessage ?? AppLocalizations.of(context)!.loginFailed,
                 style: context.appTextStyles.body.copyWith(
                   color: context.appColors.onError,
                 ),
@@ -630,12 +657,15 @@ class _OtpBottomSheetState extends State<_OtpBottomSheet> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Verify OTP', style: context.appTextStyles.dialogTitle),
+                Text(
+                  AppLocalizations.of(context)!.verifyOtp,
+                  style: context.appTextStyles.dialogTitle,
+                ),
 
                 SizedBox(height: 8),
 
                 Text(
-                  'Enter the 4-digit OTP sent to your mobile',
+                  AppLocalizations.of(context)!.enterOtpHint,
                   style: context.appTextStyles.dialogBody,
                   textAlign: TextAlign.center,
                 ),
@@ -700,13 +730,13 @@ class _OtpBottomSheetState extends State<_OtpBottomSheet> {
                               ),
                               SizedBox(width: 12),
                               Text(
-                                'Verifying...',
+                                AppLocalizations.of(context)!.verifyingOtp,
                                 style: context.appTextStyles.buttonLarge,
                               ),
                             ],
                           )
                         : Text(
-                            'Verify OTP',
+                            AppLocalizations.of(context)!.verifyOtp,
                             style: context.appTextStyles.buttonLarge,
                           ),
                   ),

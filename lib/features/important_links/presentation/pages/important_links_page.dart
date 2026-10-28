@@ -1,4 +1,5 @@
 import 'package:farmer_consultant/core/widgets/appbar.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,7 +36,7 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
     );
 
     if (uri == null || uri.host.isEmpty) {
-      _showMessage(context, 'Invalid link');
+      _showMessage(context, AppLocalizations.of(context)!.invalidLink);
       return;
     }
 
@@ -46,11 +47,11 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
       );
 
       if (!success && context.mounted) {
-        _showMessage(context, 'Unable to open link');
+        _showMessage(context, AppLocalizations.of(context)!.unableToOpenLink);
       }
     } catch (e) {
       if (context.mounted) {
-        _showMessage(context, 'Unable to open link');
+        _showMessage(context, AppLocalizations.of(context)!.unableToOpenLink);
       }
     }
   }
@@ -67,7 +68,7 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Important Links',
+        title: AppLocalizations.of(context)!.importantLinks,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -96,7 +97,10 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
                       color: Colors.redAccent,
                     ),
                     const SizedBox(height: 12),
-                    Text(state.message, textAlign: TextAlign.center),
+                    Text(
+                      AppLocalizations.of(context)!.importantLinksLoadError,
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -104,7 +108,7 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
                           const FetchImportantLinks(),
                         );
                       },
-                      child: const Text('Retry'),
+                      child: Text(AppLocalizations.of(context)!.retry),
                     ),
                   ],
                 ),
@@ -114,7 +118,11 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
 
           if (state is ImportantLinksLoaded) {
             if (state.links.isEmpty) {
-              return const Center(child: Text('No important links found'));
+              return Center(
+                child: Text(
+                  AppLocalizations.of(context)!.noImportantLinksFound,
+                ),
+              );
             }
 
             return RefreshIndicator(
@@ -133,7 +141,7 @@ class _ImportantLinksPageState extends State<ImportantLinksPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(12),
                 itemCount: state.links.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   return _buildLinkCard(context, state.links[index]);
                 },

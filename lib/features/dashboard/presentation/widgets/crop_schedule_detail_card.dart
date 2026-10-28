@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'dart:io';
 
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
@@ -185,7 +186,9 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            isPdf ? 'PDF DOCUMENT' : 'IMAGE',
+            isPdf
+                ? AppLocalizations.of(context)!.pdfDocument
+                : AppLocalizations.of(context)!.image,
             style: AppTextStyles.badge.copyWith(
               letterSpacing: 0.5,
               color: isPdf ? const Color(0xFFC62828) : const Color(0xFF2E7D32),
@@ -209,9 +212,9 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
         Text(
           isPdf
               ? (_isDownloading
-                    ? 'Downloading PDF...'
-                    : 'Tap to download / open')
-              : 'Tap to view image',
+                    ? AppLocalizations.of(context)!.downloadingPdf
+                    : AppLocalizations.of(context)!.tapToDownloadOrOpen)
+              : AppLocalizations.of(context)!.tapToViewImage,
           style: AppTextStyles.bodySmall.copyWith(color: Color(0xFF78909C)),
         ),
 
@@ -247,7 +250,7 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
         Text(
           _downloadProgress > 0
               ? '${(_downloadProgress * 100).toStringAsFixed(0)}%'
-              : 'Preparing download...',
+              : AppLocalizations.of(context)!.preparingDownload,
           style: AppTextStyles.badge.copyWith(color: Color(0xFF2E7D32)),
         ),
       ],
@@ -314,7 +317,10 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
 
   Future<void> _openImage() async {
     if (fileUrl.isEmpty) {
-      _showMessage('Image URL not available', isError: true);
+      _showMessage(
+        AppLocalizations.of(context)!.imageUrlUnavailable,
+        isError: true,
+      );
       return;
     }
 
@@ -363,7 +369,10 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
         _downloadProgress = 0.0;
       });
 
-      _showMessage('Unable to open PDF', isError: true);
+      _showMessage(
+        AppLocalizations.of(context)!.unableToOpenPdf,
+        isError: true,
+      );
     }
   }
 
@@ -435,7 +444,7 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
         _downloadProgress = 1.0;
       });
 
-      _showMessage('PDF downloaded successfully');
+      _showMessage(AppLocalizations.of(context)!.pdfDownloadedSuccessfully);
 
       // Open PDF automatically after download.
       await Future.delayed(const Duration(milliseconds: 300));
@@ -453,7 +462,10 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
         _downloadProgress = 0.0;
       });
 
-      _showMessage('PDF download failed', isError: true);
+      _showMessage(
+        AppLocalizations.of(context)!.pdfDownloadFailed,
+        isError: true,
+      );
     }
   }
 
@@ -462,8 +474,13 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
   // ===========================================================================
 
   Future<void> _openPdfFile(File file) async {
-    if (!await file.exists()) {
-      _showMessage('PDF file not found', isError: true);
+    final exists = await file.exists();
+    if (!mounted) return;
+    if (!exists) {
+      _showMessage(
+        AppLocalizations.of(context)!.pdfFileNotFound,
+        isError: true,
+      );
       return;
     }
 
@@ -474,7 +491,10 @@ class _CropScheduleDetailCardState extends State<CropScheduleDetailCard> {
     }
 
     if (result.type != ResultType.done) {
-      _showMessage('No PDF viewer available on this device', isError: true);
+      _showMessage(
+        AppLocalizations.of(context)!.pdfViewerUnavailable,
+        isError: true,
+      );
     }
   }
 
@@ -597,7 +617,7 @@ class FullScreenImagePage extends StatelessWidget {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        'Unable to load image',
+                        AppLocalizations.of(context)!.unableToLoadImage,
                         style: AppTextStyles.body.copyWith(
                           color: Colors.white70,
                         ),

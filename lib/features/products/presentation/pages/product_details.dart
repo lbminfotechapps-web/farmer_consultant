@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
@@ -285,6 +286,23 @@ class _ProductDetailsState extends State<ProductDetails> {
   FertilizerProductEntity? get product => widget.product;
 
   ProductLanguage _selectedLanguage = ProductLanguage.english;
+  String? _appLanguageCode;
+
+  ProductLanguage get _preferredLanguage => switch (_appLanguageCode) {
+    'mr' => ProductLanguage.marathi,
+    'hi' => ProductLanguage.hindi,
+    _ => ProductLanguage.english,
+  };
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final code = Localizations.localeOf(context).languageCode;
+    if (_appLanguageCode != code) {
+      _appLanguageCode = code;
+      _selectedLanguage = _preferredLanguage;
+    }
+  }
 
   bool _isSharing = false;
   Map<ProductLanguage, String> _contents = {};
@@ -300,7 +318,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.product != product) {
       _contents = product == null ? {} : _languageContents(product!);
-      _selectedLanguage = ProductLanguage.english;
+      _selectedLanguage = _preferredLanguage;
     }
   }
 
@@ -313,7 +331,8 @@ class _ProductDetailsState extends State<ProductDetails> {
         backgroundColor: context.backgroundColor,
         body: Center(
           child: Text(
-            'Product Not Found',
+            AppLocalizations.of(context)!.productNotFound,
+            textAlign: TextAlign.center,
             style: AppTextStyles.body.copyWith(color: context.primaryTextColor),
           ),
         ),
@@ -343,7 +362,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       appBar: CommonDashboardAppBar(
         showProfile: false,
         showNotification: false,
-        title: 'Product Details',
+        title: AppLocalizations.of(context)!.productDetails,
 
         onBackTap: () => Navigator.pop(context),
       ),
@@ -367,14 +386,14 @@ class _ProductDetailsState extends State<ProductDetails> {
               if (item.productShortDetails.trim().isNotEmpty)
                 _buildInfoCard(
                   icon: Icons.description_outlined,
-                  title: 'Product Details',
+                  title: AppLocalizations.of(context)!.productDetails,
                   child: Text(item.productShortDetails, style: _bodyStyle()),
                 ),
 
               if (item.productDosage.trim().isNotEmpty)
                 _buildInfoCard(
                   icon: Icons.science_outlined,
-                  title: 'Recommended Dosage',
+                  title: AppLocalizations.of(context)!.recommendedDosage,
                   child: Text(item.productDosage, style: _bodyStyle()),
                 ),
 
@@ -453,7 +472,10 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Positioned(
                   left: 10,
                   top: 10,
-                  child: _smallTag(Icons.eco_outlined, 'Product'),
+                  child: _smallTag(
+                    Icons.eco_outlined,
+                    AppLocalizations.of(context)!.product,
+                  ),
                 ),
 
                 if (hasImage)
@@ -659,7 +681,10 @@ class _ProductDetailsState extends State<ProductDetails> {
 
           SizedBox(height: 12),
 
-          _sectionTitle(Icons.menu_book_outlined, 'Product Contents'),
+          _sectionTitle(
+            Icons.menu_book_outlined,
+            AppLocalizations.of(context)!.productContents,
+          ),
 
           SizedBox(height: 12),
           Container(height: 1, color: context.borderColor),
@@ -685,7 +710,7 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     return _buildInfoCard(
       icon: Icons.coronavirus_outlined,
-      title: 'Disease Information',
+      title: AppLocalizations.of(context)!.diseaseInformation,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: GestureDetector(
@@ -761,7 +786,10 @@ class _ProductDetailsState extends State<ProductDetails> {
                               ),
                             )
                           : Icon(Icons.ios_share_outlined, size: 18),
-                      label: Text('Share', style: AppTextStyles.button),
+                      label: Text(
+                        AppLocalizations.of(context)!.share,
+                        style: AppTextStyles.button,
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: context.primaryColor,
                         side: BorderSide(color: context.primaryColor),
@@ -936,15 +964,16 @@ class _ProductDetailsState extends State<ProductDetails> {
         }
       }
 
-      addSection('Product Details', item.productShortDetails);
+      final strings = AppLocalizations.of(context)!;
+      addSection(strings.productDetails, item.productShortDetails);
 
-      addSection('Dosage', item.productDosage);
+      addSection(strings.dosage, item.productDosage);
 
       final contentMap = _languageContents(item);
 
       for (final entry in contentMap.entries) {
         addSection(
-          'Product Contents (${_languageLabel(entry.key)})',
+          '${strings.productContents} (${_languageLabel(entry.key)})',
           entry.value,
         );
       }
@@ -998,7 +1027,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Unable to share product. Please try again.',
+              AppLocalizations.of(context)!.unableToShareProduct,
               style: AppTextStyles.button,
             ),
           ),
@@ -1048,6 +1077,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                   color: dialogContext.cardBackgroundColor,
                   shape: const CircleBorder(),
                   child: IconButton(
+                    tooltip: AppLocalizations.of(dialogContext)!.close,
                     onPressed: () => Navigator.of(dialogContext).pop(),
                     icon: Icon(Icons.close, color: dialogContext.cardTextColor),
                   ),

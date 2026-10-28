@@ -1,4 +1,3 @@
-
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
@@ -16,6 +15,15 @@ class ProductCard extends StatelessWidget {
     required this.onTap,
     required this.index,
   });
+
+  String _localizedName(BuildContext context) {
+    final translated = switch (Localizations.localeOf(context).languageCode) {
+      'mr' => product.productNameMarathi,
+      'hi' => product.productNameHindi,
+      _ => product.productName,
+    };
+    return translated.trim().isNotEmpty ? translated : product.productName;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +48,7 @@ class ProductCard extends StatelessWidget {
 
               // PRODUCT NAME
               Text(
-                product.productName,
+                _localizedName(context),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -79,6 +87,7 @@ class ProductCard extends StatelessWidget {
       width: 140,
       height: 140,
       fit: BoxFit.contain,
+      semanticLabel: _localizedName(context),
       errorBuilder: (_, __, ___) {
         return _placeholderImage(context);
       },

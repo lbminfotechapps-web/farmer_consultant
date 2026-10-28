@@ -1,9 +1,8 @@
-
-
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:farmer_consultant/features/notification/domain/entity/notification.dart';
 import 'package:flutter/material.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationEntity notification;
@@ -95,6 +94,7 @@ class NotificationCard extends StatelessWidget {
                 _buildInfoItem(
                   context,
                   icon: Icons.calendar_today_rounded,
+                  label: AppLocalizations.of(context)!.date,
                   value: notification.notificationDate,
                 ),
 
@@ -103,6 +103,7 @@ class NotificationCard extends StatelessWidget {
                 _buildInfoItem(
                   context,
                   icon: Icons.access_time_rounded,
+                  label: AppLocalizations.of(context)!.time,
                   value: notification.notificationTime,
                 ),
               ],
@@ -132,26 +133,31 @@ class NotificationCard extends StatelessWidget {
   Widget _buildInfoItem(
     BuildContext context, {
     required IconData icon,
+    required String label,
     required String value,
   }) {
     return Flexible(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: context.primaryColor),
+      child: Semantics(
+        label: '$label: $value',
+        excludeSemantics: true,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: context.primaryColor),
 
-          const SizedBox(width: 6),
+            const SizedBox(width: 6),
 
-          Flexible(
-            child: Text(
-              value,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.labelSmall.copyWith(
-                color: context.secondaryTextColor,
+            Flexible(
+              child: Text(
+                value,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: context.secondaryTextColor,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
