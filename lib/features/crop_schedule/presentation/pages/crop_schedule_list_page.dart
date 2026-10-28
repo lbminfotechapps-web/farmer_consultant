@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/theme/app_dynamic_colors.dart';
 import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -376,7 +377,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+   backgroundColor: context.appBackground,
 
       appBar: CommonDashboardAppBar(
         title: AppLocalizations.of(context)!.cropSchedule,

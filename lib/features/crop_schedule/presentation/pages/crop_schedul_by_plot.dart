@@ -1704,30 +1704,30 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
             _buildProductRow(index + 1, products[index]),
           ],
 
-          if (schedule.remark.trim().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Text.rich(
-                  TextSpan(
-                    style: TextStyle(
-                      fontSize: 12,
-                      height: 1.5,
-                      color: colors.onPrimaryContainer,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: AppLocalizations.of(context)!.remarkLabel,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: schedule.remark.trim()),
-                    ],
-                  ),
-                  softWrap: true,
-                ),
-              ),
-            ),
+          // if (schedule.remark.trim().isNotEmpty)
+          //   Padding(
+          //     padding: const EdgeInsets.all(8.0),
+          //     child: Align(
+          //       alignment: Alignment.topLeft,
+          //       child: Text.rich(
+          //         TextSpan(
+          //           style: TextStyle(
+          //             fontSize: 12,
+          //             height: 1.5,
+          //             color: colors.onPrimaryContainer,
+          //           ),
+          //           children: [
+          //             TextSpan(
+          //               text: AppLocalizations.of(context)!.remarkLabel,
+          //               style: TextStyle(fontWeight: FontWeight.bold),
+          //             ),
+          //             TextSpan(text: schedule.remark.trim()),
+          //           ],
+          //         ),
+          //         softWrap: true,
+          //       ),
+          //     ),
+          //   ),
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1850,6 +1850,30 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
               ],
             ),
           ),
+          if (product.remark.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 30, top: 8),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: colors.onSurface,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: AppLocalizations.of(context)!.remarkLabel,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: product.remark.trim()),
+                    ],
+                  ),
+                  softWrap: true,
+                ),
+              ),
+            ),
         ],
       ),
     );

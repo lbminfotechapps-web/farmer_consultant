@@ -26,6 +26,7 @@ class ScheduleDetailByPlotEntity extends Equatable {
   final String unit;
   final String waterQty;
   final String waterUnit;
+  final String remark;
 
   const ScheduleDetailByPlotEntity({
     required this.scheduleDetailId,
@@ -38,6 +39,7 @@ class ScheduleDetailByPlotEntity extends Equatable {
     required this.unit,
     required this.waterQty,
     required this.waterUnit,
+    required this.remark
   });
 
   @override
@@ -52,6 +54,7 @@ class ScheduleDetailByPlotEntity extends Equatable {
     unit,
     waterQty,
     waterUnit,
+    remark
   ];
 }
 
