@@ -1,10 +1,9 @@
-
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 import '../../../../core/di/organization_di.dart';
 
@@ -40,16 +39,14 @@ class AboutUsPage extends StatelessWidget {
         //     color: context.onPrimaryColor,
         //   ),
         // ),
-
-
-            appBar: CommonDashboardAppBar(
-             backgroundColor: context.primaryColor,
-        title: 'About Us',
-        showProfile: false,
-        showNotification: false,
-        showThemeButton: true,
-        onBackTap: () => Navigator.of(context).pop(),
-      ),
+        appBar: CommonDashboardAppBar(
+          backgroundColor: context.primaryColor,
+          title: AppLocalizations.of(context)!.aboutUs,
+          showProfile: false,
+          showNotification: false,
+          showThemeButton: true,
+          onBackTap: () => Navigator.of(context).pop(),
+        ),
 
         backgroundColor: context.backgroundColor,
         body: Column(
@@ -123,7 +120,8 @@ class AboutUsPage extends StatelessWidget {
           const SizedBox(height: 12),
 
           Text(
-            'About Our Organization',
+            AppLocalizations.of(context)!.aboutOurOrganization,
+            textAlign: TextAlign.center,
             style: AppTextStyles.headingMedium.copyWith(
               color: context.onPrimaryColor,
             ),
@@ -132,7 +130,8 @@ class AboutUsPage extends StatelessWidget {
           const SizedBox(height: 4),
 
           Text(
-            'Learn more about us',
+            AppLocalizations.of(context)!.learnMoreAboutUs,
+            textAlign: TextAlign.center,
             style: AppTextStyles.cardSubtitle.copyWith(
               color: context.onPrimaryColor.withOpacity(0.75),
             ),
@@ -235,7 +234,8 @@ class AboutUsPage extends StatelessWidget {
           const SizedBox(height: 20),
 
           Text(
-            'Loading About Us...',
+            AppLocalizations.of(context)!.loadingAboutUs,
+            textAlign: TextAlign.center,
             style: AppTextStyles.cardTitle.copyWith(
               color: context.primaryTextColor,
             ),
@@ -244,7 +244,8 @@ class AboutUsPage extends StatelessWidget {
           const SizedBox(height: 6),
 
           Text(
-            'Please wait a moment',
+            AppLocalizations.of(context)!.pleaseWaitAMoment,
+            textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall.copyWith(
               color: context.secondaryTextColor,
             ),
@@ -282,7 +283,7 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 22),
 
             Text(
-              'Unable to Load About Us',
+              AppLocalizations.of(context)!.unableToLoadAboutUs,
               textAlign: TextAlign.center,
               style: AppTextStyles.headingLarge.copyWith(
                 color: context.primaryTextColor,
@@ -292,8 +293,7 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 8),
 
             Text(
-              'Something went wrong while loading '
-              'the organization information.',
+              AppLocalizations.of(context)!.organizationLoadError,
               textAlign: TextAlign.center,
               style: AppTextStyles.cardSubtitle.copyWith(
                 height: 1.5,
@@ -334,7 +334,10 @@ class AboutUsPage extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.refresh_rounded, size: 20),
-                label: Text('Try Again', style: AppTextStyles.listTitle),
+                label: Text(
+                  AppLocalizations.of(context)!.retry,
+                  style: AppTextStyles.listTitle,
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.primaryColor,
                   foregroundColor: context.onPrimaryColor,

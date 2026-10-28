@@ -1,7 +1,7 @@
 import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/core/theme/app_dynamic_colors.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
-import 'package:farmer_consultant/core/utility/custom_loader.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/utility/tab_refresh.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
@@ -12,7 +12,6 @@ import 'package:farmer_consultant/features/products/presentation/bloc/product_ev
 import 'package:farmer_consultant/features/products/presentation/bloc/product_state.dart';
 import 'package:farmer_consultant/features/products/presentation/widget/category_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -113,7 +112,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-        final colors = Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       // backgroundColor: Colors.white,
       backgroundColor: context.appBackground,
@@ -127,20 +126,16 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
       // ),
       appBar: CommonDashboardAppBar(
         showProfile: false,
-        title: 'Product Category',
+        title: AppLocalizations.of(context)!.productCategory,
         showNotification: false,
         showThemeButton: true,
-        onBackTap: () =>   context.go(AppRouter.dashboard),
-        
+        onBackTap: () => context.go(AppRouter.dashboard),
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: Column(
           children: [
-     
             _buildSearchBar(),
-
-     
 
             // ==================================================
             // SEARCH RESULTS
@@ -150,7 +145,6 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
                 return _buildSearchResults(state);
               },
             ),
-
 
             // ==================================================
             // CATEGORY GRID
@@ -164,15 +158,16 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
 
                   if (!isSearching &&
                       state.productStatus == ProductStatus.loading) {
-                     return Center(
-              child: CircularProgressIndicator(color: colors.primary),
-            );
+                    return Center(
+                      child: CircularProgressIndicator(color: colors.primary),
+                    );
                   }
 
                   if (!isSearching && state.fertilizerCategoryList.isEmpty) {
                     return Center(
                       child: Text(
-                        'No categories found',
+                        AppLocalizations.of(context)!.noCategoriesFound,
+                        textAlign: TextAlign.center,
                         style: AppTextStyles.body,
                       ),
                     );
@@ -201,7 +196,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
         textInputAction: TextInputAction.search,
         style: AppTextStyles.input.copyWith(color: context.appText),
         decoration: InputDecoration(
-          hintText: 'Search product...',
+          hintText: AppLocalizations.of(context)!.searchProduct,
           hintStyle: AppTextStyles.inputHint.copyWith(
             color: context.appSubText,
           ),
@@ -210,6 +205,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
           prefixIcon: const Icon(Icons.search_rounded),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
+                  tooltip: AppLocalizations.of(context)!.clearSearch,
                   onPressed: () {
                     _searchController.clear();
 
@@ -278,7 +274,12 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
             SizedBox(width: 12),
-            Text('Searching products...', style: AppTextStyles.body),
+            Expanded(
+              child: Text(
+                AppLocalizations.of(context)!.searchingProducts,
+                style: AppTextStyles.body,
+              ),
+            ),
           ],
         ),
       );
@@ -318,7 +319,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'No product found for "$query"',
+                AppLocalizations.of(context)!.noProductForQuery(query),
                 style: AppTextStyles.body.copyWith(color: context.appSubText),
               ),
             ),
@@ -396,7 +397,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
                         const SizedBox(height: 2),
 
                         Text(
-                          'View product details',
+                          AppLocalizations.of(context)!.viewProductDetails,
                           style: AppTextStyles.bodySmall.copyWith(
                             color: context.appSubText,
                           ),

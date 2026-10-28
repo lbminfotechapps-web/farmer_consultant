@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
@@ -119,7 +120,7 @@ class _CropScheduleCardState extends State<CropScheduleCard> {
                               borderRadius: BorderRadius.circular(7),
                             ),
                             child: Text(
-                              'CROP SCHEDULE',
+                              AppLocalizations.of(context)!.cropSchedule,
                               style: AppTextStyles.labelSmall.copyWith(
                                 letterSpacing: 0.6,
                                 color: context.primaryColor,
@@ -219,7 +220,9 @@ class _CropScheduleCardState extends State<CropScheduleCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _showDetails ? 'Hide Details' : 'View Details',
+                                _showDetails
+                                    ? AppLocalizations.of(context)!.hideDetails
+                                    : AppLocalizations.of(context)!.viewDetails,
                                 style: AppTextStyles.labelLarge.copyWith(
                                   color: context.primaryColor,
                                 ),
@@ -227,8 +230,12 @@ class _CropScheduleCardState extends State<CropScheduleCard> {
                               const SizedBox(height: 2),
                               Text(
                                 _showDetails
-                                    ? 'Close schedule information'
-                                    : 'View complete schedule',
+                                    ? AppLocalizations.of(
+                                        context,
+                                      )!.closeScheduleInformation
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.viewCompleteSchedule,
                                 style: AppTextStyles.helperText.copyWith(
                                   color: context.secondaryTextColor,
                                 ),
@@ -299,14 +306,16 @@ class _CropScheduleCardState extends State<CropScheduleCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Schedule Details',
+                              AppLocalizations.of(context)!.scheduleDetails,
                               style: AppTextStyles.cardTitle.copyWith(
                                 color: context.cardTextColor,
                               ),
                             ),
                             SizedBox(height: 2),
                             Text(
-                              'Crop activity timeline',
+                              AppLocalizations.of(
+                                context,
+                              )!.cropActivityTimeline,
                               style: AppTextStyles.helperText.copyWith(
                                 color: context.secondaryTextColor,
                               ),
@@ -326,7 +335,9 @@ class _CropScheduleCardState extends State<CropScheduleCard> {
                           border: Border.all(color: context.borderColor),
                         ),
                         child: Text(
-                          '${schedule.details.length} Steps',
+                          AppLocalizations.of(
+                            context,
+                          )!.scheduleStepCount(schedule.details.length),
                           style: AppTextStyles.badge.copyWith(
                             color: context.primaryColor,
                           ),
@@ -396,7 +407,9 @@ class _CropScheduleCardState extends State<CropScheduleCard> {
 
                     Expanded(
                       child: Text(
-                        'No schedule details available.',
+                        AppLocalizations.of(
+                          context,
+                        )!.noScheduleDetailsAvailable,
                         style: AppTextStyles.buttonSmall.copyWith(
                           color: context.secondaryTextColor,
                         ),

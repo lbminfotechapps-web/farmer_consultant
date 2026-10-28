@@ -53,6 +53,9 @@ class CommonDashboardAppBar extends StatelessWidget
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final appBarTheme = theme.appBarTheme;
+    final bottomBorder = Border(
+      bottom: BorderSide(color: colors.outlineVariant, width: 1),
+    );
 
     // ==========================================================
     // DYNAMIC APPBAR COLORS
@@ -102,6 +105,7 @@ class CommonDashboardAppBar extends StatelessWidget
 
     if (!showProfile) {
       return AppBar(
+        shape: bottomBorder,
         backgroundColor: effectiveBackground,
         foregroundColor: foreground,
         elevation: 0,
@@ -136,6 +140,7 @@ class CommonDashboardAppBar extends StatelessWidget
     }
 
     return AppBar(
+      shape: bottomBorder,
       automaticallyImplyLeading: false,
       toolbarHeight: 92,
       backgroundColor: effectiveBackground,
@@ -268,15 +273,24 @@ class CommonDashboardAppBar extends StatelessWidget
           Icon(Icons.notifications_none_rounded, color: foreground, size: 27),
           if (notificationCount > 0)
             Positioned(
-              right: 1,
-              top: 1,
+              right: -6,
+              top: -6,
               child: Container(
-                height: 9,
-                width: 9,
+                constraints: const BoxConstraints(minHeight: 16, minWidth: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.error,
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: background, width: 1.5),
+                ),
+                child: Text(
+                  notificationCount > 99 ? '99+' : '$notificationCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

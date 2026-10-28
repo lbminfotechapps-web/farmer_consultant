@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
@@ -42,16 +43,16 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //     final confirmed = await showDialog<bool>(
 //       context: context,
 //       builder: (dialogContext) => AlertDialog(
-//         title: const Text('Confirm products applied'),
-//         content: const Text('Have you applied all products in this schedule?'),
+//         title: Text(AppLocalizations.of(context)!.confirmProductsApplied),
+//         content: Text(AppLocalizations.of(context)!.productsAppliedConfirmation),
 //         actions: [
 //           TextButton(
 //             onPressed: () => Navigator.pop(dialogContext, false),
-//             child: const Text('Cancel'),
+//             child: Text(AppLocalizations.of(context)!.cancel),
 //           ),
 //           FilledButton(
 //             onPressed: () => Navigator.pop(dialogContext, true),
-//             child: const Text('Yes'),
+//             child: Text(AppLocalizations.of(context)!.yes),
 //           ),
 //         ],
 //       ),
@@ -86,10 +87,10 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         SnackBar(
 //           content: Text(
-//             result.errorMessage ??
+//
 //                 (result.cropStatus == CropStatus.success
-//                     ? 'Schedule updated successfully'
-//                     : 'Unable to update schedule'),
+//                     ? AppLocalizations.of(context)!.scheduleUpdatedSuccessfully
+//                     : AppLocalizations.of(context)!.unableToUpdateSchedule),
 //           ),
 //         ),
 //       );
@@ -124,7 +125,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //   Future<void> _initialize() async {
 //     try {
 //       if (widget.plotId.trim().isEmpty) {
-//         throw Exception('Plot ID is missing');
+//         throw Exception(AppLocalizations.of(context)!.plotIdMissing);
 //       }
 
 //       final farmerId = await SecureStorage.instance.getFarmerId();
@@ -132,7 +133,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //       if (!mounted) return;
 
 //       if (farmerId.isEmpty || farmerId == '0') {
-//         throw Exception('Please login again');
+//         throw Exception(AppLocalizations.of(context)!.pleaseLoginAgain);
 //       }
 
 //       setState(() {
@@ -210,7 +211,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
 //       appBar: CommonDashboardAppBar(
-//         title: 'Plot Schedules',
+//         title: AppLocalizations.of(context)!.plotSchedules,
 //         showProfile: false,
 //         showNotification: false,
 //         showThemeButton: true,
@@ -222,7 +223,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //           : _localError != null
 //           ? _buildMessage(
 //               icon: Icons.error_outline,
-//               title: 'Unable to load schedules',
+//               title: AppLocalizations.of(context)!.unableToLoadSchedules,
 //               message: _localError!,
 //               onRetry: _initialize,
 //             )
@@ -239,8 +240,8 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                 if (state.cropStatus == CropStatus.failure) {
 //                   return _buildMessage(
 //                     icon: Icons.error_outline_rounded,
-//                     title: 'Unable to load schedules',
-//                     message: state.errorMessage ?? 'Something went wrong',
+//                     title: AppLocalizations.of(context)!.unableToLoadSchedules,
+//                     message: AppLocalizations.of(context)!.cropScheduleLoadError,
 //                     onRetry: _loadSchedules,
 //                   );
 //                 }
@@ -250,7 +251,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                 if (schedules.isEmpty) {
 //                   return _buildMessage(
 //                     icon: Icons.event_busy_outlined,
-//                     title: 'No schedules found',
+//                     title: AppLocalizations.of(context)!.noSchedulesFound,
 //                     message: 'No crop schedules available for this plot.',
 //                     onRetry: _loadSchedules,
 //                   );
@@ -275,7 +276,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                             schedules.first.plotName,
 //                           ),
 //                           Text(
-//                             'Note: Doses for 200 liters',
+//                             AppLocalizations.of(context)!.dosesFor200Liters,
 //                             style: TextStyle(
 //                               fontSize: 10.sp,
 //                               fontWeight: FontWeight.w600,
@@ -308,13 +309,13 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                               if (state.paginationError != null) {
 //                                 return Column(
 //                                   children: [
-//                                     const Text('Unable to load more schedules'),
+//                                     Text('Unable to load more schedules'),
 //                                     TextButton(
 //                                       onPressed: _answerBusy
 //                                           ? null
 //                                           : () =>
 //                                                 _loadSchedules(loadMore: true),
-//                                       child: const Text('Retry'),
+//                                       child: Text(AppLocalizations.of(context)!.retry),
 //                                     ),
 //                                   ],
 //                                 );
@@ -372,7 +373,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //               crossAxisAlignment: CrossAxisAlignment.start,
 //               children: [
 //                 Text(
-//                   plotName.trim().isEmpty ? 'Plot Name' : plotName.trim(),
+//                   plotName.trim().isEmpty ? AppLocalizations.of(context)!.plotName : plotName.trim(),
 //                   style: TextStyle(
 //                     fontSize: 14,
 //                     fontWeight: FontWeight.w800,
@@ -391,7 +392,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //             ),
 //           ),
 //           Text(
-//             '$count Found',
+//             AppLocalizations.of(context)!.scheduleFoundCount(count),
 //             style: TextStyle(
 //               fontSize: 11,
 //               fontWeight: FontWeight.w700,
@@ -438,7 +439,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                   ),
 //                   _miniChip(
 //                     Icons.inventory_2_outlined,
-//                     '${schedule.details.length} Products',
+//                     AppLocalizations.of(context)!.productCount(schedule.details.length),
 //                   ),
 //                 ],
 //               ),
@@ -455,7 +456,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                     const SizedBox(width: 7),
 //                     Expanded(
 //                       child: Text(
-//                         'Consultant: ${schedule.adminName}',
+//                         AppLocalizations.of(context)!.consultantName(schedule.adminName),
 //                         style: TextStyle(fontSize: 11, color: colors.onSurface),
 //                       ),
 //                     ),
@@ -465,7 +466,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //               const SizedBox(height: 12),
 
 //               if (schedule.details.isEmpty)
-//                 const Text('No product details')
+//                 Text(AppLocalizations.of(context)!.noProductDetails)
 //               else
 //                 _buildProductGroup(schedule, selected, onAnswer),
 //             ],
@@ -514,8 +515,8 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                       color: colors.onPrimaryContainer,
 //                     ),
 //                     children: [
-//                       const TextSpan(
-//                         text: 'Remark : ',
+//                       TextSpan(
+//                         text: AppLocalizations.of(context)!.remarkLabel,
 //                         style: TextStyle(fontWeight: FontWeight.bold),
 //                       ),
 //                       TextSpan(text: schedule.remark.trim()),
@@ -533,7 +534,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //               children: [
 //                 Expanded(
 //                   child: Text(
-//                     'Products applied?',
+//                     AppLocalizations.of(context)!.productsApplied,
 //                     style: TextStyle(
 //                       fontSize: 11,
 //                       fontWeight: FontWeight.w700,
@@ -543,7 +544,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //                 ),
 
 //                 _answerButton(
-//                   'Yes',
+//                   AppLocalizations.of(context)!.yes,
 //                   true,
 //                   selected,
 //                   onAnswer,
@@ -552,7 +553,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 //                 const SizedBox(width: 10),
 
-//                 _answerButton('No', false, selected, onAnswer),
+//                 _answerButton(AppLocalizations.of(context)!.no, false, selected, onAnswer),
 //               ],
 //             ),
 //           ),
@@ -596,7 +597,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 //               Expanded(
 //                 child: Text(
-//                   product.productName.isEmpty ? 'Product' : product.productName,
+//                   product.productName.isEmpty ? AppLocalizations.of(context)!.product : product.productName,
 //                   style: TextStyle(
 //                     fontSize: 12,
 //                     fontWeight: FontWeight.w700,
@@ -625,14 +626,14 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //               children: [
 //                 Expanded(
 //                   child: _productValue(
-//                     'Qty',
+//                     AppLocalizations.of(context)!.quantity,
 //                     _quantity(product.productQty, product.unit),
 //                     Icons.scale_outlined,
 //                   ),
 //                 ),
 //                 Expanded(
 //                   child: _productValue(
-//                     'Water',
+//                     AppLocalizations.of(context)!.water,
 //                     _quantity(product.waterQty, product.waterUnit),
 //                     Icons.water_drop_outlined,
 //                   ),
@@ -791,7 +792,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 //               style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
 //             ),
 //             const SizedBox(height: 15),
-//             FilledButton(onPressed: onRetry, child: const Text('Retry')),
+//             FilledButton(onPressed: onRetry, child: Text(AppLocalizations.of(context)!.retry)),
 //           ],
 //         ),
 //       ),
@@ -896,7 +897,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
           suffixIcon: const Icon(Icons.calendar_today_outlined, size: 17),
         ),
         child: Text(
-          value == null ? 'Select date' : _filterDate(value),
+          value == null
+              ? AppLocalizations.of(context)!.selectDate
+              : _filterDate(value),
           style: TextStyle(fontSize: 12.sp),
         ),
       ),
@@ -907,7 +910,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
     if (_filtersBusy) return;
     if (!clear && _from != null && _to != null && _from!.isAfter(_to!)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('From Date cannot be after To Date')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.invalidDateRange)),
       );
       return;
     }
@@ -948,7 +951,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
             ),
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Status',
+              labelText: AppLocalizations.of(context)!.status,
               labelStyle: TextStyle(
                 fontSize: 12.sp,
                 color: colors.onSurfaceVariant,
@@ -972,10 +975,19 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                 borderSide: BorderSide(color: colors.outlineVariant),
               ),
             ),
-            items: const [
-              DropdownMenuItem(value: '', child: Text('Select status')),
-              DropdownMenuItem(value: '1', child: Text('Yes')),
-              DropdownMenuItem(value: '0', child: Text('No')),
+            items: [
+              DropdownMenuItem(
+                value: '',
+                child: Text(AppLocalizations.of(context)!.selectStatus),
+              ),
+              DropdownMenuItem(
+                value: '1',
+                child: Text(AppLocalizations.of(context)!.yes),
+              ),
+              DropdownMenuItem(
+                value: '0',
+                child: Text(AppLocalizations.of(context)!.no),
+              ),
             ],
             onChanged: _filtersBusy
                 ? null
@@ -987,11 +999,19 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
           Row(
             children: [
               Expanded(
-                child: _dateTile('From Date', _from, () => _chooseDate(true)),
+                child: _dateTile(
+                  AppLocalizations.of(context)!.fromDate,
+                  _from,
+                  () => _chooseDate(true),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _dateTile('To Date', _to, () => _chooseDate(false)),
+                child: _dateTile(
+                  AppLocalizations.of(context)!.toDate,
+                  _to,
+                  () => _chooseDate(false),
+                ),
               ),
             ],
           ),
@@ -1003,7 +1023,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                   onPressed: _filtersBusy
                       ? null
                       : () => _applyFilters(clear: true),
-                  child: const Text('Clear'),
+                  child: Text(AppLocalizations.of(context)!.clear),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1014,7 +1034,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                     backgroundColor: colors.primary,
                   ),
                   icon: const Icon(Icons.search, size: 17),
-                  label: const Text('Apply Filters'),
+                  label: Text(AppLocalizations.of(context)!.applyFilters),
                   onPressed: _filtersBusy ? null : () => _applyFilters(),
                 ),
               ),
@@ -1031,16 +1051,18 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirm products applied'),
-        content: const Text('Have you applied all products in this schedule?'),
+        title: Text(AppLocalizations.of(context)!.confirmProductsApplied),
+        content: Text(
+          AppLocalizations.of(context)!.productsAppliedConfirmation,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Yes'),
+            child: Text(AppLocalizations.of(context)!.yes),
           ),
         ],
       ),
@@ -1074,10 +1096,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result.errorMessage ??
-                (result.cropStatus == CropStatus.success
-                    ? 'Schedule updated successfully'
-                    : 'Unable to update schedule'),
+            (result.cropStatus == CropStatus.success
+                ? AppLocalizations.of(context)!.scheduleUpdatedSuccessfully
+                : AppLocalizations.of(context)!.unableToUpdateSchedule),
           ),
         ),
       );
@@ -1112,7 +1133,11 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
   Future<void> _initialize() async {
     try {
       if (widget.plotId.trim().isEmpty) {
-        throw Exception('Plot ID is missing');
+        setState(() {
+          _loadingFarmer = false;
+          _localError = 'plotIdMissing';
+        });
+        return;
       }
 
       final farmerId = await SecureStorage.instance.getFarmerId();
@@ -1120,7 +1145,11 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
       if (!mounted) return;
 
       if (farmerId.isEmpty || farmerId == '0') {
-        throw Exception('Please login again');
+        setState(() {
+          _loadingFarmer = false;
+          _localError = 'pleaseLoginAgain';
+        });
+        return;
       }
 
       setState(() {
@@ -1135,7 +1164,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
 
       setState(() {
         _loadingFarmer = false;
-        _localError = e.toString();
+        _localError = 'loadError';
       });
     }
   }
@@ -1220,7 +1249,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Plot Schedules',
+        title: AppLocalizations.of(context)!.plotSchedules,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -1251,8 +1280,12 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                 : _localError != null
                 ? _buildMessage(
                     icon: Icons.error_outline,
-                    title: 'Unable to load schedules',
-                    message: _localError!,
+                    title: AppLocalizations.of(context)!.unableToLoadSchedules,
+                    message: _localError == 'plotIdMissing'
+                        ? AppLocalizations.of(context)!.plotIdMissing
+                        : _localError == 'pleaseLoginAgain'
+                        ? AppLocalizations.of(context)!.pleaseLoginAgain
+                        : AppLocalizations.of(context)!.cropScheduleLoadError,
                     onRetry: _initialize,
                   )
                 : BlocConsumer<CropBloc, CropState>(
@@ -1271,8 +1304,12 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                       if (state.cropStatus == CropStatus.failure) {
                         return _buildMessage(
                           icon: Icons.error_outline_rounded,
-                          title: 'Unable to load schedules',
-                          message: state.errorMessage ?? 'Something went wrong',
+                          title: AppLocalizations.of(
+                            context,
+                          )!.unableToLoadSchedules,
+                          message: AppLocalizations.of(
+                            context,
+                          )!.cropScheduleLoadError,
                           onRetry: _loadSchedules,
                         );
                       }
@@ -1289,10 +1326,14 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                         }
                         return _buildMessage(
                           icon: Icons.event_busy_outlined,
-                          title: 'No schedules found',
+                          title: AppLocalizations.of(context)!.noSchedulesFound,
                           message: state.loadingMore
-                              ? 'Loading matching schedules...'
-                              : 'No crop schedules match the selected filters.',
+                              ? AppLocalizations.of(
+                                  context,
+                                )!.loadingMatchingSchedules
+                              : AppLocalizations.of(
+                                  context,
+                                )!.noSchedulesMatchFilters,
                           onRetry: state.paginationError != null
                               ? () => _loadSchedules(loadMore: true)
                               : _loadSchedules,
@@ -1320,11 +1361,13 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colors.primaryContainer,
+                                    color: const Color(0xFFF5F5F5),
                                     borderRadius: BorderRadius.circular(9),
                                   ),
                                   child: Text(
-                                    "Note: Show Today's Schedules by default | Scroll Down ↓ → Load Future Schedules | Scroll Up ↑ → Load Past Schedules.",
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.scheduleTimelineHint,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       height: 1.5,
@@ -1339,7 +1382,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                                   schedules.first.plotName,
                                 ),
                                 Text(
-                                  'Note: Doses for 200 liters',
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.dosesFor200Liters,
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.w600,
@@ -1428,7 +1473,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
             onPressed: _answerBusy
                 ? null
                 : () => _loadSchedules(loadMore: true),
-            child: const Text('Unable to load more schedules. Tap to retry'),
+            child: Text(AppLocalizations.of(context)!.loadMoreSchedulesError),
           ),
         );
       }
@@ -1504,7 +1549,8 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.primaryContainer,
+        color: const Color(0xFFF5F5F5),
+        //  colors.primaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -1516,7 +1562,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  plotName.trim().isEmpty ? 'Plot Name' : plotName.trim(),
+                  plotName.trim().isEmpty
+                      ? AppLocalizations.of(context)!.plotName
+                      : plotName.trim(),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -1535,7 +1583,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
             ),
           ),
           Text(
-            '$count Found',
+            AppLocalizations.of(context)!.scheduleFoundCount(count),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -1589,7 +1637,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                   ),
                   _miniChip(
                     Icons.inventory_2_outlined,
-                    '${schedule.details.length} Products',
+                    AppLocalizations.of(
+                      context,
+                    )!.productCount(schedule.details.length),
                   ),
                 ],
               ),
@@ -1606,7 +1656,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                     const SizedBox(width: 7),
                     Expanded(
                       child: Text(
-                        'Consultant: ${schedule.adminName}',
+                        AppLocalizations.of(
+                          context,
+                        )!.consultantName(schedule.adminName),
                         style: TextStyle(fontSize: 11, color: colors.onSurface),
                       ),
                     ),
@@ -1616,7 +1668,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
               const SizedBox(height: 12),
 
               if (schedule.details.isEmpty)
-                const Text('No product details')
+                Text(AppLocalizations.of(context)!.noProductDetails)
               else
                 _buildProductGroup(schedule, selected, onAnswer),
             ],
@@ -1665,8 +1717,8 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                       color: colors.onPrimaryContainer,
                     ),
                     children: [
-                      const TextSpan(
-                        text: 'Remark : ',
+                      TextSpan(
+                        text: AppLocalizations.of(context)!.remarkLabel,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       TextSpan(text: schedule.remark.trim()),
@@ -1684,7 +1736,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
               children: [
                 Expanded(
                   child: Text(
-                    'Products applied?',
+                    AppLocalizations.of(context)!.productsApplied,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -1694,7 +1746,7 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                 ),
 
                 _answerButton(
-                  'Yes',
+                  AppLocalizations.of(context)!.yes,
                   true,
                   selected,
                   onAnswer,
@@ -1703,7 +1755,12 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
 
                 const SizedBox(width: 10),
 
-                _answerButton('No', false, selected, onAnswer),
+                _answerButton(
+                  AppLocalizations.of(context)!.no,
+                  false,
+                  selected,
+                  onAnswer,
+                ),
               ],
             ),
           ),
@@ -1747,7 +1804,9 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
 
               Expanded(
                 child: Text(
-                  product.productName.isEmpty ? 'Product' : product.productName,
+                  product.productName.isEmpty
+                      ? AppLocalizations.of(context)!.product
+                      : product.productName,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -1776,14 +1835,14 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
               children: [
                 Expanded(
                   child: _productValue(
-                    'Qty',
+                    AppLocalizations.of(context)!.quantity,
                     _quantity(product.productQty, product.unit),
                     Icons.scale_outlined,
                   ),
                 ),
                 Expanded(
                   child: _productValue(
-                    'Water',
+                    AppLocalizations.of(context)!.water,
                     _quantity(product.waterQty, product.waterUnit),
                     Icons.water_drop_outlined,
                   ),
@@ -1942,7 +2001,10 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
               style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
             ),
             const SizedBox(height: 15),
-            FilledButton(onPressed: onRetry, child: const Text('Retry')),
+            FilledButton(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context)!.retry),
+            ),
           ],
         ),
       ),

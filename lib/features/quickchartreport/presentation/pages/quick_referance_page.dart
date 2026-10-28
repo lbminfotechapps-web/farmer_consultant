@@ -5,7 +5,7 @@ import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/gallerybloc.dart';
 import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/galleryevent.dart';
 import 'package:farmer_consultant/features/quickchartreport/presentation/bloc/gallerystate.dart';
-import 'package:go_router/go_router.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +34,7 @@ class _QuickReferencePageState extends State<QuickReferencePage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Quick Reference Chart Report',
+        title: AppLocalizations.of(context)!.quickReferenceChartReport,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -94,7 +94,8 @@ class _QuickReferencePageState extends State<QuickReferencePage> {
           ),
           SizedBox(height: 12),
           Text(
-            'No quick reference found',
+            AppLocalizations.of(context)!.noQuickReferenceFound,
+            textAlign: TextAlign.center,
             style: AppTextStyles.body.copyWith(
               color: context.secondaryTextColor,
             ),
@@ -128,7 +129,10 @@ class _QuickReferencePageState extends State<QuickReferencePage> {
                 context.read<GalleryBloc>().add(const GetGalleryEvent());
               },
               icon: const Icon(Icons.refresh),
-              label: Text('Retry', style: AppTextStyles.button),
+              label: Text(
+                AppLocalizations.of(context)!.retry,
+                style: AppTextStyles.button,
+              ),
             ),
           ],
         ),
@@ -227,7 +231,7 @@ class _QuickReferenceCard extends StatelessWidget {
             const SizedBox(height: 14),
 
             Text(
-              files.length > 1 ? 'Available References' : 'Available Reference',
+              AppLocalizations.of(context)!.availableReferences(files.length),
               style: AppTextStyles.label.copyWith(
                 color: context.secondaryTextColor,
               ),
@@ -344,6 +348,8 @@ class _ReferenceFileTile extends StatelessWidget {
                 children: [
                   Text(
                     language,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.labelLarge.copyWith(
                       color: context.primaryTextColor,
                     ),
@@ -351,10 +357,12 @@ class _ReferenceFileTile extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     isPdf
-                        ? 'PDF Document'
+                        ? AppLocalizations.of(context)!.pdfDocument
                         : isImage
-                        ? 'Image Reference'
-                        : 'Reference File',
+                        ? AppLocalizations.of(context)!.imageReference
+                        : AppLocalizations.of(context)!.referenceFile,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption.copyWith(
                       color: context.secondaryTextColor,
                     ),
@@ -558,7 +566,7 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Unable to share image. Please try again.',
+              AppLocalizations.of(context)!.unableToShareImage,
               style: AppTextStyles.body,
             ),
           ),
@@ -585,7 +593,7 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
       backgroundColor: context.backgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Share image',
+        title: AppLocalizations.of(context)!.shareImage,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -661,7 +669,10 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
                                     ),
                                     SizedBox(height: 10),
                                     Text(
-                                      'Unable to load image',
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.unableToLoadImage,
+                                      textAlign: TextAlign.center,
                                       style: AppTextStyles.body.copyWith(
                                         color: context.secondaryTextColor,
                                       ),
@@ -681,7 +692,7 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      tooltip: 'Previous image',
+                      tooltip: AppLocalizations.of(context)!.previousImage,
                       onPressed: _index > 0
                           ? () => _changeSlide(_index - 1)
                           : null,
@@ -692,14 +703,14 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
                       style: AppTextStyles.body,
                     ),
                     IconButton(
-                      tooltip: 'Next image',
+                      tooltip: AppLocalizations.of(context)!.nextImage,
                       onPressed: _index < _images.length - 1
                           ? () => _changeSlide(_index + 1)
                           : null,
                       icon: const Icon(Icons.chevron_right),
                     ),
                     IconButton(
-                      tooltip: 'Zoom out',
+                      tooltip: AppLocalizations.of(context)!.zoomOut,
                       onPressed: () => _setZoom(
                         _transforms[_index].value.getMaxScaleOnAxis() / 1.5,
                         viewport,
@@ -707,12 +718,12 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
                       icon: const Icon(Icons.zoom_out),
                     ),
                     IconButton(
-                      tooltip: 'Reset zoom',
+                      tooltip: AppLocalizations.of(context)!.resetZoom,
                       onPressed: () => _setZoom(1, viewport),
                       icon: const Icon(Icons.fit_screen),
                     ),
                     IconButton(
-                      tooltip: 'Zoom in',
+                      tooltip: AppLocalizations.of(context)!.zoomIn,
                       onPressed: () => _setZoom(
                         _transforms[_index].value.getMaxScaleOnAxis() * 1.5,
                         viewport,

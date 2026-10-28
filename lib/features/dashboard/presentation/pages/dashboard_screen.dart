@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:farmer_consultant/core/di/crop_di.dart';
+import 'package:farmer_consultant/core/notification/fcm_service.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/core/router/app_router.dart';
@@ -9,11 +12,13 @@ import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashbo
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/farmer_banner.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_event.dart';
+import 'package:farmer_consultant/features/notification/presentation/bloc/notification_state.dart';
 import 'package:farmer_consultant/features/weather/weather_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 import '../widgets/dashboard_activity_card.dart';
 
@@ -37,7 +42,7 @@ class DashboardScreen extends StatefulWidget {
     this.userName = '',
     this.location = 'Nashik, Maharashtra',
     this.profileImage,
-    this.notificationCount = 2,
+    this.notificationCount = 0,
     this.onProfileTap,
     this.onNotificationTap,
     this.onCropCareTap,
@@ -52,7 +57,10 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with WidgetsBindingObserver {
+  late int _notificationCount;
+  StreamSubscription<void>? _notificationSubscription;
   bool _isLoggingOut = false;
   DateTime? _activeFrom;
   DateTime? _activeTo;
@@ -60,12 +68,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _notificationCount = widget.notificationCount;
+    WidgetsBinding.instance.addObserver(this);
+    _notificationSubscription = FcmService.notificationReceived.listen((_) {
+      if (mounted) _loadNotifications();
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _loadSchedules();
       _loadNotifications();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _notificationSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _loadNotifications();
+  }
+
+  Future<void> _openNotifications() async {
+    if (widget.onNotificationTap != null) {
+      widget.onNotificationTap!();
+      return;
+    }
+    final farmerId = await SecureStorage.instance.getFarmerId();
+    if (!mounted) return;
+    await context.push(AppRouter.notification, extra: farmerId);
+    if (mounted) await _loadNotifications();
   }
 
   Future<void> _logout() async {
@@ -80,7 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (!mounted) return;
       context.go(AppRouter.login);
     } catch (_) {
-      if (mounted) _showMessage('Unable to log out. Please try again.');
+      if (mounted) _showMessage(AppLocalizations.of(context)!.logoutError);
     } finally {
       if (mounted) setState(() => _isLoggingOut = false);
     }
@@ -149,193 +185,200 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!mounted) return;
 
     final userId = int.tryParse(farmerId.trim());
-    if (userId == null) {
+    if (userId == null || userId <= 0) {
       debugPrint('Invalid farmer ID: $farmerId');
       return;
     }
 
     context.read<NotificationBloc>().add(
-      GetNotificationListEvent(userId: userId, isLogin: true, userType: ''),
+      GetNotificationListEvent(
+        userId: userId,
+        isLogin: true,
+        userType: '',
+        loadAll: true,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: Color.alphaBlend(
-        colors.primary.withValues(alpha: 0.025),
-        colors.surface,
-      ),
-      appBar: CommonDashboardAppBar(
-        backgroundColor: colors.surface,
-        userName: widget.userName,
-        location: widget.location,
-        profileImage: widget.profileImage,
-        notificationCount: widget.notificationCount,
-        onNotificationTap: widget.onNotificationTap,
-        onProfileTap: () {
-          context.push('/profile');
-          // _logout();
-        },
-      ),
+    final strings = AppLocalizations.of(context)!;
+    return BlocListener<NotificationBloc, NotificationState>(
+      listener: (context, state) {
+        if (state is NotificationLoaded) {
+          setState(() => _notificationCount = state.notifications.length);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: CommonDashboardAppBar(
+          backgroundColor: colors.surface,
+          userName: widget.userName,
+          greeting: '${strings.welcome},',
+          location: widget.location,
+          profileImage: widget.profileImage,
+          notificationCount: _notificationCount,
+          onNotificationTap: _openNotifications,
+          onProfileTap: () {
+            context.push('/profile');
+            // _logout();
+          },
+        ),
 
-      // Existing bottom navigation is managed by parent.
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Your farm, at a glance',
+        // Existing bottom navigation is managed by parent.
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 5, 20, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        strings.farmAtAGlance,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      DateFormat(
+                        'dd MMM, yyyy',
+                        strings.localeName,
+                      ).format(DateTime.now()),
                       style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
                         color: colors.onSurfaceVariant,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    DateFormat('dd MMM, yyyy').format(DateTime.now()),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: colors.onSurfaceVariant,
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const FarmingBanner(),
+                const SizedBox(height: 26),
+                Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: colors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const FarmingBanner(),
-              const SizedBox(height: 26),
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: colors.primary,
-                      borderRadius: BorderRadius.circular(2),
+                    const SizedBox(width: 9),
+                    Text(
+                      strings.todaysActivities,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: colors.onSurface,
+                        letterSpacing: -0.3,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 9),
-                  Text(
-                    "Today's Activities",
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurface,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
+                  ],
+                ),
+                const SizedBox(height: 14),
 
-              // Crop Schedule
-              BlocBuilder<CropBloc, CropState>(
-                builder: (context, state) {
-                  return DashboardActivityCard(
-                    title: 'Crop Schedule',
-                    subtitle: "View today's tasks",
-                    icon: Icons.calendar_month_rounded,
-                    onTap:
-                        widget.onCropScheduleTap ??
-                        () async {
-                          final String farmerId = await SecureStorage.instance
-                              .getFarmerId();
-                          if (!context.mounted) return;
-                          await context.push(
-                            AppRouter.cropScheduleList,
-                            extra: farmerId,
-                          );
-                          if (!mounted) return;
-                          await _loadSchedules();
+                // Crop Schedule
+                BlocBuilder<CropBloc, CropState>(
+                  builder: (context, state) {
+                    return DashboardActivityCard(
+                      title: strings.cropSchedule,
+                      subtitle: strings.viewTodaysTasks,
+                      icon: Icons.calendar_month_rounded,
+                      onTap:
+                          widget.onCropScheduleTap ??
+                          () async {
+                            final String farmerId = await SecureStorage.instance
+                                .getFarmerId();
+                            if (!context.mounted) return;
+                            await context.push(
+                              AppRouter.cropScheduleList,
+                              extra: farmerId,
+                            );
+                            if (!mounted) return;
+                            await _loadSchedules();
 
-                          debugPrint('Farmer ID: $farmerId');
-                        },
-                    notificationCount: state.cropStatus == CropStatus.success
-                        ? _getScheduleCount(state)
-                        : null,
-                  );
-                },
-              ),
+                            debugPrint('Farmer ID: $farmerId');
+                          },
+                      notificationCount: state.cropStatus == CropStatus.success
+                          ? _getScheduleCount(state)
+                          : null,
+                    );
+                  },
+                ),
 
-              // const SizedBox(height: 5),
-              const SizedBox(height: 10),
+                // const SizedBox(height: 5),
+                const SizedBox(height: 10),
 
-              // Notifications
-              DashboardActivityCard(
-                title: 'Notifications',
-                subtitle: widget.notificationCount == 0
-                    ? 'No new alerts'
-                    : '${widget.notificationCount} new alerts',
-                icon: Icons.notifications_rounded,
+                // Notifications
+                DashboardActivityCard(
+                  title: strings.notifications,
+                  subtitle: _notificationCount == 0
+                      ? strings.noNotificationsAvailable
+                      : strings.totalNotificationCount(_notificationCount),
+                  icon: Icons.notifications_rounded,
 
-                notificationCount: widget.notificationCount,
-                onTap:
-                    widget.onNotificationTap ??
-                    () async {
-                      final String farmerId = await SecureStorage.instance
-                          .getFarmerId();
-                      if (!context.mounted) return;
-                      context.push('/notification', extra: farmerId);
-                    },
-              ),
+                  notificationCount: _notificationCount,
+                  onTap: _openNotifications,
+                ),
 
-              const SizedBox(height: 26),
-              DashboardMenu(
-                onWeatherTap:
-                    widget.onWeatherTap ??
-                    () {
-                      WeatherCardDialog.show(context);
-                    },
+                const SizedBox(height: 26),
+                DashboardMenu(
+                  onWeatherTap:
+                      widget.onWeatherTap ??
+                      () {
+                        WeatherCardDialog.show(context);
+                      },
 
-                onMyPlotsTap:
-                    widget.onMyFieldsTap ??
-                    () {
-                      context.push(AppRouter.plotList);
-                    },
+                  onMyPlotsTap:
+                      widget.onMyFieldsTap ??
+                      () {
+                        context.push(AppRouter.plotList);
+                      },
 
-                onQuickReferenceTap: () {
-                  context.push(AppRouter.quickReferance);
-                },
+                  onQuickReferenceTap: () {
+                    context.push(AppRouter.quickReferance);
+                  },
 
-                onNearDealersTap: () {
-                  context.push('/nearealers');
-                },
+                  onNearDealersTap: () {
+                    context.push('/nearealers');
+                  },
 
-                onContactUsTap: () {
-                  context.push('/contactUs');
-                },
+                  onContactUsTap: () {
+                    context.push('/contactUs');
+                  },
 
-                onImportantLinksTap: () {
-                  context.push(AppRouter.importantLink);
-                },
+                  onImportantLinksTap: () {
+                    context.push(AppRouter.importantLink);
+                  },
 
-                onSocialMediaTap: () {
-                  context.push('/social');
-                },
+                  onSocialMediaTap: () {
+                    context.push('/social');
+                  },
 
-                onAboutUsTap: () {
-                  context.push('/aboutUs');
-                },
+                  onAboutUsTap: () {
+                    context.push('/aboutUs');
+                  },
 
-                onCropAdviceTap: () {
-                  context.push(AppRouter.cropSchedule);
-                },
+                  onCropAdviceTap: () {
+                    context.push(AppRouter.cropSchedule);
+                  },
 
-                onGalleryTap: () {
-                  context.push(AppRouter.gallery);
-                },
-              ),
-            ],
+                  onGalleryTap: () {
+                    context.push(AppRouter.gallery);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

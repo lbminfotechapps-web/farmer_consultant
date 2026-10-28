@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 class FarmingBanner extends StatelessWidget {
   final VoidCallback? onTap;
@@ -8,6 +9,7 @@ class FarmingBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
     return Semantics(
       button: onTap != null,
       child: GestureDetector(
@@ -60,7 +62,7 @@ class FarmingBanner extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.2),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
@@ -69,23 +71,25 @@ class FarmingBanner extends StatelessWidget {
                             color: Color(0xFFE4D49F),
                           ),
                           SizedBox(width: 6),
-                          Text(
-                            'AI POWERED FARMING',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.3,
+                          Flexible(
+                            child: Text(
+                              strings.aiPoweredFarming,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.3,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Text(
-                      'Grow smarter.\nHarvest better.',
+                    Text(
+                      strings.growSmarter,
                       style: TextStyle(
-                        fontSize: 29,
+                        fontSize: 20,
                         height: 1.15,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.7,
@@ -93,8 +97,8 @@ class FarmingBanner extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Better decisions for every season.',
+                    Text(
+                      strings.betterDecisions,
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.5,

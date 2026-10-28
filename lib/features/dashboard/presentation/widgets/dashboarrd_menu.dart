@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 class QuickAccessItem {
   final String title;
@@ -42,73 +43,73 @@ class DashboardMenu extends StatelessWidget {
     this.onGalleryTap,
   });
 
-  List<QuickAccessItem> _getMenus() {
+  List<QuickAccessItem> _getMenus(AppLocalizations strings) {
     return [
       QuickAccessItem(
-        title: 'My Plots',
+        title: strings.myPlots,
         icon: Icons.grass_rounded,
         iconColor: const Color(0xFF15803D),
         backgroundColor: const Color(0xFFDCFCE7),
         onTap: onMyPlotsTap,
       ),
       QuickAccessItem(
-        title: 'Near Dealers',
+        title: strings.nearDealers,
         icon: Icons.storefront_outlined,
         iconColor: const Color(0xFFEA580C),
         backgroundColor: const Color(0xFFFFEDD5),
         onTap: onNearDealersTap,
       ),
       QuickAccessItem(
-        title: 'Quick Reference',
+        title: strings.quickReference,
         icon: Icons.menu_book_rounded,
         iconColor: const Color(0xFF7C3AED),
         backgroundColor: const Color(0xFFF3E8FF),
         onTap: onQuickReferenceTap,
       ),
       QuickAccessItem(
-        title: 'Weather',
+        title: strings.weather,
         icon: Icons.cloud_outlined,
         iconColor: const Color(0xFF0284C7),
         backgroundColor: const Color(0xFFE0F2FE),
         onTap: onWeatherTap,
       ),
       QuickAccessItem(
-        title: 'Important Links',
+        title: strings.importantLinks,
         icon: Icons.link_rounded,
         iconColor: const Color(0xFF4F46E5),
         backgroundColor: const Color(0xFFE0E7FF),
         onTap: onImportantLinksTap,
       ),
       QuickAccessItem(
-        title: 'Crop Advice',
+        title: strings.cropAdvice,
         icon: Icons.eco_outlined,
         iconColor: const Color(0xFF16A34A),
         backgroundColor: const Color(0xFFDCFCE7),
         onTap: onCropAdviceTap,
       ),
       QuickAccessItem(
-        title: 'Gallery',
+        title: strings.gallery,
         icon: Icons.photo_library_outlined,
         iconColor: const Color(0xFF9333EA),
         backgroundColor: const Color(0xFFF3E8FF),
         onTap: onGalleryTap,
       ),
       QuickAccessItem(
-        title: 'Social Media',
+        title: strings.socialMedia,
         icon: Icons.share_outlined,
         iconColor: const Color(0xFFDB2777),
         backgroundColor: const Color(0xFFFCE7F3),
         onTap: onSocialMediaTap,
       ),
       QuickAccessItem(
-        title: 'About Us',
+        title: strings.aboutUs,
         icon: Icons.info_outline_rounded,
         iconColor: const Color(0xFF475569),
         backgroundColor: const Color(0xFFF1F5F9),
         onTap: onAboutUsTap,
       ),
       QuickAccessItem(
-        title: 'Contact Us',
+        title: strings.contactUs,
         icon: Icons.support_agent_rounded,
         iconColor: const Color(0xFF0891B2),
         backgroundColor: const Color(0xFFCFFAFE),
@@ -119,7 +120,8 @@ class DashboardMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final menus = _getMenus();
+    final strings = AppLocalizations.of(context)!;
+    final menus = _getMenus(strings);
     final colors = Theme.of(context).colorScheme;
 
     return Column(
@@ -132,7 +134,7 @@ class DashboardMenu extends StatelessWidget {
               Icon(Icons.grid_view_rounded, color: colors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Quick Access',
+                strings.quickAccess,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,

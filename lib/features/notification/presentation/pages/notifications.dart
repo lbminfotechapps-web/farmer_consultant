@@ -1,5 +1,5 @@
-
 import 'package:farmer_consultant/core/di/crop_di.dart';
+import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
@@ -10,6 +10,8 @@ import 'package:farmer_consultant/features/notification/presentation/pages/notif
 import 'package:farmer_consultant/features/notification/presentation/widgets/notification_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 class NotificationPage extends StatefulWidget {
   final int userId;
@@ -111,14 +113,19 @@ class _NotificationPageState extends State<NotificationPage> {
 
             // =================================================
             // APP BAR
-        
-      appBar: CommonDashboardAppBar(
-        title: 'Notifications',
-        showProfile: false,
-        showNotification: false,
-        showThemeButton: true,
-        onBackTap: () => Navigator.of(context).pop(),
-      ),
+            appBar: CommonDashboardAppBar(
+              title: AppLocalizations.of(context)!.notifications,
+              showProfile: false,
+              showNotification: false,
+              showThemeButton: true,
+              onBackTap: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(AppRouter.dashboard);
+                }
+              },
+            ),
             // =================================================
             // BODY
             // =================================================
@@ -225,7 +232,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Stay Updated',
+                      AppLocalizations.of(context)!.stayUpdated,
                       style: AppTextStyles.sectionTitle.copyWith(
                         color: context.onPrimaryColor,
                       ),
@@ -235,8 +242,10 @@ class _NotificationPageState extends State<NotificationPage> {
 
                     Text(
                       count == 0
-                          ? 'No notifications available'
-                          : 'Here are your latest updates',
+                          ? AppLocalizations.of(
+                              context,
+                            )!.noNotificationsAvailable
+                          : AppLocalizations.of(context)!.latestUpdates,
                       style: AppTextStyles.listTitle.copyWith(
                         color: context.onPrimaryColor.withValues(alpha: 0.75),
                       ),
@@ -455,7 +464,8 @@ class _NotificationPageState extends State<NotificationPage> {
                     const SizedBox(height: 25),
 
                     Text(
-                      'Record Not Found',
+                      AppLocalizations.of(context)!.recordNotFound,
+                      textAlign: TextAlign.center,
                       style: AppTextStyles.pageTitle.copyWith(
                         color: context.primaryTextColor,
                       ),
@@ -545,7 +555,8 @@ class _NotificationPageState extends State<NotificationPage> {
             const SizedBox(height: 25),
 
             Text(
-              'Unable to Load',
+              AppLocalizations.of(context)!.unableToLoad,
+              textAlign: TextAlign.center,
               style: AppTextStyles.pageTitle.copyWith(
                 color: context.primaryTextColor,
               ),
@@ -554,8 +565,7 @@ class _NotificationPageState extends State<NotificationPage> {
             const SizedBox(height: 9),
 
             Text(
-              'We couldn’t load your notifications.\n'
-              'Please check your connection and try again.',
+              AppLocalizations.of(context)!.notificationLoadError,
               textAlign: TextAlign.center,
               style: AppTextStyles.cardSubtitle.copyWith(
                 color: context.secondaryTextColor,
@@ -606,7 +616,10 @@ class _NotificationPageState extends State<NotificationPage> {
                 );
               },
               icon: const Icon(Icons.refresh_rounded, size: 19),
-              label: Text('Try Again', style: AppTextStyles.body),
+              label: Text(
+                AppLocalizations.of(context)!.retry,
+                style: AppTextStyles.body,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,
                 foregroundColor: context.onPrimaryColor,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
@@ -43,19 +44,22 @@ class _DealerListScreenState extends State<DealerListScreen> {
   }
 
   bool _isLoading = false;
-  String? _loadError;
+  bool _loadFailed = false;
+  bool _requiresSignIn = false;
 
   Future<void> _loadDealers() async {
     if (_isLoading) return;
     setState(() {
       _isLoading = true;
-      _loadError = null;
+      _loadFailed = false;
+      _requiresSignIn = false;
     });
     try {
       final farmerId = (await SecureStorage.instance.getFarmerId()).trim();
       if (!mounted) return;
       if (farmerId.isEmpty || farmerId == '0') {
-        throw Exception('Please sign in again to load nearby dealers.');
+        _requiresSignIn = true;
+        return;
       }
       final position = await LocationUtil.instance.getCurrentLocation().timeout(
         const Duration(seconds: 20),
@@ -80,7 +84,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
       await completed;
     } catch (error) {
       if (mounted) {
-        _loadError = error.toString().replaceFirst('Exception: ', '');
+        _loadFailed = true;
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -97,6 +101,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
 
   Future<void> _openDealerDirections(DealerListModel dealer) async {
     if (_isOpeningDirections) return;
+    final strings = AppLocalizations.of(context)!;
 
     void showError(String message) {
       if (!mounted) return;
@@ -114,7 +119,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
         latitude.abs() > 90 ||
         longitude.abs() > 180 ||
         (latitude == 0 && longitude == 0)) {
-      showError('Dealer location is not available. Please update it first.');
+      showError(strings.dealerLocationUnavailable);
       return;
     }
 
@@ -126,9 +131,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
       );
       if (!mounted) return;
       if (position == null) {
-        showError(
-          'Unable to get your location. Enable GPS and allow location access.',
-        );
+        showError(strings.locationAccessError);
         return;
       }
 
@@ -139,9 +142,9 @@ class _DealerListScreenState extends State<DealerListScreen> {
         'travelmode': 'driving',
       });
       final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!opened) showError('Unable to open Google Maps. Please try again.');
+      if (!opened) showError(strings.unableToOpenMaps);
     } catch (_) {
-      showError('Unable to open directions. Please try again.');
+      showError(strings.unableToOpenDirections);
     } finally {
       if (mounted) setState(() => _isOpeningDirections = false);
     }
@@ -159,7 +162,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: CommonDashboardAppBar(
-          title: 'Near Fertilizer Shop',
+          title: AppLocalizations.of(context)!.nearFertilizerShop,
           showProfile: false,
           showNotification: false,
           showThemeButton: true,
@@ -178,7 +181,8 @@ class _DealerListScreenState extends State<DealerListScreen> {
                     );
                   }
 
-                  if (_loadError != null ||
+                  if (_loadFailed ||
+                      _requiresSignIn ||
                       state.status == DealerListStatus.failure) {
                     return Center(
                       child: Padding(
@@ -193,9 +197,13 @@ class _DealerListScreenState extends State<DealerListScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              _loadError ??
-                                  state.errorMessage ??
-                                  'Something went wrong',
+                              _requiresSignIn
+                                  ? AppLocalizations.of(
+                                      context,
+                                    )!.dealerSignInRequired
+                                  : AppLocalizations.of(
+                                      context,
+                                    )!.dealerLoadError,
                               textAlign: TextAlign.center,
                               style: AppTextStyles.body,
                             ),
@@ -206,7 +214,10 @@ class _DealerListScreenState extends State<DealerListScreen> {
                                 backgroundColor: context.primaryColor,
                                 foregroundColor: context.onPrimaryColor,
                               ),
-                              child: Text('Retry', style: AppTextStyles.button),
+                              child: Text(
+                                AppLocalizations.of(context)!.retry,
+                                style: AppTextStyles.button,
+                              ),
                             ),
                           ],
                         ),
@@ -297,8 +308,11 @@ class _DealerListScreenState extends State<DealerListScreen> {
             Expanded(
               child: Text(
                 hasLocation
-                    ? 'Lat ${latitude.toStringAsFixed(5)}   |   Long ${longitude.toStringAsFixed(5)}'
-                    : 'Location unavailable',
+                    ? AppLocalizations.of(context)!.locationCoordinates(
+                        latitude.toStringAsFixed(5),
+                        longitude.toStringAsFixed(5),
+                      )
+                    : AppLocalizations.of(context)!.locationUnavailable,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.labelSmall.copyWith(
@@ -326,7 +340,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
           const SizedBox(height: 12),
 
           Text(
-            'No dealers found nearby',
+            AppLocalizations.of(context)!.noNearbyDealers,
             style: AppTextStyles.bodyMedium.copyWith(
               color: context.secondaryTextColor,
             ),
@@ -334,7 +348,10 @@ class _DealerListScreenState extends State<DealerListScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadDealers,
-            child: Text('Retry', style: AppTextStyles.button),
+            child: Text(
+              AppLocalizations.of(context)!.retry,
+              style: AppTextStyles.button,
+            ),
           ),
         ],
       ),
@@ -361,6 +378,7 @@ class _DealerListItem extends StatelessWidget {
   });
 
   Future<void> _openWhatsApp(BuildContext context) async {
+    final strings = AppLocalizations.of(context)!;
     String normalize(String? value) {
       var number = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
       if (number.startsWith('00')) {
@@ -387,7 +405,7 @@ class _DealerListItem extends StatelessWidget {
     }
 
     if (!isValid(number)) {
-      showError('A valid dealer mobile number is not available.');
+      showError(strings.dealerMobileUnavailable);
       return;
     }
     try {
@@ -395,9 +413,9 @@ class _DealerListItem extends StatelessWidget {
         Uri.https('wa.me', '/$number'),
         mode: LaunchMode.externalApplication,
       );
-      if (!opened) showError('Unable to open WhatsApp. Please try again.');
+      if (!opened) showError(strings.unableToOpenWhatsApp);
     } catch (_) {
-      showError('Unable to open WhatsApp. Please try again.');
+      showError(strings.unableToOpenWhatsApp);
     }
   }
 
@@ -445,7 +463,9 @@ class _DealerListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name.isEmpty ? 'Unknown dealer' : name,
+                      name.isEmpty
+                          ? AppLocalizations.of(context)!.unknownDealer
+                          : name,
                       style: AppTextStyles.headingMedium.copyWith(
                         color: context.cardTextColor,
                         height: 1.25,
@@ -456,8 +476,10 @@ class _DealerListItem extends StatelessWidget {
                         distance.isFinite &&
                         distance >= 0) ...[
                       const SizedBox(height: 3),
-                      Text(
-                        '${distance.toStringAsFixed(1)} km away',
+                     Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.dealerDistanceAway(distance.toStringAsFixed(1)),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: context.primaryColor,
                           fontWeight: FontWeight.w600,
@@ -472,14 +494,18 @@ class _DealerListItem extends StatelessWidget {
           const SizedBox(height: 10),
           _DealerDetail(
             icon: Icons.location_on_outlined,
-            text: address.isEmpty ? 'Address not available' : address,
+            text: address.isEmpty
+                ? AppLocalizations.of(context)!.addressUnavailable
+                : address,
           ),
           const SizedBox(height: 8),
           _DealerDetail(
             icon: Icons.phone_outlined,
             text: [
               if (person.isNotEmpty) person,
-              mobile.isEmpty ? 'Mobile number not available' : mobile,
+              mobile.isEmpty
+                  ? AppLocalizations.of(context)!.mobileNumberUnavailable
+                  : mobile,
             ].join(' | '),
           ),
           const SizedBox(height: 10),
@@ -501,19 +527,30 @@ class _DealerListItem extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.call_outlined, size: 16),
-                label: const Text('Call', style: TextStyle(fontSize: 14)),
+                label: Text(
+                  AppLocalizations.of(context)!.call,
+                  style: const TextStyle(fontSize: 14),
+                ),
               ),
-              OutlinedButton(
+              OutlinedButton.icon(
                 key: mapKey,
                 onPressed: onMapTap,
                 style: _actionStyle(context),
-                child: const Text('Directions', style: TextStyle(fontSize: 14)),
+                icon: const Icon(Icons.directions_outlined, size: 16),
+                label: Text(
+                  AppLocalizations.of(context)!.directions,
+                  style: const TextStyle(fontSize: 14),
+                ),
               ),
-              OutlinedButton(
+              OutlinedButton.icon(
                 key: whatsappKey,
                 onPressed: mobile.isEmpty ? null : () => _openWhatsApp(context),
                 style: _actionStyle(context),
-                child: const Text('WhatsApp', style: TextStyle(fontSize: 14)),
+                icon: const Icon(Icons.chat_outlined, size: 16),
+                label: Text(
+                  AppLocalizations.of(context)!.whatsApp,
+                  style: const TextStyle(fontSize: 14),
+                ),
               ),
             ],
           ),

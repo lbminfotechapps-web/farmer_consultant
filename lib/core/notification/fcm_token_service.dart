@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,6 +12,9 @@ class FcmTokenService {
 
   FirebaseMessaging get _messaging => FirebaseMessaging.instance;
 
+  String? _currentToken;
+
+  StreamSubscription<String>? _tokenRefreshSubscription;
   bool get _isAvailable =>
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
@@ -121,33 +125,85 @@ class FcmTokenService {
     }
   }
 
-  // ============================================================
-  // TOKEN REFRESH
-  // ============================================================
+  Future<void> saveCurrentToken() async {
+    try {
+      final String? token = await getFcmToken();
+
+      if (token == null || token.isEmpty) {
+        debugPrint('FCM TOKEN NOT AVAILABLE');
+        return;
+      }
+
+      _currentToken = token;
+
+      debugPrint('================================');
+      debugPrint('CURRENT FCM TOKEN READY');
+      debugPrint('================================');
+
+      // If you have a backend API for updating FCM tokens,
+      // call it here after the farmer logs in.
+    } catch (e) {
+      debugPrint('SAVE CURRENT FCM TOKEN ERROR: $e');
+    }
+  }
+
+  // =====================================================
+  // GET CACHED TOKEN
+  // =====================================================
+
+  String? get currentToken => _currentToken;
+
+  // =====================================================
+  // TOKEN REFRESH LISTENER
+  // =====================================================
 
   void listenTokenRefresh({
-    required Future<void> Function(String token) onTokenChanged,
+    Future<void> Function(String token)? onTokenChanged,
   }) {
     if (!_isAvailable) return;
-    _messaging.onTokenRefresh.listen(
+
+    // Prevent duplicate listeners.
+    if (_tokenRefreshSubscription != null) return;
+
+    _tokenRefreshSubscription = _messaging.onTokenRefresh.listen(
       (String token) async {
-        if (token.trim().isEmpty) {
-          return;
+        final refreshedToken = token.trim();
+
+        if (refreshedToken.isEmpty) return;
+
+        _currentToken = refreshedToken;
+
+        debugPrint('================================');
+        debugPrint('FCM TOKEN REFRESHED');
+        debugPrint('================================');
+
+        if (onTokenChanged != null) {
+          try {
+            await onTokenChanged(refreshedToken);
+          } catch (e) {
+            debugPrint('FCM TOKEN SYNC ERROR: $e');
+          }
         }
 
-        debugPrint('======================================');
-
-        debugPrint('FCM TOKEN REFRESHED');
-
-        debugPrint(token);
-
-        debugPrint('======================================');
-
-        await onTokenChanged(token);
+        // If your backend requires FCM token updates,
+        // send refreshedToken to that endpoint.
       },
       onError: (error) {
         debugPrint('FCM REFRESH ERROR: $error');
       },
     );
   }
+
+  // =====================================================
+  // DISPOSE LISTENER
+  // =====================================================
+
+  Future<void> dispose() async {
+    await _tokenRefreshSubscription?.cancel();
+    _tokenRefreshSubscription = null;
+  }
+
+  // ============================================================
+  // TOKEN REFRESH
+  // ============================================================
 }

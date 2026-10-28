@@ -4,6 +4,7 @@ import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
 import 'package:farmer_consultant/features/products/domain/entity/fertilizer_category_entity.dart';
 
 import 'package:flutter/material.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 class CategoryCard extends StatelessWidget {
   final FertilizerCategoryEntity category;
@@ -56,7 +57,9 @@ class CategoryCard extends StatelessWidget {
 
               // PRODUCT COUNT
               Text(
-                '${category.products.length} Products',
+                AppLocalizations.of(
+                  context,
+                )!.productCount(category.products.length),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: context.appSubText,
@@ -81,6 +84,7 @@ class CategoryCard extends StatelessWidget {
         width: 150,
         height: 120,
         fit: BoxFit.contain,
+        semanticLabel: category.categoryName,
         errorBuilder: (_, __, ___) {
           return _placeholderImage(context);
         },

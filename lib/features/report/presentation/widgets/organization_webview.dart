@@ -1,4 +1,5 @@
 import 'package:farmer_consultant/core/theme/typography/app_text_styles.dart';
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:url_launcher/url_launcher.dart';
@@ -78,7 +79,7 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
             // ------------------------------------------------------------
 
             if (url.startsWith('mailto:')) {
-              await _openExternal(url, 'Unable to open email application');
+              await _openExternal(url, (strings) => strings.unableToOpenEmail);
 
               return NavigationDecision.prevent;
             }
@@ -126,12 +127,12 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
       );
 
       if (!launched) {
-        _showMessage('Unable to open phone dialer');
+        _showMessage((strings) => strings.unableToOpenPhone);
       }
     } catch (e) {
       debugPrint('PHONE ERROR: $e');
 
-      _showMessage('Unable to open phone dialer');
+      _showMessage((strings) => strings.unableToOpenPhone);
     }
   }
 
@@ -162,12 +163,12 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
       );
 
       if (!launched) {
-        _showMessage('Unable to open website');
+        _showMessage((strings) => strings.unableToOpenWebsite);
       }
     } catch (e) {
       debugPrint('BROWSER ERROR: $e');
 
-      _showMessage('Unable to open website');
+      _showMessage((strings) => strings.unableToOpenWebsite);
     }
   }
 
@@ -175,7 +176,10 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
   // OPEN EXTERNAL URI
   // =========================================================================
 
-  Future<void> _openExternal(String url, String errorMessage) async {
+  Future<void> _openExternal(
+    String url,
+    String Function(AppLocalizations) errorMessage,
+  ) async {
     try {
       final Uri uri = Uri.parse(url);
 
@@ -198,7 +202,7 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
   // MESSAGE
   // =========================================================================
 
-  void _showMessage(String message) {
+  void _showMessage(String Function(AppLocalizations) message) {
     if (!mounted) {
       return;
     }
@@ -207,7 +211,10 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(message, style: AppTextStyles.body),
+          content: Text(
+            message(AppLocalizations.of(context)!),
+            style: AppTextStyles.body,
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -217,8 +224,9 @@ class _OrganizationWebViewState extends State<OrganizationWebView> {
   // BUILD HTML
   // =========================================================================
 
-String _buildHtml(String content) {
-  final html = '''
+  String _buildHtml(String content) {
+    final html =
+        '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -317,46 +325,43 @@ $content
 </html>
 ''';
 
-  final document = html_parser.parse(html);
+    final document = html_parser.parse(html);
 
-  // Fix fixed/sticky positioned elements only in guidelines.
-  if (content.contains('Guidelines For Using App')) {
-    for (final element in document.querySelectorAll('div')) {
-      final style = element.attributes['style'] ?? '';
+    // Fix fixed/sticky positioned elements only in guidelines.
+    if (content.contains('Guidelines For Using App')) {
+      for (final element in document.querySelectorAll('div')) {
+        final style = element.attributes['style'] ?? '';
 
-      if (RegExp(
-        r'position\s*:\s*(fixed|sticky)',
-        caseSensitive: false,
-      ).hasMatch(style)) {
-        element.classes.add('guideline-heading');
+        if (RegExp(
+          r'position\s*:\s*(fixed|sticky)',
+          caseSensitive: false,
+        ).hasMatch(style)) {
+          element.classes.add('guideline-heading');
 
-        // Remove inline positioning so CSS can
-        // restore normal document flow.
-        element.attributes['style'] = style.replaceAll(
-          RegExp(
-            r'position\s*:\s*(fixed|sticky)\s*;?',
-            caseSensitive: false,
-          ),
-          '',
-        );
+          // Remove inline positioning so CSS can
+          // restore normal document flow.
+          element.attributes['style'] = style.replaceAll(
+            RegExp(r'position\s*:\s*(fixed|sticky)\s*;?', caseSensitive: false),
+            '',
+          );
+        }
       }
     }
-  }
 
-  if (widget.removeHtmlBackground) {
-    for (final element in document.querySelectorAll('*')) {
-      element.attributes.remove('bgcolor');
-      element.attributes.remove('background');
+    if (widget.removeHtmlBackground) {
+      for (final element in document.querySelectorAll('*')) {
+        element.attributes.remove('bgcolor');
+        element.attributes.remove('background');
 
-      final style = element.attributes['style'] ?? '';
+        final style = element.attributes['style'] ?? '';
 
-      element.attributes['style'] =
-          '$style; background: transparent !important;';
+        element.attributes['style'] =
+            '$style; background: transparent !important;';
+      }
     }
-  }
 
-  return document.outerHtml;
-}
+    return document.outerHtml;
+  }
 
   // =========================================================================
   // HTML UPDATE

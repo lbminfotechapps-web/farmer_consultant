@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/di/global_di.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
@@ -98,7 +99,7 @@ class _GalleryScreenState extends State<_GalleryView>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Gallery',
+        title: AppLocalizations.of(context)!.gallery,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -169,10 +170,10 @@ class _GalleryScreenState extends State<_GalleryView>
           fontWeight: FontWeight.w500,
         ),
 
-        tabs: const [
-          Tab(text: 'Images'),
-          Tab(text: 'Videos'),
-          Tab(text: 'Certificates'),
+        tabs: [
+          Tab(text: AppLocalizations.of(context)!.images),
+          Tab(text: AppLocalizations.of(context)!.videos),
+          Tab(text: AppLocalizations.of(context)!.certificates),
         ],
       ),
     );
@@ -204,10 +205,7 @@ class _GalleryScreenState extends State<_GalleryView>
 
         // Error
         if (isCurrentTab && state.status == GalleryStatus.failure) {
-          return _buildError(
-            type,
-            state.errorMessage ?? 'Something went wrong',
-          );
+          return _buildError(type);
         }
 
         // Empty
@@ -346,7 +344,7 @@ class _GalleryScreenState extends State<_GalleryView>
                   // ---------------------------------------------------------
                   // CERTIFICATE BADGE
                   // ---------------------------------------------------------
-                  if (type == 'CERTIFICATES')
+                  if (type == 'certificate')
                     Positioned(
                       top: 10,
                       left: 10,
@@ -363,7 +361,7 @@ class _GalleryScreenState extends State<_GalleryView>
                         ),
 
                         child: Text(
-                          'Certificate',
+                          AppLocalizations.of(context)!.certificate,
                           style: TextStyle(
                             color: context.onPrimaryColor,
                             fontSize: 10,
@@ -393,9 +391,9 @@ class _GalleryScreenState extends State<_GalleryView>
                       child: Text(
                         item.galleryTitle.trim().isNotEmpty
                             ? item.galleryTitle
-                            : type == 'CERTIFICATES'
-                            ? 'Certificate'
-                            : 'Gallery',
+                            : type == 'certificate'
+                            ? AppLocalizations.of(context)!.certificate
+                            : AppLocalizations.of(context)!.gallery,
 
                         maxLines: 2,
 
@@ -561,10 +559,8 @@ class _GalleryScreenState extends State<_GalleryView>
 
   void _showYoutubeError() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Unable to open YouTube. Please check your internet connection or browser.',
-        ),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.unableToOpenYoutube),
       ),
     );
   }
@@ -681,9 +677,11 @@ class _GalleryScreenState extends State<_GalleryView>
       );
 
       if (!launched && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Unable to open PDF')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.unableToOpenPdf),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('PDF launch error: $e');
@@ -715,7 +713,7 @@ class _GalleryScreenState extends State<_GalleryView>
             SizedBox(height: 8),
 
             Text(
-              'PDF',
+              AppLocalizations.of(context)!.pdfDocument,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -794,7 +792,7 @@ class _GalleryScreenState extends State<_GalleryView>
   // ERROR
   // ---------------------------------------------------------------------------
 
-  Widget _buildError(String type, String message) {
+  Widget _buildError(String type) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(25),
@@ -808,7 +806,7 @@ class _GalleryScreenState extends State<_GalleryView>
             const SizedBox(height: 15),
 
             Text(
-              message,
+              AppLocalizations.of(context)!.galleryLoadError,
               textAlign: TextAlign.center,
 
               style: TextStyle(fontSize: 14, color: context.secondaryTextColor),
@@ -823,7 +821,7 @@ class _GalleryScreenState extends State<_GalleryView>
 
               icon: const Icon(Icons.refresh),
 
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context)!.retry),
 
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.primaryColor,
@@ -849,11 +847,11 @@ class _GalleryScreenState extends State<_GalleryView>
     String title;
 
     if (type == 'gallery') {
-      title = 'No images available';
+      title = AppLocalizations.of(context)!.noImagesAvailable;
     } else if (type == 'video') {
-      title = 'No videos available';
+      title = AppLocalizations.of(context)!.noVideosAvailable;
     } else {
-      title = 'No certificates available';
+      title = AppLocalizations.of(context)!.noCertificatesAvailable;
     }
 
     return RefreshIndicator(
@@ -878,7 +876,7 @@ class _GalleryScreenState extends State<_GalleryView>
                   Icon(
                     type == 'video'
                         ? Icons.video_library_outlined
-                        : type == 'CERTIFICATES'
+                        : type == 'certificate'
                         ? Icons.workspace_premium_outlined
                         : Icons.photo_library_outlined,
 
@@ -910,7 +908,7 @@ class _GalleryScreenState extends State<_GalleryView>
 
                     icon: const Icon(Icons.refresh),
 
-                    label: const Text('Refresh'),
+                    label: Text(AppLocalizations.of(context)!.refresh),
 
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.primaryColor,

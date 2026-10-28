@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/di/global_di.dart';
 import 'package:farmer_consultant/core/theme/app_theme_context.dart';
 import 'package:farmer_consultant/core/theme/typography/app_typography_extension.dart';
@@ -9,7 +10,6 @@ import 'package:farmer_consultant/features/dashboard/presentation/home_bloc/crop
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/crop_schedule_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class CropScheduleAdvicePage extends StatelessWidget {
   const CropScheduleAdvicePage({super.key});
@@ -38,7 +38,7 @@ class CropScheduleView extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Crop Advise',
+        title: AppLocalizations.of(context)!.cropAdvice,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -65,7 +65,7 @@ class CropScheduleView extends StatelessWidget {
           if (state.status == CropScheduleStatus.failure &&
               state.schedules.isEmpty) {
             return _ErrorView(
-              message: state.errorMessage ?? 'Unable to load crop schedule.',
+              message: AppLocalizations.of(context)!.cropScheduleLoadError,
             );
           }
 
@@ -158,16 +158,16 @@ class _SummaryHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Crop Planning',
+                  AppLocalizations.of(context)!.cropPlanning,
                   style: context.appTextStyles.sectionTitle.copyWith(
                     color: context.onPrimaryColor,
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  count == 1
-                      ? '1 crop schedule available'
-                      : '$count crop schedules available',
+                  AppLocalizations.of(
+                    context,
+                  )!.availableCropScheduleCount(count),
                   style: context.appTextStyles.cardSubtitle.copyWith(
                     color: context.onPrimaryColor.withValues(alpha: 0.7),
                   ),
@@ -273,7 +273,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 22),
 
             Text(
-              'Unable to load schedules',
+              AppLocalizations.of(context)!.unableToLoadSchedules,
               textAlign: TextAlign.center,
               style: context.appTextStyles.headingLarge.copyWith(
                 color: context.primaryTextColor,
@@ -310,7 +310,10 @@ class _ErrorView extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.refresh_rounded),
-              label: Text('Try Again', style: context.appTextStyles.button),
+              label: Text(
+                AppLocalizations.of(context)!.retry,
+                style: context.appTextStyles.button,
+              ),
             ),
           ],
         ),
@@ -358,7 +361,7 @@ class _EmptyView extends StatelessWidget {
 
           Center(
             child: Text(
-              'No Crop Schedule',
+              AppLocalizations.of(context)!.noCropSchedule,
               style: context.appTextStyles.headingLarge.copyWith(
                 color: context.primaryTextColor,
               ),
@@ -371,7 +374,7 @@ class _EmptyView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'There are currently no crop schedules available.',
+                AppLocalizations.of(context)!.noCropSchedulesAvailable,
                 textAlign: TextAlign.center,
                 style: context.appTextStyles.body.copyWith(
                   color: context.secondaryTextColor,

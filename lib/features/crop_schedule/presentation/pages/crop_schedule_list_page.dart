@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
@@ -15,10 +16,6 @@ import 'package:intl/intl.dart';
 // import '.../schedule_detail_entity.dart';
 // import '.../common_dashboard_app_bar.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-
 // Keep your project-specific imports:
 // CropBloc, CropState, CropStatus, Crop events
 // ScheduleEntity, ScheduleDetailEntity
@@ -27,21 +24,20 @@ import 'package:intl/intl.dart';
 class CropSchedulePage extends StatefulWidget {
   final String farmerId;
 
-  const CropSchedulePage({
-    super.key,
-    required this.farmerId,
-  });
+  const CropSchedulePage({super.key, required this.farmerId});
 
   @override
-  State<CropSchedulePage> createState() =>
-      _CropSchedulePageState();
+  State<CropSchedulePage> createState() => _CropSchedulePageState();
 }
 
 class _CropSchedulePageState extends State<CropSchedulePage> {
   final DateFormat _apiDateFormat = DateFormat('dd-MM-yyyy');
-  final DateFormat _dayFormat = DateFormat('EEE');
-  final DateFormat _monthFormat = DateFormat('MMMM yyyy');
-  final DateFormat _headingFormat = DateFormat('dd MMMM yyyy');
+  DateFormat get _dayFormat =>
+      DateFormat('EEE', Localizations.localeOf(context).languageCode);
+  DateFormat get _monthFormat =>
+      DateFormat('MMMM yyyy', Localizations.localeOf(context).languageCode);
+  DateFormat get _headingFormat =>
+      DateFormat('dd MMMM yyyy', Localizations.localeOf(context).languageCode);
 
   static const int _previousDays = 30;
   static const int _nextDays = 30;
@@ -51,8 +47,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   late DateTime _selectedDate;
   late final List<DateTime> _calendarDates;
 
-  final ScrollController _dateScrollController =
-      ScrollController();
+  final ScrollController _dateScrollController = ScrollController();
 
   // Separate BLoC for available dates.
   late final CropBloc _datesBloc;
@@ -77,9 +72,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
     _calendarDates = List.generate(
       _previousDays + _nextDays + 1,
-      (index) => _today.add(
-        Duration(days: index - _previousDays),
-      ),
+      (index) => _today.add(Duration(days: index - _previousDays)),
     );
 
     final parentBloc = context.read<CropBloc>();
@@ -120,9 +113,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   }
 
   bool _hasSchedule(DateTime date) {
-    return _availableDates.contains(
-      _formatApiDate(date),
-    );
+    return _availableDates.contains(_formatApiDate(date));
   }
 
   bool _isToday(DateTime date) {
@@ -133,10 +124,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // SCROLL CALENDAR
   // ===================================================
 
-  void _scrollToDate(
-    int index, {
-    bool animate = true,
-  }) {
+  void _scrollToDate(int index, {bool animate = true}) {
     if (!_dateScrollController.hasClients) return;
 
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -148,8 +136,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
         (_dateItemExtent / 2) -
         (availableWidth / 2);
 
-    final maxScroll =
-        _dateScrollController.position.maxScrollExtent;
+    final maxScroll = _dateScrollController.position.maxScrollExtent;
 
     final targetOffset = offset.clamp(0.0, maxScroll);
 
@@ -176,9 +163,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       _datesError = null;
     });
 
-    _datesBloc.add(
-      GetAvailableDatesEvent(widget.farmerId),
-    );
+    _datesBloc.add(GetAvailableDatesEvent(widget.farmerId));
   }
 
   void _onAvailableDatesState(CropState state) {
@@ -186,30 +171,22 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
     if (state.cropStatus == CropStatus.success) {
       setState(() {
-        _availableDates =
-            state.availableDateList.toSet();
+        _availableDates = state.availableDateList.toSet();
 
         _datesLoading = false;
         _datesError = null;
       });
 
-      debugPrint(
-        'AVAILABLE DATES: $_availableDates',
-      );
+      debugPrint('AVAILABLE DATES: $_availableDates');
     } else if (state.cropStatus == CropStatus.failure) {
       setState(() {
         _datesLoading = false;
-        _datesError = state.errorMessage ??
-            'Unable to load available dates';
+        _datesError = state.errorMessage ?? 'Unable to load available dates';
       });
 
       debugPrint('AVAILABLE DATES ERROR: $_datesError');
     }
   }
-
-  // ===================================================
-  // SCHEDULE API
-  // ===================================================
 
   void _loadSchedules() {
     final selectedDate = _formatApiDate(_selectedDate);
@@ -255,10 +232,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // ===================================================
 
   void _goToToday() {
-    final alreadyToday = _isSameDay(
-      _selectedDate,
-      _today,
-    );
+    final alreadyToday = _isSameDay(_selectedDate, _today);
 
     setState(() {
       _selectedDate = _today;
@@ -304,22 +278,18 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(
-          'Confirm products applied',
-        ),
-        content: const Text(
-          'Have you applied all products in this schedule?',
+        title: Text(AppLocalizations.of(context)!.confirmProductsApplied),
+        content: Text(
+          AppLocalizations.of(context)!.productsAppliedConfirmation,
         ),
         actions: [
           TextButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           FilledButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, true),
-            child: const Text('Yes'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(AppLocalizations.of(context)!.yes),
           ),
         ],
       ),
@@ -339,8 +309,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     });
 
     final updateBloc = CropBloc(
-      cropScheduleUsecases:
-          context.read<CropBloc>().cropScheduleUsecases,
+      cropScheduleUsecases: context.read<CropBloc>().cropScheduleUsecases,
     );
 
     try {
@@ -351,10 +320,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       );
 
       updateBloc.add(
-        UpdateScheduleStatus(
-          farmerId: widget.farmerId,
-          scheduleId: scheduleId,
-        ),
+        UpdateScheduleStatus(farmerId: widget.farmerId, scheduleId: scheduleId),
       );
 
       final result = await completion;
@@ -371,14 +337,13 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       }
 
       _showMessage(
-        result.errorMessage ??
-            (result.cropStatus == CropStatus.success
-                ? 'Schedule updated successfully'
-                : 'Unable to update schedule'),
+        (result.cropStatus == CropStatus.success
+            ? AppLocalizations.of(context)!.scheduleUpdatedSuccessfully
+            : AppLocalizations.of(context)!.unableToUpdateSchedule),
       );
     } catch (e) {
       if (mounted) {
-        _showMessage('Unable to update schedule: $e');
+        _showMessage(AppLocalizations.of(context)!.unableToUpdateSchedule);
       }
     } finally {
       await updateBloc.close();
@@ -398,10 +363,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
   }
 
@@ -414,11 +376,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor:
-          Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: 'Crop Schedule',
+        title: AppLocalizations.of(context)!.cropSchedule,
         showProfile: false,
         showNotification: false,
         showThemeButton: true,
@@ -435,15 +396,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             // Fixed horizontal calendar header.
             _buildCalendarSection(),
 
-            Divider(
-              height: 1,
-              color: colors.outlineVariant,
-            ),
+            Divider(height: 1, color: colors.outlineVariant),
 
             // Only schedule list scrolls vertically.
-            Expanded(
-              child: _buildScheduleBody(),
-            ),
+            Expanded(child: _buildScheduleBody()),
           ],
         ),
       ),
@@ -460,9 +416,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
-      decoration: BoxDecoration(
-        color: colors.surface,
-      ),
+      decoration: BoxDecoration(color: colors.surface),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -487,8 +441,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       _monthFormat.format(_selectedDate),
@@ -500,7 +453,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Select a date to view schedules',
+                      AppLocalizations.of(context)!.selectScheduleDateHint,
                       style: TextStyle(
                         fontSize: 10.5,
                         color: colors.onSurfaceVariant,
@@ -512,16 +465,11 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
               OutlinedButton.icon(
                 onPressed: _goToToday,
-                icon: const Icon(
-                  Icons.today_rounded,
-                  size: 15,
-                ),
-                label: const Text('Today'),
+                icon: const Icon(Icons.today_rounded, size: 15),
+                label: Text(AppLocalizations.of(context)!.today),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(0, 34),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   textStyle: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -570,7 +518,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 ),
                 const SizedBox(width: 7),
                 Text(
-                  'Checking available schedules...',
+                  AppLocalizations.of(context)!.checkingAvailableSchedules,
                   style: TextStyle(
                     fontSize: 10,
                     color: colors.onSurfaceVariant,
@@ -585,17 +533,14 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
-                    'Schedule dates unavailable',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: colors.error,
-                    ),
+                    AppLocalizations.of(context)!.scheduleDatesUnavailable,
+                    style: TextStyle(fontSize: 10, color: colors.error),
                   ),
                 ),
                 InkWell(
                   onTap: _loadAvailableDates,
                   child: Text(
-                    'Retry',
+                    AppLocalizations.of(context)!.retry,
                     style: TextStyle(
                       color: colors.primary,
                       fontSize: 11,
@@ -614,7 +559,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Green dot = Schedule available',
+                  AppLocalizations.of(context)!.scheduleAvailableLegend,
                   style: TextStyle(
                     fontSize: 10,
                     color: colors.onSurfaceVariant,
@@ -626,7 +571,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
               if (_datesError == null && !_datesLoading)
                 Text(
-                  '${_availableDates.length} Dates',
+                  AppLocalizations.of(
+                    context,
+                  )!.scheduleDateCount(_availableDates.length),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
@@ -647,10 +594,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   Widget _buildDateItem(DateTime date, int index) {
     final colors = Theme.of(context).colorScheme;
 
-    final selected = _isSameDay(
-      date,
-      _selectedDate,
-    );
+    final selected = _isSameDay(date, _selectedDate);
 
     final today = _isToday(date);
     final hasSchedule = _hasSchedule(date);
@@ -660,9 +604,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       borderRadius: BorderRadius.circular(14),
       child: Container(
         decoration: BoxDecoration(
-          color: selected
-              ? colors.primary
-              : colors.surfaceContainerLow,
+          color: selected ? colors.primary : colors.surfaceContainerLow,
 
           borderRadius: BorderRadius.circular(14),
 
@@ -670,8 +612,8 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             color: selected
                 ? colors.primary
                 : today
-                    ? colors.primary.withValues(alpha: 0.6)
-                    : colors.outlineVariant,
+                ? colors.primary.withValues(alpha: 0.6)
+                : colors.outlineVariant,
             width: today ? 1.3 : 0.8,
           ),
         ),
@@ -683,9 +625,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               _dayFormat.format(date),
               style: TextStyle(
                 fontSize: 10,
-                color: selected
-                    ? colors.onPrimary
-                    : colors.onSurfaceVariant,
+                color: selected ? colors.onPrimary : colors.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -697,9 +637,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: selected
-                    ? colors.onPrimary
-                    : colors.onSurface,
+                color: selected ? colors.onPrimary : colors.onSurface,
               ),
             ),
 
@@ -735,36 +673,29 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       buildWhen: (previous, current) =>
           previous.cropStatus != current.cropStatus ||
           previous.errorMessage != current.errorMessage ||
-          previous.sceduleentityList !=
-              current.sceduleentityList,
+          previous.sceduleentityList != current.sceduleentityList,
 
       builder: (context, state) {
-        final schedules =
-            state.cropStatus == CropStatus.success
-                ? state.sceduleentityList.where((schedule) {
-                    try {
-                      final date = _apiDateFormat.parseStrict(
-                        schedule.scheduleDate.trim(),
-                      );
+        final schedules = state.cropStatus == CropStatus.success
+            ? state.sceduleentityList.where((schedule) {
+                try {
+                  final date = _apiDateFormat.parseStrict(
+                    schedule.scheduleDate.trim(),
+                  );
 
-                      return _isSameDay(date, _selectedDate);
-                    } catch (_) {
-                      return false;
-                    }
-                  }).toList()
-                : <ScheduleEntity>[];
+                  return _isSameDay(date, _selectedDate);
+                } catch (_) {
+                  return false;
+                }
+              }).toList()
+            : <ScheduleEntity>[];
 
         return RefreshIndicator(
           color: colors.primary,
           onRefresh: _refreshSchedules,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(
-              12,
-              14,
-              12,
-              24,
-            ),
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 24),
             children: [
               _buildSelectedDateHeader(),
 
@@ -773,35 +704,29 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               if (state.cropStatus == CropStatus.initial ||
                   state.cropStatus == CropStatus.loading)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 60,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 60),
                   child: Center(
-                    child: CircularProgressIndicator(
-                      color: colors.primary,
-                    ),
+                    child: CircularProgressIndicator(color: colors.primary),
                   ),
                 ),
 
               if (state.cropStatus == CropStatus.failure)
                 _buildStatusWidget(
                   icon: Icons.error_outline_rounded,
-                  title: 'Unable to load schedules',
-                  subtitle: state.errorMessage ??
-                      'Something went wrong',
-                  buttonText: 'Retry',
+                  title: AppLocalizations.of(context)!.unableToLoadSchedules,
+                  subtitle: AppLocalizations.of(context)!.cropScheduleLoadError,
+                  buttonText: AppLocalizations.of(context)!.retry,
                   onPressed: _loadSchedules,
                 ),
 
-              if (state.cropStatus == CropStatus.success &&
-                  schedules.isEmpty)
+              if (state.cropStatus == CropStatus.success && schedules.isEmpty)
                 _buildStatusWidget(
                   icon: Icons.event_busy_outlined,
-                  title: 'No schedules found',
-                  subtitle:
-                      'No crop schedules available for '
-                      '${_headingFormat.format(_selectedDate)}.',
-                  buttonText: 'Refresh',
+                  title: AppLocalizations.of(context)!.noSchedulesFound,
+                  subtitle: AppLocalizations.of(
+                    context,
+                  )!.noSchedulesForDate(_headingFormat.format(_selectedDate)),
+                  buttonText: AppLocalizations.of(context)!.refresh,
                   onPressed: _loadSchedules,
                 ),
 
@@ -813,9 +738,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
                 ...schedules.map(
                   (schedule) => Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 9,
-                    ),
+                    padding: const EdgeInsets.only(bottom: 9),
                     child: _buildScheduleCard(schedule),
                   ),
                 ),
@@ -836,35 +759,26 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final today = _isToday(_selectedDate);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 13,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
       decoration: BoxDecoration(
-        color: colors.primaryContainer
-            .withValues(alpha: 0.45),
+        color: colors.primaryContainer.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(12),
       ),
 
       child: Row(
         children: [
-          Icon(
-            Icons.event_note_rounded,
-            size: 22,
-            color: colors.primary,
-          ),
+          Icon(Icons.event_note_rounded, size: 22, color: colors.primary),
 
           const SizedBox(width: 10),
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   today
-                      ? "Today's Schedule"
-                      : 'Selected Date Schedule',
+                      ? AppLocalizations.of(context)!.todaysSchedule
+                      : AppLocalizations.of(context)!.selectedDateSchedule,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -887,16 +801,13 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
           if (_hasSchedule(_selectedDate))
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 9,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
                 color: const Color(0xFFDCFCE7),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Available',
+              child: Text(
+                AppLocalizations.of(context)!.available,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -913,15 +824,12 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // LIST HEADER
   // ===================================================
 
-  Widget _buildListHeader(
-    List<ScheduleEntity> schedules,
-  ) {
+  Widget _buildListHeader(List<ScheduleEntity> schedules) {
     final colors = Theme.of(context).colorScheme;
 
     final totalProducts = schedules.fold<int>(
       0,
-      (total, schedule) =>
-          total + schedule.details.length,
+      (total, schedule) => total + schedule.details.length,
     );
 
     return Row(
@@ -943,11 +851,10 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Schedules',
+                AppLocalizations.of(context)!.schedules,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -955,27 +862,21 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 ),
               ),
               Text(
-                '$totalProducts total products',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: colors.onSurfaceVariant,
-                ),
+                AppLocalizations.of(context)!.totalProductCount(totalProducts),
+                style: TextStyle(fontSize: 10, color: colors.onSurfaceVariant),
               ),
             ],
           ),
         ),
 
         Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 5,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             color: colors.primaryContainer,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            '${schedules.length} Found',
+            AppLocalizations.of(context)!.scheduleFoundCount(schedules.length),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
@@ -1010,9 +911,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
         borderRadius: BorderRadius.circular(12),
 
         border: Border.all(
-          color: applied
-              ? colors.primary
-              : colors.outlineVariant,
+          color: applied ? colors.primary : colors.outlineVariant,
         ),
 
         boxShadow: [
@@ -1029,16 +928,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
         child: ExpansionTile(
           key: ValueKey(schedule.scheduleId),
 
-          tilePadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-          ),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 12),
 
-          childrenPadding: const EdgeInsets.fromLTRB(
-            12,
-            0,
-            12,
-            12,
-          ),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
 
           shape: const Border(),
           collapsedShape: const Border(),
@@ -1046,8 +938,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           collapsedIconColor: colors.onSurfaceVariant,
 
           title: Text(
-            'Plot Name: '
-            '${schedule.plotName.trim().isEmpty ? '-' : schedule.plotName}',
+            AppLocalizations.of(context)!.plotNameValue(
+              schedule.plotName.trim().isEmpty ? '-' : schedule.plotName,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -1063,13 +956,12 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               spacing: 6,
               runSpacing: 5,
               children: [
-                _miniChip(
-                  Icons.calendar_today_outlined,
-                  schedule.scheduleDate,
-                ),
+                _miniChip(Icons.calendar_today_outlined, schedule.scheduleDate),
                 _miniChip(
                   Icons.inventory_2_outlined,
-                  '${schedule.details.length} Products',
+                  AppLocalizations.of(
+                    context,
+                  )!.productCount(schedule.details.length),
                 ),
               ],
             ),
@@ -1079,7 +971,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             const Divider(height: 16),
 
             _detailRow(
-              'Consultant',
+              AppLocalizations.of(context)!.consultant,
               schedule.adminName,
             ),
 
@@ -1096,7 +988,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 const SizedBox(width: 6),
 
                 Text(
-                  'PRODUCT DETAILS',
+                  AppLocalizations.of(context)!.productDetails,
                   style: TextStyle(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
@@ -1109,11 +1001,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             const SizedBox(height: 8),
 
             if (schedule.details.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: 10,
-                ),
-                child: Text('No product details.'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(AppLocalizations.of(context)!.noProductDetails),
               )
             else
               _buildProductGroup(schedule),
@@ -1131,24 +1021,15 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 7,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: colors.primaryContainer,
-        ),
+        border: Border.all(color: colors.primaryContainer),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 11,
-            color: colors.onPrimaryContainer,
-          ),
+          Icon(icon, size: 11, color: colors.onPrimaryContainer),
           const SizedBox(width: 4),
           Text(
             text,
@@ -1167,9 +1048,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // PRODUCT GROUP
   // ===================================================
 
-  Widget _buildProductGroup(
-    ScheduleEntity schedule,
-  ) {
+  Widget _buildProductGroup(ScheduleEntity schedule) {
     final colors = Theme.of(context).colorScheme;
     final products = schedule.details;
 
@@ -1181,20 +1060,14 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: colors.outlineVariant,
-        ),
+        border: Border.all(color: colors.outlineVariant),
       ),
 
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 11,
-              vertical: 3,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 3),
             child: Column(
               children: [
                 for (int i = 0; i < products.length; i++) ...[
@@ -1205,16 +1078,11 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                       color: colors.outlineVariant,
                     ),
 
-                  _buildProductRow(
-                    i + 1,
-                    products[i],
-                  ),
+                  _buildProductRow(i + 1, products[i]),
 
                   if (products[i].remark.trim().isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 10,
-                      ),
+                      padding: const EdgeInsets.only(bottom: 10),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text.rich(
@@ -1225,18 +1093,11 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                               color: colors.onSurface,
                             ),
                             children: [
-                              const TextSpan(
-                                text: 'Remark: ',
-                                style: TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
                               TextSpan(
-                                text: products[i]
-                                    .remark
-                                    .trim(),
+                                text: AppLocalizations.of(context)!.remarkLabel,
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
+                              TextSpan(text: products[i].remark.trim()),
                             ],
                           ),
                         ),
@@ -1248,13 +1109,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           ),
 
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 7,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             decoration: BoxDecoration(
-              color: colors.primaryContainer
-                  .withValues(alpha: 0.6),
+              color: colors.primaryContainer.withValues(alpha: 0.6),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
@@ -1265,7 +1122,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               children: [
                 Expanded(
                   child: Text(
-                    'Products applied?',
+                    AppLocalizations.of(context)!.productsApplied,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -1275,7 +1132,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 ),
 
                 _answerOption(
-                  text: 'Yes',
+                  text: AppLocalizations.of(context)!.yes,
                   value: true,
                   selected: selected,
                   scheduleId: schedule.scheduleId,
@@ -1284,7 +1141,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 const SizedBox(width: 8),
 
                 _answerOption(
-                  text: 'No',
+                  text: AppLocalizations.of(context)!.no,
                   value: false,
                   selected: selected,
                   scheduleId: schedule.scheduleId,
@@ -1323,22 +1180,16 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
       borderRadius: BorderRadius.circular(18),
 
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 3,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
 
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (value &&
-                _updatingScheduleId == scheduleId) ...[
+            if (value && _updatingScheduleId == scheduleId) ...[
               const SizedBox(
                 width: 14,
                 height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
               const SizedBox(width: 4),
             ],
@@ -1347,9 +1198,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               isSelected
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_unchecked_rounded,
-              color: isSelected
-                  ? colors.primary
-                  : colors.onSurfaceVariant,
+              color: isSelected ? colors.primary : colors.onSurfaceVariant,
               size: 19,
             ),
 
@@ -1358,13 +1207,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
             Text(
               text,
               style: TextStyle(
-                color: isSelected
-                    ? colors.primary
-                    : colors.onSurface,
+                color: isSelected ? colors.primary : colors.onSurface,
                 fontSize: 11,
-                fontWeight: isSelected
-                    ? FontWeight.w800
-                    : FontWeight.w600,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
               ),
             ),
           ],
@@ -1377,20 +1222,14 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // PRODUCT ROW
   // ===================================================
 
-  Widget _buildProductRow(
-    int index,
-    ScheduleDetailEntity product,
-  ) {
+  Widget _buildProductRow(int index, ScheduleDetailEntity product) {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 10),
 
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -1400,8 +1239,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: colors.primaryContainer,
-                  borderRadius:
-                      BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   '$index',
@@ -1418,7 +1256,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               Expanded(
                 child: Text(
                   product.productName.isEmpty
-                      ? 'Unnamed Product'
+                      ? AppLocalizations.of(context)!.unnamedProduct
                       : product.productName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -1432,17 +1270,14 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
               if (product.productType.isNotEmpty)
                 Container(
-                  margin: const EdgeInsets.only(
-                    left: 6,
-                  ),
+                  margin: const EdgeInsets.only(left: 6),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 7,
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
                     color: colors.primaryContainer,
-                    borderRadius:
-                        BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(5),
                   ),
                   child: Text(
                     product.productType,
@@ -1459,19 +1294,14 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           const SizedBox(height: 6),
 
           Padding(
-            padding: const EdgeInsets.only(
-              left: 29,
-            ),
+            padding: const EdgeInsets.only(left: 29),
 
             child: Row(
               children: [
                 Expanded(
                   child: _inlineValue(
-                    'Qty',
-                    _quantityText(
-                      product.productQty,
-                      product.unit,
-                    ),
+                    AppLocalizations.of(context)!.quantity,
+                    _quantityText(product.productQty, product.unit),
                     Icons.scale_outlined,
                     const Color(0xFFB7791F),
                   ),
@@ -1481,11 +1311,8 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
                 Expanded(
                   child: _inlineValue(
-                    'Water',
-                    _quantityText(
-                      product.waterQty,
-                      product.waterUnit,
-                    ),
+                    AppLocalizations.of(context)!.water,
+                    _quantityText(product.waterQty, product.waterUnit),
                     Icons.water_drop_outlined,
                     const Color(0xFF0284C7),
                   ),
@@ -1502,12 +1329,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // INLINE VALUE
   // ===================================================
 
-  Widget _inlineValue(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _inlineValue(String label, String value, IconData icon, Color color) {
     final colors = Theme.of(context).colorScheme;
 
     return Row(
@@ -1518,10 +1340,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 9,
-            color: colors.onSurfaceVariant,
-          ),
+          style: TextStyle(fontSize: 9, color: colors.onSurfaceVariant),
         ),
 
         Expanded(
@@ -1540,10 +1359,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     );
   }
 
-  String _quantityText(
-    String amount,
-    String unit,
-  ) {
+  String _quantityText(String amount, String unit) {
     if (amount.trim().isEmpty) return '-';
 
     return unit.trim().isEmpty
@@ -1555,10 +1371,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   // DETAIL ROW
   // ===================================================
 
-  Widget _detailRow(
-    String label,
-    String value,
-  ) {
+  Widget _detailRow(String label, String value) {
     if (value.trim().isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1566,22 +1379,16 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 6,
-      ),
+      padding: const EdgeInsets.only(bottom: 6),
 
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 85,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 10,
-                color: colors.onSurfaceVariant,
-              ),
+              style: TextStyle(fontSize: 10, color: colors.onSurfaceVariant),
             ),
           ),
 
@@ -1614,10 +1421,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 55,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 55),
 
       child: Column(
         children: [
@@ -1627,11 +1431,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
               color: colors.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 35,
-              color: colors.primary,
-            ),
+            child: Icon(icon, size: 35, color: colors.primary),
           ),
 
           const SizedBox(height: 14),
@@ -1651,20 +1451,13 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11,
-              color: colors.onSurfaceVariant,
-            ),
+            style: TextStyle(fontSize: 11, color: colors.onSurfaceVariant),
           ),
 
-          if (buttonText != null &&
-              onPressed != null) ...[
+          if (buttonText != null && onPressed != null) ...[
             const SizedBox(height: 15),
 
-            FilledButton(
-              onPressed: onPressed,
-              child: Text(buttonText),
-            ),
+            FilledButton(onPressed: onPressed, child: Text(buttonText)),
           ],
         ],
       ),
