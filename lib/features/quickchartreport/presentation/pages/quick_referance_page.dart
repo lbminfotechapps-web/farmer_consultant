@@ -593,11 +593,26 @@ class _QuickReferenceImagePageState extends State<QuickReferenceImagePage> {
       backgroundColor: context.backgroundColor,
 
       appBar: CommonDashboardAppBar(
-        title: AppLocalizations.of(context)!.shareImage,
+        title: _title,
         showProfile: false,
         showNotification: false,
-        showThemeButton: true,
+        showThemeButton: false,
         showFilterButton: false,
+        actions: [
+          Builder(
+            builder: (buttonContext) => IconButton(
+              tooltip: 'Share image',
+              onPressed: _sharing ? null : () => _shareImage(buttonContext),
+              icon: _sharing
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(Icons.share_outlined),
+            ),
+          ),
+        ],
 
         onBackTap: () => Navigator.of(context).pop(),
       ),

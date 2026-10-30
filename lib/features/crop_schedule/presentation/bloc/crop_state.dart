@@ -1,4 +1,5 @@
-import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
+
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_finance_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -21,6 +22,7 @@ class CropState {
   final List<PlotEntity> plotLits;
   final List<ScheduleByPlotEntity> scheduleByPlotList;
   final List<String> availableDateList;
+  final PlotFinanceEntity? plotFinanceEntity;
 
 
   const CropState({
@@ -38,6 +40,7 @@ class CropState {
     this.plotLits = const [],
     this.scheduleByPlotList = const [],
     this.availableDateList = const [],
+    this.plotFinanceEntity,
   });
 
   CropState copyWith({
@@ -57,6 +60,7 @@ class CropState {
     bool clearError = false,
     List<ScheduleByPlotEntity>? scheduleByPlotList,
  List<String>? availableDateList,
+ PlotFinanceEntity? plotFinanceEntity,
   }) {
     return CropState(
       loadingMorePlots: loadingMorePlots ?? this.loadingMorePlots,
@@ -75,6 +79,7 @@ class CropState {
       plotLits: plotLits ?? this.plotLits,
       scheduleByPlotList: scheduleByPlotList ?? this.scheduleByPlotList,
       availableDateList: availableDateList ?? this.availableDateList,
+      plotFinanceEntity: plotFinanceEntity?? this.plotFinanceEntity
     );
   }
 }

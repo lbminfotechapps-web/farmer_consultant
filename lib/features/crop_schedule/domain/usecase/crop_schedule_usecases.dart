@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:farmer_consultant/features/crop_schedule/data/model/plot_finance_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_finance_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -55,5 +57,37 @@ class CropScheduleUsecases {
 
   Future<Response> updateScheduleStatus(String scheduleId, String farmerId) {
     return cropRepository.updateScheduleStatus(scheduleId, farmerId);
+  }
+
+  Future<Response> addPlotFinance(
+    String date,
+
+    String amount,
+    String remark,
+
+    String farmerId,
+    String plotId,
+    String type,
+  ) {
+    return cropRepository.addPlotFinance(
+      date,
+      amount,
+      remark,
+      farmerId,
+      plotId,
+      type,
+    );
+  }
+
+  Future<PlotFinanceEntity> getPlotFinance(
+    String farmerId,
+    String plotId,
+    String type,
+  ) {
+    return cropRepository.getPlotFinance(farmerId, plotId, type);
+  }
+
+  Future<Response> deletePlotFinance(String financeId, String farmerId) {
+    return cropRepository.deletePlotFinance(financeId, farmerId);
   }
 }

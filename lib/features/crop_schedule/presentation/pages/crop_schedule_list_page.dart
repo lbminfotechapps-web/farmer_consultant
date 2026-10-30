@@ -377,7 +377,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-   backgroundColor: context.appBackground,
+      backgroundColor: context.appBackground,
 
       appBar: CommonDashboardAppBar(
         title: AppLocalizations.of(context)!.cropSchedule,
@@ -715,7 +715,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 _buildStatusWidget(
                   icon: Icons.error_outline_rounded,
                   title: AppLocalizations.of(context)!.unableToLoadSchedules,
-                  subtitle: AppLocalizations.of(context)!.cropScheduleLoadError,
+                  // subtitle: AppLocalizations.of(context)!.cropScheduleLoadError,
                   buttonText: AppLocalizations.of(context)!.retry,
                   onPressed: _loadSchedules,
                 ),
@@ -724,9 +724,9 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                 _buildStatusWidget(
                   icon: Icons.event_busy_outlined,
                   title: AppLocalizations.of(context)!.noSchedulesFound,
-                  subtitle: AppLocalizations.of(
-                    context,
-                  )!.noSchedulesForDate(_headingFormat.format(_selectedDate)),
+                  // subtitle: AppLocalizations.of(
+                  //   context,
+                  // )!.noSchedulesForDate(_headingFormat.format(_selectedDate)),
                   buttonText: AppLocalizations.of(context)!.refresh,
                   onPressed: _loadSchedules,
                 ),
@@ -964,6 +964,36 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
                     context,
                   )!.productCount(schedule.details.length),
                 ),
+                if (applied)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 12,
+                          color: colors.onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          AppLocalizations.of(context)!.scheduleCompleted,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: colors.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -1415,7 +1445,7 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
   Widget _buildStatusWidget({
     required IconData icon,
     required String title,
-    required String subtitle,
+    // required String subtitle,
     String? buttonText,
     VoidCallback? onPressed,
   }) {
@@ -1449,12 +1479,11 @@ class _CropSchedulePageState extends State<CropSchedulePage> {
 
           const SizedBox(height: 6),
 
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: colors.onSurfaceVariant),
-          ),
-
+          // Text(
+          //   subtitle,
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(fontSize: 11, color: colors.onSurfaceVariant),
+          // ),
           if (buttonText != null && onPressed != null) ...[
             const SizedBox(height: 15),
 

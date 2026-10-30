@@ -1641,6 +1641,36 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
                       context,
                     )!.productCount(schedule.details.length),
                   ),
+                  if (selected)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.primaryContainer,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: 12,
+                            color: colors.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            AppLocalizations.of(context)!.scheduleCompleted,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: colors.onPrimaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
               const Divider(height: 16),
@@ -1728,7 +1758,6 @@ class _CropSchedulByPlotState extends State<CropSchedulByPlot> {
           //       ),
           //     ),
           //   ),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             color: colors.primaryContainer.withValues(alpha: 0.5),

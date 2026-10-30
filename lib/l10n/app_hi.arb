@@ -187,7 +187,7 @@
   "locationCoordinates": "अक्षांश {latitude}   |   देशांतर {longitude}",
   "cropPlanning": "फसल योजना",
   "cropScheduleLoadError": "फसल कार्यक्रम लोड नहीं हो सका। कृपया फिर से कोशिश करें।",
-  "unableToLoadSchedules": "कार्यक्रम लोड नहीं हो सके",
+  "unableToLoadSchedules": "इस तारीख के लिए कोई शेड्यूल नहीं जोड़ा गया है।",
   "noCropSchedule": "कोई फसल कार्यक्रम नहीं है",
   "noCropSchedulesAvailable": "फ़िलहाल कोई फसल कार्यक्रम उपलब्ध नहीं है।",
   "hideDetails": "विवरण छिपाएँ",
@@ -268,5 +268,64 @@
   "noSchedulesForDate": "{date} के लिए कोई फसल कार्यक्रम उपलब्ध नहीं है।",
   "plotNameValue": "खेत का नाम: {name}",
   "consultantName": "सलाहकार: {name}",
-  "totalNotificationCount": "{count, plural, =1{1 सूचना} other{{count} सूचनाएँ}}"
+  "totalNotificationCount": "{count, plural, =1{1 सूचना} other{{count} सूचनाएँ}}",
+
+    "financeAddPlotRevenue":  "प्लॉट की आय जोड़ें",
+    "financeAddPlotExpense":  "प्लॉट का खर्च जोड़ें",
+    "financeTransactionDate":  "लेनदेन की तारीख",
+    "financeAmount":  "राशि (₹)",
+    "financeEnterAmount":  "राशि दर्ज करें",
+    "financeInvalidAmount":  "मान्य राशि दर्ज करें",
+    "financeRemark":  "टिप्पणी",
+    "financeRevenueHint":  "जैसे फसल बिक्री, उपज की आय",
+    "financeExpenseHint":  "जैसे बीज, मजदूरी, खाद",
+    "financeEnterRemark":  "कृपया टिप्पणी दर्ज करें",
+    "financeRevenueAdded":  "आय सफलतापूर्वक जोड़ी गई",
+    "financeExpenseAdded":  "खर्च सफलतापूर्वक जोड़ा गया",
+    "financeDeleteTitle":  "प्रविष्टि हटाएं?",
+    "financeEntryDeleted":  "प्रविष्टि हटा दी गई",
+    "financeUndo":  "पूर्ववत करें",
+    "financeSubtitle":  "खर्च, आय और लाभ का हिसाब रखें",
+    "financeTitle":  "प्लॉट लेन-देन",
+    "financeExpenseHistory":  "खर्च का इतिहास",
+    "financeRevenueHistory":  "आय का इतिहास",
+    "financeDemoPlot":  "प्लॉट १",
+    "financeDemoCrop":  "प्याज • १ एकड़",
+    "financeRevenue":  "आय",
+    "financeExpenses":  "खर्च",
+    "financeProfit":  "लाभ",
+    "financeLoss":  "हानि",
+    "financeAddExpense":  "खर्च जोड़ें",
+    "financeRecordSpending":  "खर्च दर्ज करें",
+    "financeAddRevenue":  "आय जोड़ें",
+    "financeRecordIncome":  "आय दर्ज करें",
+    "financeNoRevenue":  "अभी कोई आय नहीं जोड़ी गई",
+    "financeNoExpenses":  "अभी कोई खर्च नहीं जोड़ा गया",
+    "financeDeleteEntry":  "प्रविष्टि हटाएं",
+    "financeProfitSummary":  "लाभ का सारांश",
+    "financeNetProfit":  "शुद्ध लाभ",
+    "financeNetLoss":  "शुद्ध हानि",
+    "financeSeeds":  "बीज",
+    "financeSpray":  "छिड़काव",
+    "financeLabour":  "मजदूरी",
+    "financeFertilizer":  "खाद",
+    "financeFirstYield":  "पहली उपज",
+    "financeSecondYield":  "दूसरी उपज",
+    "financeEntryCount":  "{count} प्रविष्टियां",
+    "@financeEntryCount":  {
+                               "placeholders":  {
+                                                    "count":  {
+                                                                  "type":  "int"
+                                                              }
+                                                }
+                           },
+    "financeDeleteMessage":  "{amount} की यह प्रविष्टि हटाएं?",
+    "@financeDeleteMessage":  {
+                                  "placeholders":  {
+                                                       "amount":  {
+                                                                      "type":  "String"
+                                                                  }
+                                                   }
+                              },
+  "scheduleCompleted": "पूर्ण"
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:farmer_consultant/core/di/crop_di.dart';
 import 'package:farmer_consultant/core/notification/fcm_service.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
+import 'package:farmer_consultant/core/theme/app_dynamic_colors.dart';
 import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
@@ -211,9 +212,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         }
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: context.appBackground,
         appBar: CommonDashboardAppBar(
-          backgroundColor: colors.surface,
+          // backgroundColor: colors.surface,
           userName: widget.userName,
           greeting: '${strings.welcome},',
           location: widget.location,

@@ -20,6 +20,9 @@ class CommonDashboardAppBar extends StatelessWidget
   final Color? backgroundColor;
   final bool showThemeButton;
 
+  /// Optional custom actions displayed before the built-in action buttons.
+  final List<Widget>? actions;
+
   final bool showFilterButton;
   final bool isFilterActive;
   final VoidCallback? onFilterTap;
@@ -29,7 +32,7 @@ class CommonDashboardAppBar extends StatelessWidget
     this.title,
     this.userName = '',
     this.location = '',
-    this.greeting = 'Welcome,',
+    this.greeting = '',
     this.showgreteting = true,
     this.profileImage,
     this.showProfile = true,
@@ -39,14 +42,18 @@ class CommonDashboardAppBar extends StatelessWidget
     this.onProfileTap,
     this.onBackTap,
     this.showThemeButton = true,
+    this.actions,
     this.backgroundColor,
     this.showFilterButton = false,
     this.isFilterActive = false,
     this.onFilterTap,
   });
 
+  bool get _hasGreeting => showgreteting && greeting.trim().isNotEmpty;
+
   @override
-  Size get preferredSize => Size.fromHeight(showProfile ? 92 : kToolbarHeight);
+  Size get preferredSize =>
+      Size.fromHeight(showProfile ? 92 : (_hasGreeting ? 80 : kToolbarHeight));
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +112,7 @@ class CommonDashboardAppBar extends StatelessWidget
 
     if (!showProfile) {
       return AppBar(
+        toolbarHeight: preferredSize.height,
         shape: bottomBorder,
         backgroundColor: effectiveBackground,
         foregroundColor: foreground,
@@ -116,8 +124,29 @@ class CommonDashboardAppBar extends StatelessWidget
                 onPressed: onBackTap,
                 icon: const Icon(Icons.arrow_back_ios_new),
               ),
-        title: Text(title ?? '', style: titleStyle),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: titleStyle,
+            ),
+            if (_hasGreeting) ...[
+              const SizedBox(height: 2),
+              Text(
+                greeting,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: subtitleStyle,
+              ),
+            ],
+          ],
+        ),
         actions: [
+          ...?actions,
           if (showFilterButton)
             _filterButton(context, foreground, isFilterActive)
           else if (showNotification)
@@ -196,6 +225,7 @@ class CommonDashboardAppBar extends StatelessWidget
         ],
       ),
       actions: [
+        ...?actions,
         if (showNotification)
           _notificationButton(context, foreground, effectiveBackground),
 

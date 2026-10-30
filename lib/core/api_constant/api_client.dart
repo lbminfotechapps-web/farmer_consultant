@@ -34,4 +34,9 @@ class ApiClient {
 
   static const String nearByFarmerOutlet = "/nearByFarmerOutlet";
   static const String getFarmerScheduleDateList = "/getFarmerScheduleDateList";
+
+  static const String addPlotFinance = "/add_plot_finance";
+  static const String getPlotFinanceList = "/get_plot_finance_list";
+
+  static const String deleteplotfinance = "/deleteplotfinance";
 }

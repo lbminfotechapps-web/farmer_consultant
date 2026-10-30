@@ -162,7 +162,7 @@ class _DealerListScreenState extends State<DealerListScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: CommonDashboardAppBar(
-          title: AppLocalizations.of(context)!.nearFertilizerShop,
+          title: AppLocalizations.of(context)!.nearDealers,
           showProfile: false,
           showNotification: false,
           showThemeButton: true,
@@ -476,7 +476,7 @@ class _DealerListItem extends StatelessWidget {
                         distance.isFinite &&
                         distance >= 0) ...[
                       const SizedBox(height: 3),
-                     Text(
+                      Text(
                         AppLocalizations.of(
                           context,
                         )!.dealerDistanceAway(distance.toStringAsFixed(1)),
@@ -501,6 +501,7 @@ class _DealerListItem extends StatelessWidget {
           const SizedBox(height: 8),
           _DealerDetail(
             icon: Icons.phone_outlined,
+            onTap: mobile.isEmpty ? null : () => callFarmer(mobile),
             text: [
               if (person.isNotEmpty) person,
               mobile.isEmpty
@@ -573,12 +574,13 @@ class _DealerListItem extends StatelessWidget {
 class _DealerDetail extends StatelessWidget {
   final IconData icon;
   final String text;
+  final VoidCallback? onTap;
 
-  const _DealerDetail({required this.icon, required this.text});
+  const _DealerDetail({required this.icon, required this.text, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final detail = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
@@ -597,6 +599,7 @@ class _DealerDetail extends StatelessWidget {
         ),
       ],
     );
+    return onTap == null ? detail : InkWell(onTap: onTap, child: detail);
   }
 }
 

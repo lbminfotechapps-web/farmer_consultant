@@ -610,7 +610,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cropScheduleLoadError => 'फसल कार्यक्रम लोड नहीं हो सका। कृपया फिर से कोशिश करें।';
 
   @override
-  String get unableToLoadSchedules => 'कार्यक्रम लोड नहीं हो सके';
+  String get unableToLoadSchedules => 'इस तारीख के लिए कोई शेड्यूल नहीं जोड़ा गया है।';
 
   @override
   String get noCropSchedule => 'कोई फसल कार्यक्रम नहीं है';
@@ -916,4 +916,140 @@ class AppLocalizationsHi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeAddPlotRevenue => 'प्लॉट की आय जोड़ें';
+
+  @override
+  String get financeAddPlotExpense => 'प्लॉट का खर्च जोड़ें';
+
+  @override
+  String get financeTransactionDate => 'लेनदेन की तारीख';
+
+  @override
+  String get financeAmount => 'राशि (₹)';
+
+  @override
+  String get financeEnterAmount => 'राशि दर्ज करें';
+
+  @override
+  String get financeInvalidAmount => 'मान्य राशि दर्ज करें';
+
+  @override
+  String get financeRemark => 'टिप्पणी';
+
+  @override
+  String get financeRevenueHint => 'जैसे फसल बिक्री, उपज की आय';
+
+  @override
+  String get financeExpenseHint => 'जैसे बीज, मजदूरी, खाद';
+
+  @override
+  String get financeEnterRemark => 'कृपया टिप्पणी दर्ज करें';
+
+  @override
+  String get financeRevenueAdded => 'आय सफलतापूर्वक जोड़ी गई';
+
+  @override
+  String get financeExpenseAdded => 'खर्च सफलतापूर्वक जोड़ा गया';
+
+  @override
+  String get financeDeleteTitle => 'प्रविष्टि हटाएं?';
+
+  @override
+  String get financeEntryDeleted => 'प्रविष्टि हटा दी गई';
+
+  @override
+  String get financeUndo => 'पूर्ववत करें';
+
+  @override
+  String get financeSubtitle => 'खर्च, आय और लाभ का हिसाब रखें';
+
+  @override
+  String get financeTitle => 'प्लॉट लेन-देन';
+
+  @override
+  String get financeExpenseHistory => 'खर्च का इतिहास';
+
+  @override
+  String get financeRevenueHistory => 'आय का इतिहास';
+
+  @override
+  String get financeDemoPlot => 'प्लॉट १';
+
+  @override
+  String get financeDemoCrop => 'प्याज • १ एकड़';
+
+  @override
+  String get financeRevenue => 'आय';
+
+  @override
+  String get financeExpenses => 'खर्च';
+
+  @override
+  String get financeProfit => 'लाभ';
+
+  @override
+  String get financeLoss => 'हानि';
+
+  @override
+  String get financeAddExpense => 'खर्च जोड़ें';
+
+  @override
+  String get financeRecordSpending => 'खर्च दर्ज करें';
+
+  @override
+  String get financeAddRevenue => 'आय जोड़ें';
+
+  @override
+  String get financeRecordIncome => 'आय दर्ज करें';
+
+  @override
+  String get financeNoRevenue => 'अभी कोई आय नहीं जोड़ी गई';
+
+  @override
+  String get financeNoExpenses => 'अभी कोई खर्च नहीं जोड़ा गया';
+
+  @override
+  String get financeDeleteEntry => 'प्रविष्टि हटाएं';
+
+  @override
+  String get financeProfitSummary => 'लाभ का सारांश';
+
+  @override
+  String get financeNetProfit => 'शुद्ध लाभ';
+
+  @override
+  String get financeNetLoss => 'शुद्ध हानि';
+
+  @override
+  String get financeSeeds => 'बीज';
+
+  @override
+  String get financeSpray => 'छिड़काव';
+
+  @override
+  String get financeLabour => 'मजदूरी';
+
+  @override
+  String get financeFertilizer => 'खाद';
+
+  @override
+  String get financeFirstYield => 'पहली उपज';
+
+  @override
+  String get financeSecondYield => 'दूसरी उपज';
+
+  @override
+  String financeEntryCount(int count) {
+    return '$count प्रविष्टियां';
+  }
+
+  @override
+  String financeDeleteMessage(String amount) {
+    return '$amount की यह प्रविष्टि हटाएं?';
+  }
+
+  @override
+  String get scheduleCompleted => 'पूर्ण';
 }

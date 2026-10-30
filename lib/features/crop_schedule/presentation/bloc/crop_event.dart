@@ -84,3 +84,52 @@ class UpdateScheduleStatus extends CropEvent {
   @override
   List<Object?> get props => [farmerId, scheduleId];
 }
+
+class AddPlotFinanceEvent extends CropEvent {
+  final String date;
+  final String amount;
+  final String remark;
+  final String farmerId;
+  final String plotId;
+  final String type;
+
+  const AddPlotFinanceEvent({
+    required this.date,
+    required this.amount,
+    required this.remark,
+    required this.farmerId,
+    required this.plotId,
+    required this.type,
+  });
+
+  @override
+  List<Object?> get props => [date, amount, remark, farmerId, plotId, type];
+}
+
+class GetPlotFinanceEvent extends CropEvent {
+  final String farmerId;
+  final String plotId;
+  final String type;
+
+  const GetPlotFinanceEvent({
+    required this.farmerId,
+    required this.plotId,
+    required this.type,
+  });
+
+  @override
+  List<Object?> get props => [farmerId, plotId, type];
+}
+
+class DeletePlotFinanceEvent extends CropEvent {
+  final String farmerId;
+  final String financeId;
+
+  const DeletePlotFinanceEvent({
+    required this.farmerId,
+    required this.financeId,
+  });
+
+  @override
+  List<Object?> get props => [farmerId, financeId];
+}

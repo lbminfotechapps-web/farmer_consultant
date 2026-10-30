@@ -31,6 +31,7 @@ class PlotEntity extends Equatable {
   final String farmerId;
   final String farmerName;
   final String createdDate;
+    final String acres;
 
   const PlotEntity({
     required this.plotRegistrationId,
@@ -41,6 +42,7 @@ class PlotEntity extends Equatable {
     required this.farmerId,
     required this.farmerName,
     required this.createdDate,
+    required this.acres
   });
 
   @override
@@ -53,6 +55,7 @@ class PlotEntity extends Equatable {
         farmerId,
         farmerName,
         createdDate,
+        acres
       ];
 }
 

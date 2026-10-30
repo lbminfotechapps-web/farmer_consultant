@@ -610,7 +610,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cropScheduleLoadError => 'Unable to load crop schedule. Please try again.';
 
   @override
-  String get unableToLoadSchedules => 'Unable to load schedules';
+  String get unableToLoadSchedules => 'No schedules have been added for this date.';
 
   @override
   String get noCropSchedule => 'No Crop Schedule';
@@ -916,4 +916,146 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeAddPlotRevenue => 'Add Plot Revenue';
+
+  @override
+  String get financeAddPlotExpense => 'Add Plot Expense';
+
+  @override
+  String get financeTransactionDate => 'Transaction Date';
+
+  @override
+  String get financeAmount => 'Amount (₹)';
+
+  @override
+  String get financeEnterAmount => 'Enter amount';
+
+  @override
+  String get financeInvalidAmount => 'Enter a valid amount';
+
+  @override
+  String get financeRemark => 'Remark';
+
+  @override
+  String get financeRevenueHint => 'e.g. Crop sale, Harvest income';
+
+  @override
+  String get financeExpenseHint => 'e.g. Seeds, Labour, Fertilizer';
+
+  @override
+  String get financeEnterRemark => 'Please enter remark';
+
+  @override
+  String get financeRevenueAdded => 'Revenue added successfully';
+
+  @override
+  String get financeExpenseAdded => 'Expense added successfully';
+
+  @override
+  String get financeDeleteTitle => 'Delete Entry?';
+
+  @override
+  String get financeEntryDeleted => 'Entry deleted';
+
+  @override
+  String get financeUndo => 'UNDO';
+
+  @override
+  String get financeSubtitle => 'Track Expenses, Revenue & Profit';
+
+  @override
+  String get financeTitle => 'Plot Finace';
+
+  @override
+  String get financeExpenseHistory => 'Expense History';
+
+  @override
+  String get financeRevenueHistory => 'Revenue History';
+
+  @override
+  String get financeDemoPlot => 'Plot 1';
+
+  @override
+  String get financeDemoCrop => 'Onion  •  1 Acre';
+
+  @override
+  String get financeRevenue => 'Revenue';
+
+  @override
+  String get financeExpenses => 'Expenses';
+
+  @override
+  String get financeProfit => 'Profit';
+
+  @override
+  String get financeLoss => 'Loss';
+
+  @override
+  String get financeAddExpense => 'Add Expense';
+
+  @override
+  String get financeRecordSpending => 'Record spending';
+
+  @override
+  String get financeAddRevenue => 'Add Revenue';
+
+  @override
+  String get financeRecordIncome => 'Record income';
+
+  @override
+  String get financeNoRevenue => 'No revenue added yet';
+
+  @override
+  String get financeNoExpenses => 'No expenses added yet';
+
+  @override
+  String get financeDeleteEntry => 'Delete entry';
+
+  @override
+  String get financeProfitSummary => 'Profit Summary';
+
+  @override
+  String get financeNetProfit => 'Net Profit';
+
+  @override
+  String get financeNetLoss => 'Net Loss';
+
+  @override
+  String get financeSeeds => 'Seeds';
+
+  @override
+  String get financeSpray => 'Spray';
+
+  @override
+  String get financeLabour => 'Labour';
+
+  @override
+  String get financeFertilizer => 'Fertilizer';
+
+  @override
+  String get financeFirstYield => '1st yielded';
+
+  @override
+  String get financeSecondYield => '2nd yield';
+
+  @override
+  String financeEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financeDeleteMessage(String amount) {
+    return 'Delete this entry of $amount?';
+  }
+
+  @override
+  String get scheduleCompleted => 'Completed';
 }
