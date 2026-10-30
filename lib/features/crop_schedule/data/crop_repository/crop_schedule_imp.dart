@@ -1,6 +1,8 @@
 import 'package:dio/src/response.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/crop_datasource/crop_datasource.dart';
+import 'package:farmer_consultant/features/crop_schedule/data/model/plot_finance_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_finance_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -60,5 +62,41 @@ class CropScheduleImp extends CropRepository {
   @override
   Future<AvailableDatesEntity> getAvailableDates(String farmerId) {
     return cropDatasource.getAvailableDates(farmerId);
+  }
+
+  @override
+  Future<Response<dynamic>> addPlotFinance(
+    String date,
+    String amount,
+    String remark,
+    String farmerId,
+    String plotId,
+    String type,
+  ) {
+    return cropDatasource.addPlotFinance(
+      date,
+      amount,
+      remark,
+      farmerId,
+      plotId,
+      type,
+    );
+  }
+
+  @override
+  Future<PlotFinanceEntity> getPlotFinance(
+    String farmerId,
+    String plotId,
+    String type,
+  ) {
+    return cropDatasource.getPlotFinance(farmerId, plotId, type);
+  }
+
+  @override
+  Future<Response<dynamic>> deletePlotFinance(
+    String financeId,
+    String farmerId,
+  ) {
+    return cropDatasource.deletePlotFinance(financeId, farmerId);
   }
 }

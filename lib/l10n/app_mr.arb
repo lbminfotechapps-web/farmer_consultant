@@ -187,7 +187,7 @@
   "locationCoordinates": "अक्षांश {latitude}   |   रेखांश {longitude}",
   "cropPlanning": "पीक नियोजन",
   "cropScheduleLoadError": "पीक वेळापत्रक लोड करता आले नाही. कृपया पुन्हा प्रयत्न करा.",
-  "unableToLoadSchedules": "वेळापत्रके लोड करता आली नाहीत",
+  "unableToLoadSchedules": "या तारखेसाठी कोणतेही वेळापत्रक जोडलेले नाही.",
   "noCropSchedule": "पीक वेळापत्रक नाही",
   "noCropSchedulesAvailable": "सध्या कोणतीही पीक वेळापत्रके उपलब्ध नाहीत.",
   "hideDetails": "तपशील लपवा",
@@ -268,5 +268,64 @@
   "noSchedulesForDate": "{date} साठी कोणतीही पीक वेळापत्रके उपलब्ध नाहीत.",
   "plotNameValue": "प्लॉटचे नाव: {name}",
   "consultantName": "सल्लागार: {name}",
-  "totalNotificationCount": "{count, plural, =1{1 सूचना} other{{count} सूचना}}"
+  "totalNotificationCount": "{count, plural, =1{1 सूचना} other{{count} सूचना}}",
+
+    "financeAddPlotRevenue":  "प्लॉटचे उत्पन्न जोडा",
+    "financeAddPlotExpense":  "प्लॉटचा खर्च जोडा",
+    "financeTransactionDate":  "व्यवहाराची तारीख",
+    "financeAmount":  "रक्कम (₹)",
+    "financeEnterAmount":  "रक्कम प्रविष्ट करा",
+    "financeInvalidAmount":  "वैध रक्कम प्रविष्ट करा",
+    "financeRemark":  "शेरा",
+    "financeRevenueHint":  "उदा. पीक विक्री, कापणीचे उत्पन्न",
+    "financeExpenseHint":  "उदा. बियाणे, मजुरी, खत",
+    "financeEnterRemark":  "कृपया शेरा प्रविष्ट करा",
+    "financeRevenueAdded":  "उत्पन्न यशस्वीपणे जोडले",
+    "financeExpenseAdded":  "खर्च यशस्वीपणे जोडला",
+    "financeDeleteTitle":  "नोंद हटवायची?",
+    "financeEntryDeleted":  "नोंद हटवली",
+    "financeUndo":  "पूर्ववत करा",
+    "financeSubtitle":  "खर्च, उत्पन्न आणि नफ्याचा मागोवा घ्या",
+    "financeTitle":  "प्लॉट व्यवहार",
+    "financeExpenseHistory":  "खर्चाचा इतिहास",
+    "financeRevenueHistory":  "उत्पन्नाचा इतिहास",
+    "financeDemoPlot":  "प्लॉट १",
+    "financeDemoCrop":  "कांदा • १ एकर",
+    "financeRevenue":  "उत्पन्न",
+    "financeExpenses":  "खर्च",
+    "financeProfit":  "नफा",
+    "financeLoss":  "तोटा",
+    "financeAddExpense":  "खर्च जोडा",
+    "financeRecordSpending":  "खर्च नोंदवा",
+    "financeAddRevenue":  "उत्पन्न जोडा",
+    "financeRecordIncome":  "उत्पन्न नोंदवा",
+    "financeNoRevenue":  "अद्याप उत्पन्न जोडलेले नाही",
+    "financeNoExpenses":  "अद्याप खर्च जोडलेला नाही",
+    "financeDeleteEntry":  "नोंद हटवा",
+    "financeProfitSummary":  "नफ्याचा सारांश",
+    "financeNetProfit":  "निव्वळ नफा",
+    "financeNetLoss":  "निव्वळ तोटा",
+    "financeSeeds":  "बियाणे",
+    "financeSpray":  "फवारणी",
+    "financeLabour":  "मजुरी",
+    "financeFertilizer":  "खत",
+    "financeFirstYield":  "पहिले उत्पादन",
+    "financeSecondYield":  "दुसरे उत्पादन",
+    "financeEntryCount":  "{count} नोंदी",
+    "@financeEntryCount":  {
+                               "placeholders":  {
+                                                    "count":  {
+                                                                  "type":  "int"
+                                                              }
+                                                }
+                           },
+    "financeDeleteMessage":  "{amount} ची ही नोंद हटवायची?",
+    "@financeDeleteMessage":  {
+                                  "placeholders":  {
+                                                       "amount":  {
+                                                                      "type":  "String"
+                                                                  }
+                                                   }
+                              },
+  "scheduleCompleted": "पूर्ण झाले"
 }

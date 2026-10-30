@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/api_constant/dio_client.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/available_dates_model.dart';
+import 'package:farmer_consultant/features/crop_schedule/data/model/plot_finance_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/plot_response_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/schedule_detail_respo_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/data/model/schedule_response_model.dart';
@@ -197,6 +198,132 @@ class CropDatasource {
       debugPrint('Update Schedule Status Error: $e');
 
       throw Exception('Failed to update schedule status: $e');
+    }
+  }
+
+  Future<Response<dynamic>> addPlotFinance(
+    String date,
+
+    String amount,
+    String remark,
+
+    String farmerId,
+    String plotId,
+    String type,
+  ) async {
+    try {
+      final params = <String, dynamic>{
+        'date': date.trim(),
+
+        'amount': amount.trim(),
+
+        'remark': remark.trim(),
+
+        'farmerId': farmerId.trim(),
+        'plotId': plotId.trim(),
+        'type': type.trim(),
+      };
+
+      debugPrint('========== ADD PLOT FINACE STATUS ==========');
+      debugPrint('Request Params: $params');
+
+      final response = await dioClient.client.post(
+        ApiClient.addPlotFinance,
+        data: FormData.fromMap(params),
+      );
+
+      debugPrint('Add Plot Finance Status Response: ${response.data}');
+      debugPrint('Status Code: ${response.statusCode}');
+
+      // Return the API response
+      return response;
+    } on DioException catch (e) {
+      debugPrint('Update Plot Finance Dio Error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
+      debugPrint('Status Code: ${e.response?.statusCode}');
+
+      // Preserve DioException for handling in BLoC.
+      rethrow;
+    } catch (e) {
+      debugPrint('Update  Plot Finance Status Error: $e');
+
+      throw Exception('Failed to  Plot Finance status: $e');
+    }
+  }
+
+  Future<PlotFinanceModel> getPlotFinance(
+    String farmerId,
+    String plotId,
+    String type,
+  ) async {
+    final response = await dioClient.client.post(
+      ApiClient.getPlotFinanceList,
+      data: FormData.fromMap({
+        'farmerId': farmerId,
+        'plotId': plotId,
+        'type': type,
+      }),
+    );
+    debugPrint('farmerId datasource: $farmerId');
+    debugPrint('plotId: $plotId');
+    debugPrint('type: $type');
+
+    final dynamic rawData = response.data;
+    debugPrint('Plot Finance API response: $rawData');
+    final dynamic decodedData = rawData is String
+        ? jsonDecode(rawData)
+        : rawData;
+
+    if (decodedData is! Map) {
+      throw const FormatException('Invalid plot list response');
+    }
+
+    final result = PlotFinanceModel.fromJson(
+      Map<String, dynamic>.from(decodedData),
+    );
+
+    return result;
+  }
+
+  Future<Response<dynamic>> deletePlotFinance(
+    String financeId,
+
+    String farmerId,
+  ) async {
+    try {
+      final params = <String, dynamic>{
+        'financeId': financeId.trim(),
+
+        'farmerId': farmerId.trim(),
+      };
+
+      debugPrint('========== Delete Plot Finance STATUS ==========');
+      debugPrint('Request Params: $params');
+      debugPrint('farmerId datasource: $farmerId');
+      debugPrint('financeId: $financeId');
+      debugPrint('farmerId: $farmerId');
+
+      final response = await dioClient.client.post(
+        ApiClient.deleteplotfinance,
+        data: FormData.fromMap(params),
+      );
+
+      debugPrint(' Delete Plot Finance Status Response: ${response.data}');
+      debugPrint(' Delete Plot Finance Status Code: ${response.statusCode}');
+
+      // Return the API response
+      return response;
+    } on DioException catch (e) {
+      debugPrint(' Delete Plot Finance Dio Error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
+      debugPrint('Status Code: ${e.response?.statusCode}');
+
+      // Preserve DioException for handling in BLoC.
+      rethrow;
+    } catch (e) {
+      debugPrint(' Delete Plot Finance Status Error: $e');
+
+      throw Exception('Failed to  Delete Plot Finance status: $e');
     }
   }
 }

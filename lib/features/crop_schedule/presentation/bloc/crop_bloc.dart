@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_finance_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
@@ -20,6 +21,54 @@ class CropBloc extends Bloc<CropEvent, CropState> {
     on<GetCropScheduleByPlotListEvent>(_onGetCropScheduleByPlot);
     on<UpdateScheduleStatus>(_onUpdateScheduleStatus);
     on<GetAvailableDatesEvent>(_onGetAvailableDates);
+    on<AddPlotFinanceEvent>(_onAddPlotFinance);
+    on<GetPlotFinanceEvent>(_onGetPlotFinance);
+    on<DeletePlotFinanceEvent>(_onDeletePlotFinance);
+  }
+
+  Future<void> _onDeletePlotFinance(
+    DeletePlotFinanceEvent event,
+    Emitter<CropState> emit,
+  ) async {
+    if (state.cropStatus == CropStatus.loading) return;
+    emit(state.copyWith(cropStatus: CropStatus.loading, clearError: true));
+    try {
+      if (event.financeId.trim().isEmpty || event.farmerId.trim().isEmpty) {
+        throw const FormatException('Finance ID and Farmer ID are required');
+      }
+      final response = await cropScheduleUsecases.deletePlotFinance(
+        event.financeId.trim(),
+        event.farmerId.trim(),
+      );
+      final dynamic data = response.data is String
+          ? jsonDecode(response.data as String)
+          : response.data;
+      if (data is! Map) {
+        throw const FormatException('Invalid delete plot finance response');
+      }
+      final success =
+          data['status'] == true ||
+          data['status'] == 1 ||
+          data['status']?.toString().toLowerCase() == 'true';
+      final message = data['message']?.toString().trim() ?? '';
+      emit(
+        state.copyWith(
+          cropStatus: success ? CropStatus.success : CropStatus.failure,
+          errorMessage: message.isNotEmpty
+              ? message
+              : success
+              ? 'Plot finance deleted successfully'
+              : 'Unable to delete plot finance',
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: error.toString(),
+        ),
+      );
+    }
   }
 
   Future<void> _onGetCropSchedule(
@@ -393,6 +442,206 @@ class CropBloc extends Bloc<CropEvent, CropState> {
           cropStatus: CropStatus.failure,
           errorMessage: e.toString(),
           availableDateList: [],
+        ),
+      );
+    }
+  }
+
+  Future<void> _onAddPlotFinance(
+    AddPlotFinanceEvent event,
+    Emitter<CropState> emit,
+  ) async {
+    debugPrint('AddPlotFinanceEvent received');
+    // STEP 1: Prevent duplicate submissions.
+    if (state.cropStatus == CropStatus.loading) {
+      return;
+    }
+
+    // STEP 2: Validate required parameters.
+    if (event.date.trim().isEmpty ||
+        event.amount.trim().isEmpty ||
+        event.farmerId.trim().isEmpty ||
+        event.plotId.trim().isEmpty ||
+        event.type.trim().isEmpty) {
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: 'Please fill all required fields',
+        ),
+      );
+      return;
+    }
+
+    final double? amount = double.tryParse(event.amount.trim());
+
+    if (amount == null || !amount.isFinite || amount <= 0) {
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: 'Please enter a valid amount',
+        ),
+      );
+      return;
+    }
+
+    // STEP 3: Set loading state.
+    emit(state.copyWith(cropStatus: CropStatus.loading, errorMessage: ''));
+
+    try {
+      debugPrint('========== ADD PLOT FINANCE ==========');
+      debugPrint('Date: ${event.date}');
+      debugPrint('Amount: ${event.amount}');
+      debugPrint('Remark: ${event.remark}');
+      debugPrint('Farmer ID: ${event.farmerId}');
+      debugPrint('Plot ID: ${event.plotId}');
+      debugPrint('Type: ${event.type}');
+
+      // STEP 4: Call UseCase.
+      final response = await cropScheduleUsecases.addPlotFinance(
+        event.date,
+        event.amount,
+        event.remark,
+        event.farmerId,
+        event.plotId,
+        event.type,
+      );
+
+      debugPrint('Response Status Code: ${response.statusCode}');
+      debugPrint('Response Data: ${response.data}');
+
+      // STEP 5: Parse API response.
+      final dynamic decodedData = response.data is String
+          ? jsonDecode(response.data as String)
+          : response.data;
+
+      if (decodedData is! Map) {
+        throw const FormatException('Invalid add plot finance response');
+      }
+
+      final data = Map<String, dynamic>.from(decodedData);
+
+      final bool success =
+          data['status'] == true ||
+          data['status'] == 1 ||
+          data['status']?.toString().toLowerCase() == 'true';
+
+      final String message = data['message']?.toString() ?? '';
+
+      // STEP 6: Handle API failure.
+      if (!success) {
+        emit(
+          state.copyWith(
+            cropStatus: CropStatus.failure,
+            errorMessage: message.isNotEmpty
+                ? message
+                : 'Unable to add plot finance',
+          ),
+        );
+        return;
+      }
+
+      // STEP 7: Handle success.
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.success,
+          errorMessage: message.isNotEmpty
+              ? message
+              : 'Plot finance added successfully',
+        ),
+      );
+
+      debugPrint('Plot Finance Added Successfully');
+    } catch (e, stackTrace) {
+      debugPrint('Add Plot Finance Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onGetPlotFinance(
+    GetPlotFinanceEvent event,
+    Emitter<CropState> emit,
+  ) async {
+    // STEP 1: Prevent duplicate requests.
+    if (state.cropStatus == CropStatus.loading) {
+      return;
+    }
+
+    // STEP 2: Validate parameters.
+    if (event.farmerId.trim().isEmpty || event.plotId.trim().isEmpty) {
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: 'Farmer ID and Plot ID are required',
+        ),
+      );
+      return;
+    }
+
+    // STEP 3: Set loading state.
+    emit(state.copyWith(cropStatus: CropStatus.loading, errorMessage: ''));
+
+    try {
+      debugPrint('========== GET PLOT FINANCE ==========');
+      debugPrint('Farmer ID: ${event.farmerId}');
+      debugPrint('Plot ID: ${event.plotId}');
+      debugPrint('Type: ${event.type}');
+
+      // STEP 4: Call UseCase.
+      final PlotFinanceEntity response = await cropScheduleUsecases
+          .getPlotFinance(
+            event.farmerId.trim(),
+            event.plotId.trim(),
+            event.type.trim(),
+          );
+
+      debugPrint('========== PLOT FINANCE RESPONSE ==========');
+      debugPrint('Status: ${response.status}');
+      debugPrint('Message: ${response.message}');
+      debugPrint('Total Income: ${response.totalIncome}');
+      debugPrint('Total Expense: ${response.totalExpense}');
+      debugPrint('Profit: ${response.profit}');
+      debugPrint('Total Records: ${response.result.length}');
+
+      // STEP 5: Handle API failure.
+      if (!response.status) {
+        emit(
+          state.copyWith(
+            cropStatus: CropStatus.failure,
+            errorMessage: response.message.isNotEmpty
+                ? response.message
+                : 'Unable to fetch plot finance details',
+          ),
+        );
+        return;
+      }
+
+      // STEP 6: Handle API success.
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.success,
+          plotFinanceEntity: response,
+          errorMessage: response.message.isNotEmpty
+              ? response.message
+              : 'Plot finance details fetched successfully',
+        ),
+      );
+
+      debugPrint('Plot Finance Fetched Successfully');
+    } catch (e, stackTrace) {
+      debugPrint('Get Plot Finance Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      emit(
+        state.copyWith(
+          cropStatus: CropStatus.failure,
+          errorMessage: e.toString(),
         ),
       );
     }

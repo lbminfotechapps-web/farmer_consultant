@@ -198,7 +198,7 @@
   "@locationCoordinates": {"placeholders": {"latitude": {"type": "String"}, "longitude": {"type": "String"}}},
   "cropPlanning": "Crop Planning",
   "cropScheduleLoadError": "Unable to load crop schedule. Please try again.",
-  "unableToLoadSchedules": "Unable to load schedules",
+  "unableToLoadSchedules": "No schedules have been added for this date.",
   "noCropSchedule": "No Crop Schedule",
   "noCropSchedulesAvailable": "There are currently no crop schedules available.",
   "hideDetails": "Hide Details",
@@ -289,5 +289,64 @@
   "@plotNameValue": {"placeholders": {"name": {"type": "String"}}},
   "@consultantName": {"placeholders": {"name": {"type": "String"}}},
   "totalNotificationCount": "{count, plural, =1{1 notification} other{{count} notifications}}",
-  "@totalNotificationCount": {"placeholders": {"count": {"type": "int"}}}
+  "@totalNotificationCount": {"placeholders": {"count": {"type": "int"}}},
+
+    "financeAddPlotRevenue":  "Add Plot Revenue",
+    "financeAddPlotExpense":  "Add Plot Expense",
+    "financeTransactionDate":  "Transaction Date",
+    "financeAmount":  "Amount (₹)",
+    "financeEnterAmount":  "Enter amount",
+    "financeInvalidAmount":  "Enter a valid amount",
+    "financeRemark":  "Remark",
+    "financeRevenueHint":  "e.g. Crop sale, Harvest income",
+    "financeExpenseHint":  "e.g. Seeds, Labour, Fertilizer",
+    "financeEnterRemark":  "Please enter remark",
+    "financeRevenueAdded":  "Revenue added successfully",
+    "financeExpenseAdded":  "Expense added successfully",
+    "financeDeleteTitle":  "Delete Entry?",
+    "financeEntryDeleted":  "Entry deleted",
+    "financeUndo":  "UNDO",
+    "financeSubtitle":  "Track Expenses, Revenue \u0026 Profit",
+    "financeTitle":  "Plot Finace",
+    "financeExpenseHistory":  "Expense History",
+    "financeRevenueHistory":  "Revenue History",
+    "financeDemoPlot":  "Plot 1",
+    "financeDemoCrop":  "Onion  •  1 Acre",
+    "financeRevenue":  "Revenue",
+    "financeExpenses":  "Expenses",
+    "financeProfit":  "Profit",
+    "financeLoss":  "Loss",
+    "financeAddExpense":  "Add Expense",
+    "financeRecordSpending":  "Record spending",
+    "financeAddRevenue":  "Add Revenue",
+    "financeRecordIncome":  "Record income",
+    "financeNoRevenue":  "No revenue added yet",
+    "financeNoExpenses":  "No expenses added yet",
+    "financeDeleteEntry":  "Delete entry",
+    "financeProfitSummary":  "Profit Summary",
+    "financeNetProfit":  "Net Profit",
+    "financeNetLoss":  "Net Loss",
+    "financeSeeds":  "Seeds",
+    "financeSpray":  "Spray",
+    "financeLabour":  "Labour",
+    "financeFertilizer":  "Fertilizer",
+    "financeFirstYield":  "1st yielded",
+    "financeSecondYield":  "2nd yield",
+    "financeEntryCount":  "{count, plural, =1{1 entry} other{{count} entries}}",
+    "@financeEntryCount":  {
+                               "placeholders":  {
+                                                    "count":  {
+                                                                  "type":  "int"
+                                                              }
+                                                }
+                           },
+    "financeDeleteMessage":  "Delete this entry of {amount}?",
+    "@financeDeleteMessage":  {
+                                  "placeholders":  {
+                                                       "amount":  {
+                                                                      "type":  "String"
+                                                                  }
+                                                   }
+                              },
+  "scheduleCompleted": "Completed"
 }

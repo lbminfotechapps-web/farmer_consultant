@@ -1222,7 +1222,7 @@ abstract class AppLocalizations {
   /// No description provided for @unableToLoadSchedules.
   ///
   /// In en, this message translates to:
-  /// **'Unable to load schedules'**
+  /// **'No schedules have been added for this date.'**
   String get unableToLoadSchedules;
 
   /// No description provided for @noCropSchedule.
@@ -1710,6 +1710,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 notification} other{{count} notifications}}'**
   String totalNotificationCount(int count);
+
+  /// No description provided for @financeAddPlotRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Plot Revenue'**
+  String get financeAddPlotRevenue;
+
+  /// No description provided for @financeAddPlotExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Plot Expense'**
+  String get financeAddPlotExpense;
+
+  /// No description provided for @financeTransactionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Date'**
+  String get financeTransactionDate;
+
+  /// No description provided for @financeAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (₹)'**
+  String get financeAmount;
+
+  /// No description provided for @financeEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter amount'**
+  String get financeEnterAmount;
+
+  /// No description provided for @financeInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get financeInvalidAmount;
+
+  /// No description provided for @financeRemark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark'**
+  String get financeRemark;
+
+  /// No description provided for @financeRevenueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Crop sale, Harvest income'**
+  String get financeRevenueHint;
+
+  /// No description provided for @financeExpenseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Seeds, Labour, Fertilizer'**
+  String get financeExpenseHint;
+
+  /// No description provided for @financeEnterRemark.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter remark'**
+  String get financeEnterRemark;
+
+  /// No description provided for @financeRevenueAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue added successfully'**
+  String get financeRevenueAdded;
+
+  /// No description provided for @financeExpenseAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense added successfully'**
+  String get financeExpenseAdded;
+
+  /// No description provided for @financeDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Entry?'**
+  String get financeDeleteTitle;
+
+  /// No description provided for @financeEntryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry deleted'**
+  String get financeEntryDeleted;
+
+  /// No description provided for @financeUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'UNDO'**
+  String get financeUndo;
+
+  /// No description provided for @financeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Expenses, Revenue & Profit'**
+  String get financeSubtitle;
+
+  /// No description provided for @financeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot Finace'**
+  String get financeTitle;
+
+  /// No description provided for @financeExpenseHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense History'**
+  String get financeExpenseHistory;
+
+  /// No description provided for @financeRevenueHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue History'**
+  String get financeRevenueHistory;
+
+  /// No description provided for @financeDemoPlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot 1'**
+  String get financeDemoPlot;
+
+  /// No description provided for @financeDemoCrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Onion  •  1 Acre'**
+  String get financeDemoCrop;
+
+  /// No description provided for @financeRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get financeRevenue;
+
+  /// No description provided for @financeExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get financeExpenses;
+
+  /// No description provided for @financeProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit'**
+  String get financeProfit;
+
+  /// No description provided for @financeLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss'**
+  String get financeLoss;
+
+  /// No description provided for @financeAddExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get financeAddExpense;
+
+  /// No description provided for @financeRecordSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Record spending'**
+  String get financeRecordSpending;
+
+  /// No description provided for @financeAddRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Revenue'**
+  String get financeAddRevenue;
+
+  /// No description provided for @financeRecordIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Record income'**
+  String get financeRecordIncome;
+
+  /// No description provided for @financeNoRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'No revenue added yet'**
+  String get financeNoRevenue;
+
+  /// No description provided for @financeNoExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses added yet'**
+  String get financeNoExpenses;
+
+  /// No description provided for @financeDeleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry'**
+  String get financeDeleteEntry;
+
+  /// No description provided for @financeProfitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit Summary'**
+  String get financeProfitSummary;
+
+  /// No description provided for @financeNetProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Profit'**
+  String get financeNetProfit;
+
+  /// No description provided for @financeNetLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Loss'**
+  String get financeNetLoss;
+
+  /// No description provided for @financeSeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeds'**
+  String get financeSeeds;
+
+  /// No description provided for @financeSpray.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray'**
+  String get financeSpray;
+
+  /// No description provided for @financeLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour'**
+  String get financeLabour;
+
+  /// No description provided for @financeFertilizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fertilizer'**
+  String get financeFertilizer;
+
+  /// No description provided for @financeFirstYield.
+  ///
+  /// In en, this message translates to:
+  /// **'1st yielded'**
+  String get financeFirstYield;
+
+  /// No description provided for @financeSecondYield.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd yield'**
+  String get financeSecondYield;
+
+  /// No description provided for @financeEntryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry} other{{count} entries}}'**
+  String financeEntryCount(int count);
+
+  /// No description provided for @financeDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this entry of {amount}?'**
+  String financeDeleteMessage(String amount);
+
+  /// No description provided for @scheduleCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get scheduleCompleted;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

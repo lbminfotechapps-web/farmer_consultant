@@ -2,6 +2,7 @@ import 'package:farmer_consultant/core/di/global_di.dart';
 import 'package:farmer_consultant/core/router/bottom_navigation.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/crop_schedul_by_plot.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/crop_schedule_list_page.dart';
+import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot_finance.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot_list.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/crop_schedule_page.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/dashboard_screen.dart';
@@ -51,6 +52,8 @@ class AppRouter {
   static const String social = '/social';
   static const String importantLink = '/importantLink';
   static const String nearealers = '/nearealers';
+
+  static const String plotFinance = '/plotFinance';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -203,6 +206,22 @@ class AppRouter {
         path: profile,
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+
+      GoRoute(
+        path: plotFinance,
+        name: 'plotFinance',
+        builder: (context, state) {
+          final details = state.extra as Map<String, String>? ?? const {};
+
+          return PlotFinanceScreen(
+            plotId: details['plotId'] ?? '',
+            acres: details['acres'] ?? '',
+            cropName: details['cropName'] ?? '',
+            plotName: details['plotName'] ?? '',
+          );
+        },
+        // builder: (context, state) => const (),
       ),
 
       StatefulShellRoute.indexedStack(

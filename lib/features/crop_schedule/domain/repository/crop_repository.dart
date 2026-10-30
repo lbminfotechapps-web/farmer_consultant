@@ -1,10 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:farmer_consultant/features/crop_schedule/data/model/plot_finance_model.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/available_dates_entity.dart';
+import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_finance_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/plot_response_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_detail_respo_entity.dart';
 import 'package:farmer_consultant/features/crop_schedule/domain/entity/schedule_response_entity.dart';
 
 abstract class CropRepository {
+  Future<Response> deletePlotFinance(String financeId, String farmerId);
+
   Future<ScheduleResponseEntity> getFarmerScheduleList(
     String farmerId,
 
@@ -12,10 +16,7 @@ abstract class CropRepository {
     String toDate,
   );
 
-    Future<AvailableDatesEntity> getAvailableDates(
-    String farmerId,
-  );
-
+  Future<AvailableDatesEntity> getAvailableDates(String farmerId);
 
   Future<PlotResponseEntity> getPlotList(
     String farmerId,
@@ -34,4 +35,24 @@ abstract class CropRepository {
   );
 
   Future<Response> updateScheduleStatus(String scheduleId, String farmerId);
+  Future<Response> addPlotFinance(
+      String date,
+
+      String amount,
+      String remark,
+
+      String farmerId,
+      String plotId,
+      String type,
+  );
+
+
+
+
+
+     Future<PlotFinanceEntity> getPlotFinance(
+    String farmerId,
+    String plotId,
+    String type,
+  );
 }

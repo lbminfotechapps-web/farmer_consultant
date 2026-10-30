@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/theme/app_dynamic_colors.dart';
 import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
@@ -130,10 +131,9 @@ class _PlotListState extends State<PlotList> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: context.appBackground,
 
       appBar: CommonDashboardAppBar(
-        backgroundColor: colors.surface,
         title: AppLocalizations.of(context)!.myPlots,
         showProfile: false,
         showNotification: false,
@@ -218,10 +218,10 @@ class _PlotListState extends State<PlotList> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(14),
                     onTap: () {
-                      context.push(
-                        'cropScheduleByPlot',
-                        extra: plot.plotRegistrationId,
-                      );
+                      // context.push(
+                      //   'cropScheduleByPlot',
+                      //   extra: plot.plotRegistrationId,
+                      // );
                     },
                     child: _PlotCard(plot: plot),
                   ),
@@ -449,21 +449,64 @@ class _PlotCard extends StatelessWidget {
                   ),
                 ),
 
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 5,
+                GestureDetector(
+                  onTap: () {
+                    context.push(
+                      '/plotFinance',
+                      extra: {
+                        'plotId': plot.plotRegistrationId,
+                        'acres': plot.acres,
+                        'cropName': plot.cropName,
+                        'plotName': plot.plotName,
+                      },
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.onSurfaceVariant,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Plot Fincance',
+                      //  AppLocalizations.of(context)!.schedule,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: colors.surface,
+                      ),
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context)!.schedule,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: colors.onPrimaryContainer,
+                ),
+
+                SizedBox(width: 10),
+
+                GestureDetector(
+                  onTap: () {
+                    context.push(
+                      'cropScheduleByPlot',
+                      extra: plot.plotRegistrationId,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.schedule,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: colors.onPrimaryContainer,
+                      ),
                     ),
                   ),
                 ),

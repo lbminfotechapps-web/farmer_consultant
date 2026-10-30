@@ -610,7 +610,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get cropScheduleLoadError => 'पीक वेळापत्रक लोड करता आले नाही. कृपया पुन्हा प्रयत्न करा.';
 
   @override
-  String get unableToLoadSchedules => 'वेळापत्रके लोड करता आली नाहीत';
+  String get unableToLoadSchedules => 'या तारखेसाठी कोणतेही वेळापत्रक जोडलेले नाही.';
 
   @override
   String get noCropSchedule => 'पीक वेळापत्रक नाही';
@@ -916,4 +916,140 @@ class AppLocalizationsMr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeAddPlotRevenue => 'प्लॉटचे उत्पन्न जोडा';
+
+  @override
+  String get financeAddPlotExpense => 'प्लॉटचा खर्च जोडा';
+
+  @override
+  String get financeTransactionDate => 'व्यवहाराची तारीख';
+
+  @override
+  String get financeAmount => 'रक्कम (₹)';
+
+  @override
+  String get financeEnterAmount => 'रक्कम प्रविष्ट करा';
+
+  @override
+  String get financeInvalidAmount => 'वैध रक्कम प्रविष्ट करा';
+
+  @override
+  String get financeRemark => 'शेरा';
+
+  @override
+  String get financeRevenueHint => 'उदा. पीक विक्री, कापणीचे उत्पन्न';
+
+  @override
+  String get financeExpenseHint => 'उदा. बियाणे, मजुरी, खत';
+
+  @override
+  String get financeEnterRemark => 'कृपया शेरा प्रविष्ट करा';
+
+  @override
+  String get financeRevenueAdded => 'उत्पन्न यशस्वीपणे जोडले';
+
+  @override
+  String get financeExpenseAdded => 'खर्च यशस्वीपणे जोडला';
+
+  @override
+  String get financeDeleteTitle => 'नोंद हटवायची?';
+
+  @override
+  String get financeEntryDeleted => 'नोंद हटवली';
+
+  @override
+  String get financeUndo => 'पूर्ववत करा';
+
+  @override
+  String get financeSubtitle => 'खर्च, उत्पन्न आणि नफ्याचा मागोवा घ्या';
+
+  @override
+  String get financeTitle => 'प्लॉट व्यवहार';
+
+  @override
+  String get financeExpenseHistory => 'खर्चाचा इतिहास';
+
+  @override
+  String get financeRevenueHistory => 'उत्पन्नाचा इतिहास';
+
+  @override
+  String get financeDemoPlot => 'प्लॉट १';
+
+  @override
+  String get financeDemoCrop => 'कांदा • १ एकर';
+
+  @override
+  String get financeRevenue => 'उत्पन्न';
+
+  @override
+  String get financeExpenses => 'खर्च';
+
+  @override
+  String get financeProfit => 'नफा';
+
+  @override
+  String get financeLoss => 'तोटा';
+
+  @override
+  String get financeAddExpense => 'खर्च जोडा';
+
+  @override
+  String get financeRecordSpending => 'खर्च नोंदवा';
+
+  @override
+  String get financeAddRevenue => 'उत्पन्न जोडा';
+
+  @override
+  String get financeRecordIncome => 'उत्पन्न नोंदवा';
+
+  @override
+  String get financeNoRevenue => 'अद्याप उत्पन्न जोडलेले नाही';
+
+  @override
+  String get financeNoExpenses => 'अद्याप खर्च जोडलेला नाही';
+
+  @override
+  String get financeDeleteEntry => 'नोंद हटवा';
+
+  @override
+  String get financeProfitSummary => 'नफ्याचा सारांश';
+
+  @override
+  String get financeNetProfit => 'निव्वळ नफा';
+
+  @override
+  String get financeNetLoss => 'निव्वळ तोटा';
+
+  @override
+  String get financeSeeds => 'बियाणे';
+
+  @override
+  String get financeSpray => 'फवारणी';
+
+  @override
+  String get financeLabour => 'मजुरी';
+
+  @override
+  String get financeFertilizer => 'खत';
+
+  @override
+  String get financeFirstYield => 'पहिले उत्पादन';
+
+  @override
+  String get financeSecondYield => 'दुसरे उत्पादन';
+
+  @override
+  String financeEntryCount(int count) {
+    return '$count नोंदी';
+  }
+
+  @override
+  String financeDeleteMessage(String amount) {
+    return '$amount ची ही नोंद हटवायची?';
+  }
+
+  @override
+  String get scheduleCompleted => 'पूर्ण झाले';
 }
