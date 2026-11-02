@@ -9,6 +9,39 @@ class AppLocalizationsMr extends AppLocalizations {
   AppLocalizationsMr([String locale = 'mr']) : super(locale);
 
   @override
+  String get storiesLoadError => 'यशोगाथा लोड करता आल्या नाहीत.';
+
+  @override
+  String get storiesDateOrderError => 'सुरुवातीची तारीख शेवटच्या तारखेच्या आधी असावी.';
+
+  @override
+  String get storiesFilterByDate => 'तारखेनुसार फिल्टर करा';
+
+  @override
+  String get storiesShow => 'यशोगाथा दाखवा';
+
+  @override
+  String get storiesNoResults => 'या तारखांसाठी यशोगाथा सापडल्या नाहीत.';
+
+  @override
+  String get storiesRefresh => 'यशोगाथा रिफ्रेश करा';
+
+  @override
+  String get storiesFarmer => 'शेतकरी';
+
+  @override
+  String get storiesCropName => 'पिकाचे नाव';
+
+  @override
+  String get storiesProductName => 'उत्पादनाचे नाव';
+
+  @override
+  String get storiesVideoTitle => 'यशोगाथेचा व्हिडिओ';
+
+  @override
+  String get storiesVideoError => 'हा व्हिडिओ चालवता आला नाही.';
+
+  @override
   String get date => 'तारीख';
 
   @override

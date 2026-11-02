@@ -8,6 +8,7 @@ class NotificationModel extends NotificationEntity {
     required super.message,
     required super.notificationDate,
     required super.notificationTime,
+    required super.seenFlag,
   });
 
   factory NotificationModel.fromJson(
@@ -28,6 +29,9 @@ class NotificationModel extends NotificationEntity {
 
       notificationTime:
           json['notificationTime']?.toString() ?? '',
+
+      seenFlag:
+          json['fld_seen_flag']?.toString() ?? '',
     );
   }
 }

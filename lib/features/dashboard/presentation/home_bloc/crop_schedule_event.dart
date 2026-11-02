@@ -26,3 +26,27 @@ class RefreshCropSchedulesEvent extends CropScheduleEvent {
   @override
   List<Object?> get props => [];
 }
+
+class FarmerSuccessStoryEvent extends CropScheduleEvent {
+  final String farmerId;
+  final String fromDate;
+  final String toDate;
+  final String startLimit;
+
+  const FarmerSuccessStoryEvent({
+    required this.farmerId,
+    required this.fromDate,
+    required this.toDate,
+    required this.startLimit,
+  });
+  @override
+  List<Object> get props => [farmerId, fromDate, toDate, startLimit];
+}
+
+class UpdateNotificationStatusEvent extends CropScheduleEvent {
+  final String farmerId;
+
+  const UpdateNotificationStatusEvent({required this.farmerId});
+  @override
+  List<Object> get props => [farmerId];
+}

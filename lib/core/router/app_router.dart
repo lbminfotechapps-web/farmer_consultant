@@ -6,6 +6,7 @@ import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot
 import 'package:farmer_consultant/features/crop_schedule/presentation/pages/plot_list.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/crop_schedule_page.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/pages/dashboard_screen.dart';
+import 'package:farmer_consultant/features/dashboard/presentation/pages/farmer_success_stories.dart';
 import 'package:farmer_consultant/features/dealer/presentation/pages/DealerListScreen.dart';
 import 'package:farmer_consultant/features/gallery/presentation/pages/galleryscreen.dart';
 import 'package:farmer_consultant/features/important_links/presentation/pages/important_links_page.dart';
@@ -54,6 +55,7 @@ class AppRouter {
   static const String nearealers = '/nearealers';
 
   static const String plotFinance = '/plotFinance';
+  static const String farmerSuccessStories = '/farmerSuccessStories';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -82,6 +84,18 @@ class AppRouter {
               ? extra.toString().trim()
               : '';
           return CropSchedulePage(farmerId: farmerId);
+        },
+      ),
+
+      GoRoute(
+        path: farmerSuccessStories,
+        name: 'farmerSuccessStories',
+        builder: (context, state) {
+          final extra = state.extra;
+          final farmerId = extra is String || extra is int
+              ? extra.toString().trim()
+              : '';
+          return FarmerSuccessStories(farmerId: farmerId);
         },
       ),
 
