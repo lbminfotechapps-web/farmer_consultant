@@ -39,4 +39,7 @@ class ApiClient {
   static const String getPlotFinanceList = "/get_plot_finance_list";
 
   static const String deleteplotfinance = "/deleteplotfinance";
+  static const String getSuccessStoriesList = "/getSuccessStoriesList";
+
+  static const String updateNotificationStatus = "/updateNotificationStatus";
 }

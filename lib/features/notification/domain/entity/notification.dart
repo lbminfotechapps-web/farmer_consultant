@@ -4,6 +4,7 @@ class NotificationEntity {
   final String message;
   final String notificationDate;
   final String notificationTime;
+   final String seenFlag;
 
   const NotificationEntity({
     required this.notificationId,
@@ -11,5 +12,6 @@ class NotificationEntity {
     required this.message,
     required this.notificationDate,
     required this.notificationTime,
+    required this.seenFlag,
   });
 }

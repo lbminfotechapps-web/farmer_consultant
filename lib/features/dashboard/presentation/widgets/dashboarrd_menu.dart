@@ -7,6 +7,7 @@ class QuickAccessItem {
   final Color iconColor;
   final Color backgroundColor;
   final VoidCallback? onTap;
+  final String? value;
 
   const QuickAccessItem({
     required this.title,
@@ -14,10 +15,12 @@ class QuickAccessItem {
     required this.iconColor,
     required this.backgroundColor,
     this.onTap,
+    this.value,
   });
 }
 
 class DashboardMenu extends StatelessWidget {
+  final double? currentTemperature;
   final VoidCallback? onWeatherTap;
   final VoidCallback? onMyPlotsTap;
   final VoidCallback? onQuickReferenceTap;
@@ -31,6 +34,7 @@ class DashboardMenu extends StatelessWidget {
 
   const DashboardMenu({
     super.key,
+    this.currentTemperature,
     this.onWeatherTap,
     this.onMyPlotsTap,
     this.onQuickReferenceTap,
@@ -68,6 +72,9 @@ class DashboardMenu extends StatelessWidget {
       ),
       QuickAccessItem(
         title: strings.weather,
+        value: currentTemperature != null
+            ? '${currentTemperature!.round()}\u00B0C'
+            : null,
         icon: Icons.cloud_outlined,
         iconColor: const Color(0xFF0284C7),
         backgroundColor: const Color(0xFFE0F2FE),
@@ -227,7 +234,28 @@ class QuickAccessMenuItem extends StatelessWidget {
                     color: menu.iconColor.withValues(alpha: 0.08),
                   ),
                 ),
-                child: Icon(menu.icon, size: 25, color: menu.iconColor),
+                child: menu.value == null
+                    ? Icon(menu.icon, size: 25, color: menu.iconColor)
+                    : Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(menu.icon, size: 18, color: menu.iconColor),
+                              Text(
+                                menu.value!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: menu.iconColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
               ),
               const SizedBox(height: 9),
               ConstrainedBox(

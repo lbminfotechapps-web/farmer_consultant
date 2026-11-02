@@ -9,12 +9,15 @@ import 'package:farmer_consultant/core/router/app_router.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_bloc.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_event.dart';
 import 'package:farmer_consultant/features/crop_schedule/presentation/bloc/crop_state.dart';
+import 'package:farmer_consultant/features/dashboard/presentation/home_bloc/crop_schedule_bloc.dart';
+import 'package:farmer_consultant/features/dashboard/presentation/home_bloc/crop_schedule_event.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/dashboarrd_menu.dart';
 import 'package:farmer_consultant/features/dashboard/presentation/widgets/farmer_banner.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_event.dart';
 import 'package:farmer_consultant/features/notification/presentation/bloc/notification_state.dart';
 import 'package:farmer_consultant/features/weather/weather_card.dart';
+import 'package:farmer_consultant/features/weather/weather_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -69,6 +72,9 @@ class _DashboardScreenState extends State<DashboardScreen>
   DateTime? _activeFrom;
   DateTime? _activeTo;
   final DateFormat _apiFormat = DateFormat('dd-MM-yyyy');
+  bool _isOpeningNotifications = false;
+  double? _currentTemperature;
+  bool _loadingWeather = false;
   @override
   void initState() {
     super.initState();
@@ -82,6 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       if (!mounted) return;
       _loadSchedules();
       _loadNotifications();
+      _loadWeather();
     });
   }
 
@@ -98,14 +105,38 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Future<void> _openNotifications() async {
-    if (widget.onNotificationTap != null) {
-      widget.onNotificationTap!();
-      return;
+    if (_isOpeningNotifications) return;
+
+    _isOpeningNotifications = true;
+
+    try {
+      final farmerId = (await SecureStorage.instance.getFarmerId()).trim();
+
+      if (!mounted) return;
+
+      if (farmerId.isEmpty) {
+        _showMessage('Farmer ID not found. Please login again.');
+        return;
+      }
+
+      context.read<CropScheduleBloc>().add(
+        UpdateNotificationStatusEvent(farmerId: farmerId),
+      );
+
+      if (widget.onNotificationTap != null) {
+        widget.onNotificationTap!();
+      } else {
+        await context.push(AppRouter.notification, extra: farmerId);
+      }
+
+      if (!mounted) return;
+
+      await _loadNotifications();
+    } catch (e) {
+      debugPrint('Open Notifications Error: $e');
+    } finally {
+      _isOpeningNotifications = false;
     }
-    final farmerId = await SecureStorage.instance.getFarmerId();
-    if (!mounted) return;
-    await context.push(AppRouter.notification, extra: farmerId);
-    if (mounted) await _loadNotifications();
   }
 
   Future<void> _logout() async {
@@ -159,7 +190,36 @@ class _DashboardScreenState extends State<DashboardScreen>
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _loadSchedules() async {
+  Future<void> _refreshDashboard() async {
+    try {
+      await Future.wait([
+        _loadSchedules(waitForResult: true),
+        _loadNotifications(waitForResult: true),
+        _loadWeather(),
+      ]);
+    } catch (_) {
+      if (mounted) {
+        _showMessage('Unable to refresh dashboard. Please try again.');
+      }
+    }
+  }
+
+  Future<void> _loadWeather() async {
+    if (_loadingWeather) return;
+    _loadingWeather = true;
+    try {
+      final weather = await WeatherService().getWeather();
+      if (mounted) {
+        setState(() => _currentTemperature = weather.currentTemperature);
+      }
+    } catch (error) {
+      debugPrint('Dashboard weather unavailable: $error');
+    } finally {
+      _loadingWeather = false;
+    }
+  }
+
+  Future<void> _loadSchedules({bool waitForResult = false}) async {
     final String farmerId = await SecureStorage.instance.getFarmerId();
 
     if (!mounted) return;
@@ -174,16 +234,27 @@ class _DashboardScreenState extends State<DashboardScreen>
     debugPrint('fromDate: ${_apiFormat.format(fromDate)}');
     debugPrint('toDate: ${_apiFormat.format(toDate)}');
 
-    context.read<CropBloc>().add(
+    final bloc = context.read<CropBloc>();
+    final completed = waitForResult
+        ? bloc.stream
+              .firstWhere(
+                (state) =>
+                    state.cropStatus == CropStatus.success ||
+                    state.cropStatus == CropStatus.failure,
+              )
+              .timeout(const Duration(seconds: 30))
+        : null;
+    bloc.add(
       GetCropScheduleEvent(
         farmerId,
         // fromDate: _apiFormat.format(fromDate),
         // toDate: _apiFormat.format(toDate),
       ),
     );
+    if (completed != null) await completed;
   }
 
-  Future<void> _loadNotifications() async {
+  Future<void> _loadNotifications({bool waitForResult = false}) async {
     final farmerId = await SecureStorage.instance.getFarmerId();
 
     if (!mounted) return;
@@ -194,7 +265,16 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    context.read<NotificationBloc>().add(
+    final bloc = context.read<NotificationBloc>();
+    final completed = waitForResult
+        ? bloc.stream
+              .firstWhere(
+                (state) =>
+                    state is NotificationLoaded || state is NotificationError,
+              )
+              .timeout(const Duration(seconds: 30))
+        : null;
+    bloc.add(
       GetNotificationListEvent(
         userId: userId,
         isLogin: true,
@@ -202,6 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         loadAll: true,
       ),
     );
+    if (completed != null) await completed;
   }
 
   @override
@@ -211,7 +292,11 @@ class _DashboardScreenState extends State<DashboardScreen>
     return BlocListener<NotificationBloc, NotificationState>(
       listener: (context, state) {
         if (state is NotificationLoaded) {
-          setState(() => _notificationCount = state.notifications.length);
+          setState(() {
+            _notificationCount = state.notifications
+                .where((notification) => notification.seenFlag == '0')
+                .length;
+          });
         }
       },
       child: Scaffold(
@@ -233,157 +318,175 @@ class _DashboardScreenState extends State<DashboardScreen>
         // Existing bottom navigation is managed by parent.
         body: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 5, 20, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        strings.farmAtAGlance,
+          child: RefreshIndicator(
+            onRefresh: _refreshDashboard,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 5, 20, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          strings.farmAtAGlance,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        DateFormat(
+                          'dd MMM, yyyy',
+                          strings.localeName,
+                        ).format(DateTime.now()),
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
                           color: colors.onSurfaceVariant,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      DateFormat(
-                        'dd MMM, yyyy',
-                        strings.localeName,
-                      ).format(DateTime.now()),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colors.onSurfaceVariant,
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const FarmingBanner(),
+                  const SizedBox(height: 26),
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const FarmingBanner(),
-                const SizedBox(height: 26),
-                Row(
-                  children: [
-                    Container(
-                      width: 4,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: colors.primary,
-                        borderRadius: BorderRadius.circular(2),
+                      const SizedBox(width: 9),
+                      Text(
+                        strings.todaysActivities,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: colors.onSurface,
+                          letterSpacing: -0.3,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 9),
-                    Text(
-                      strings.todaysActivities,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: colors.onSurface,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
 
-                // Crop Schedule
-                BlocBuilder<CropBloc, CropState>(
-                  builder: (context, state) {
-                    return DashboardActivityCard(
-                      title: strings.cropSchedule,
-                      subtitle: strings.viewTodaysTasks,
-                      icon: Icons.calendar_month_rounded,
-                      onTap:
-                          widget.onCropScheduleTap ??
-                          () async {
-                            final String farmerId = await SecureStorage.instance
-                                .getFarmerId();
-                            if (!context.mounted) return;
-                            await context.push(
-                              AppRouter.cropScheduleList,
-                              extra: farmerId,
-                            );
-                            if (!mounted) return;
-                            await _loadSchedules();
+                  // Crop Schedule
+                  BlocBuilder<CropBloc, CropState>(
+                    builder: (context, state) {
+                      return DashboardActivityCard(
+                        title: strings.cropSchedule,
+                        subtitle: strings.viewTodaysTasks,
+                        icon: Icons.calendar_month_rounded,
+                        onTap:
+                            widget.onCropScheduleTap ??
+                            () async {
+                              final String farmerId = await SecureStorage
+                                  .instance
+                                  .getFarmerId();
+                              if (!context.mounted) return;
+                              await context.push(
+                                AppRouter.cropScheduleList,
+                                extra: farmerId,
+                              );
+                              if (!mounted) return;
+                              await _loadSchedules();
 
-                            debugPrint('Farmer ID: $farmerId');
-                          },
-                      notificationCount: state.cropStatus == CropStatus.success
-                          ? _getScheduleCount(state)
-                          : null,
-                    );
-                  },
-                ),
+                              debugPrint('Farmer ID: $farmerId');
+                            },
+                        notificationCount:
+                            state.cropStatus == CropStatus.success
+                            ? _getScheduleCount(state)
+                            : null,
+                      );
+                    },
+                  ),
 
-                // const SizedBox(height: 5),
-                const SizedBox(height: 10),
+                  // const SizedBox(height: 5),
+                  const SizedBox(height: 10),
 
-                // Notifications
-                DashboardActivityCard(
-                  title: strings.notifications,
-                  subtitle: _notificationCount == 0
-                      ? strings.noNotificationsAvailable
-                      : strings.totalNotificationCount(_notificationCount),
-                  icon: Icons.notifications_rounded,
+                  // Notifications
+                  DashboardActivityCard(
+                    title: strings.notifications,
+                    subtitle: _notificationCount == 0
+                        ? strings.noNotificationsAvailable
+                        : strings.totalNotificationCount(_notificationCount),
+                    icon: Icons.notifications_rounded,
 
-                  notificationCount: _notificationCount,
-                  onTap: _openNotifications,
-                ),
+                    notificationCount: _notificationCount,
+                    onTap: _openNotifications,
+                  ),
 
-                const SizedBox(height: 26),
-                DashboardMenu(
-                  onWeatherTap:
-                      widget.onWeatherTap ??
-                      () {
-                        WeatherCardDialog.show(context);
-                      },
+                  const SizedBox(height: 26),
+                  DashboardMenu(
+                    currentTemperature: _currentTemperature,
+                    onWeatherTap:
+                        widget.onWeatherTap ??
+                        () {
+                          WeatherCardDialog.show(context);
+                        },
 
-                  onMyPlotsTap:
-                      widget.onMyFieldsTap ??
-                      () {
-                        context.push(AppRouter.plotList);
-                      },
+                    onMyPlotsTap:
+                        widget.onMyFieldsTap ??
+                        () {
+                          context.push(AppRouter.plotList);
+                        },
 
-                  onQuickReferenceTap: () {
-                    context.push(AppRouter.quickReferance);
-                  },
+                    onQuickReferenceTap: () {
+                      context.push(AppRouter.quickReferance);
+                    },
 
-                  onNearDealersTap: () {
-                    context.push('/nearealers');
-                  },
+                    onNearDealersTap: () {
+                      context.push('/nearealers');
+                    },
 
-                  onContactUsTap: () {
-                    context.push('/contactUs');
-                  },
+                    onContactUsTap: () {
+                      context.push('/contactUs');
+                    },
 
-                  onImportantLinksTap: () {
-                    context.push(AppRouter.importantLink);
-                  },
+                    onImportantLinksTap: () {
+                      context.push(AppRouter.importantLink);
+                    },
 
-                  onSocialMediaTap: () {
-                    context.push('/social');
-                  },
+                    onSocialMediaTap: () {
+                      context.push('/social');
+                    },
 
-                  onAboutUsTap: () {
-                    context.push('/aboutUs');
-                  },
+                    onAboutUsTap: () {
+                      context.push('/aboutUs');
+                    },
 
-                  onCropAdviceTap: () {
-                    context.push(AppRouter.cropSchedule);
-                  },
+                    onCropAdviceTap: () {
+                      context.push(AppRouter.cropSchedule);
+                    },
 
-                  onGalleryTap: () {
-                    context.push(AppRouter.gallery);
-                  },
-                ),
-                const SizedBox(height: 24),
-                SuccessStoriesCard(onTap: widget.onSuccessStoriesTap),
-              ],
+                    onGalleryTap: () {
+                      context.push(AppRouter.gallery);
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  SuccessStoriesCard(
+                    onTap: () async {
+                      final String farmerId = await SecureStorage.instance
+                          .getFarmerId();
+                      context.push(
+                        AppRouter.farmerSuccessStories,
+                        extra: farmerId,
+                      );
+                    },
+                    //  widget.onSuccessStoriesTap
+                  ),
+                ],
+              ),
             ),
           ),
         ),

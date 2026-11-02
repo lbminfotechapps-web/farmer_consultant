@@ -9,6 +9,39 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get storiesLoadError => 'Unable to load success stories.';
+
+  @override
+  String get storiesDateOrderError => 'From Date must be before To Date.';
+
+  @override
+  String get storiesFilterByDate => 'Filter by date';
+
+  @override
+  String get storiesShow => 'Show stories';
+
+  @override
+  String get storiesNoResults => 'No stories found for these dates.';
+
+  @override
+  String get storiesRefresh => 'Refresh stories';
+
+  @override
+  String get storiesFarmer => 'Farmer';
+
+  @override
+  String get storiesCropName => 'Crop name';
+
+  @override
+  String get storiesProductName => 'Product name';
+
+  @override
+  String get storiesVideoTitle => 'Success Story Video';
+
+  @override
+  String get storiesVideoError => 'Unable to play this video.';
+
+  @override
   String get date => 'Date';
 
   @override
@@ -966,7 +999,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financeSubtitle => 'Track Expenses, Revenue & Profit';
 
   @override
-  String get financeTitle => 'Plot Finace';
+  String get financeTitle => 'Plot Finance';
 
   @override
   String get financeExpenseHistory => 'Expense History';

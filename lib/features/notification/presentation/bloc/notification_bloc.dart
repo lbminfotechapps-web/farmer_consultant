@@ -49,7 +49,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       debugPrint('========== NOTIFICATION FIRST LOAD ==========');
 
       final List<NotificationEntity> notifications = [];
+      final seenIds = <String>{};
       List<NotificationEntity> page;
+      bool madeProgress;
       do {
         page = await getNotificationList(
           userId: _userId,
@@ -57,11 +59,16 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
           userType: _userType,
           startLimit: startLimit,
         );
-        notifications.addAll(page);
+        final unique = page
+            .where((notification) => seenIds.add(notification.notificationId))
+            .toList();
+        madeProgress = unique.isNotEmpty;
+        notifications.addAll(unique);
         startLimit += page.length;
-      } while (event.loadAll && page.length >= pageSize);
+      } while (event.loadAll && page.length >= pageSize && madeProgress);
 
-      final bool hasMore = !event.loadAll && page.length >= pageSize;
+      final bool hasMore =
+          !event.loadAll && page.length >= pageSize && madeProgress;
 
       debugPrint('Received: ${notifications.length}');
 
@@ -116,12 +123,19 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
             startLimit: startLimit,
           );
 
+      final seenIds = currentState.notifications
+          .map((notification) => notification.notificationId)
+          .toSet();
+      final unique = newNotifications
+          .where((notification) => seenIds.add(notification.notificationId))
+          .toList();
       final List<NotificationEntity> updatedNotifications = [
         ...currentState.notifications,
-        ...newNotifications,
+        ...unique,
       ];
 
-      final bool hasMore = newNotifications.length >= pageSize;
+      final bool hasMore =
+          newNotifications.length >= pageSize && unique.isNotEmpty;
 
       startLimit += newNotifications.length;
 

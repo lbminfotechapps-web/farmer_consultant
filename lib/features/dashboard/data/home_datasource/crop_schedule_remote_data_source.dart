@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/api_constant/dio_client.dart';
 import 'package:farmer_consultant/features/dashboard/data/home_model/crop_schedule_model.dart';
+import 'package:farmer_consultant/features/dashboard/data/home_model/success_story_model.dart';
+import 'package:flutter/material.dart';
 
 class CropScheduleRemoteDataSource {
   final DioClient dioClient;
@@ -106,6 +108,70 @@ class CropScheduleRemoteDataSource {
       );
     } catch (e) {
       print('Crop schedule error: $e');
+
+      rethrow;
+    }
+  }
+
+  Future<SuccessStoryModel> getSuccessStoryList(
+    String farmerId,
+    String fromDate,
+    String toDate,
+    String startLimit,
+  ) async {
+    try {
+      final response = await dioClient.client.post(
+        ApiClient.getSuccessStoriesList,
+        data: FormData.fromMap({
+          'farmerId': farmerId,
+          'fromDate': fromDate,
+          'toDate': toDate,
+          'startLimit': startLimit,
+        }),
+      );
+print('========== SUCCESS STORY RESPONSE ==========');
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      final dynamic decodedData = response.data is String
+          ? jsonDecode(response.data as String)
+          : response.data;
+
+      if (decodedData is! Map) {
+        throw const FormatException('Invalid success story list response');
+      }
+
+      return SuccessStoryModel.fromJson(Map<String, dynamic>.from(decodedData));
+    } catch (e) {
+      debugPrint('Get Success Story List Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Response<dynamic>> updateNotificationStatus(String farmerId) async {
+    try {
+      final params = <String, dynamic>{'farmerId': farmerId.trim()};
+
+      debugPrint('========== UPDATE NOTIFICATION STATUS ==========');
+      debugPrint('Request Params: $params');
+
+      final response = await dioClient.client.post(
+        ApiClient.updateNotificationStatus,
+        data: FormData.fromMap(params),
+      );
+
+      debugPrint('Update Notification Status Response: ${response.data}');
+      debugPrint('Status Code: ${response.statusCode}');
+
+      return response;
+    } on DioException catch (e) {
+      debugPrint('Update Notification Status Dio Error: ${e.message}');
+      debugPrint('Response: ${e.response?.data}');
+      debugPrint('Status Code: ${e.response?.statusCode}');
+
+      rethrow;
+    } catch (e, stackTrace) {
+      debugPrint('Update Notification Status Error: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
       rethrow;
     }

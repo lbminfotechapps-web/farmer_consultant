@@ -97,6 +97,72 @@ abstract class AppLocalizations {
     Locale('mr')
   ];
 
+  /// No description provided for @storiesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load success stories.'**
+  String get storiesLoadError;
+
+  /// No description provided for @storiesDateOrderError.
+  ///
+  /// In en, this message translates to:
+  /// **'From Date must be before To Date.'**
+  String get storiesDateOrderError;
+
+  /// No description provided for @storiesFilterByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by date'**
+  String get storiesFilterByDate;
+
+  /// No description provided for @storiesShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show stories'**
+  String get storiesShow;
+
+  /// No description provided for @storiesNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No stories found for these dates.'**
+  String get storiesNoResults;
+
+  /// No description provided for @storiesRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh stories'**
+  String get storiesRefresh;
+
+  /// No description provided for @storiesFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmer'**
+  String get storiesFarmer;
+
+  /// No description provided for @storiesCropName.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop name'**
+  String get storiesCropName;
+
+  /// No description provided for @storiesProductName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product name'**
+  String get storiesProductName;
+
+  /// No description provided for @storiesVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Success Story Video'**
+  String get storiesVideoTitle;
+
+  /// No description provided for @storiesVideoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to play this video.'**
+  String get storiesVideoError;
+
   /// No description provided for @date.
   ///
   /// In en, this message translates to:

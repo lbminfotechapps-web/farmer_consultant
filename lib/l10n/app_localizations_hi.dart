@@ -9,6 +9,39 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
+  String get storiesLoadError => 'सफलता की कहानियाँ लोड नहीं हो सकीं।';
+
+  @override
+  String get storiesDateOrderError => 'आरंभ तिथि अंतिम तिथि से पहले होनी चाहिए।';
+
+  @override
+  String get storiesFilterByDate => 'तिथि के अनुसार फ़िल्टर करें';
+
+  @override
+  String get storiesShow => 'कहानियाँ दिखाएँ';
+
+  @override
+  String get storiesNoResults => 'इन तिथियों के लिए कोई कहानी नहीं मिली।';
+
+  @override
+  String get storiesRefresh => 'कहानियाँ रीफ़्रेश करें';
+
+  @override
+  String get storiesFarmer => 'किसान';
+
+  @override
+  String get storiesCropName => 'फसल का नाम';
+
+  @override
+  String get storiesProductName => 'उत्पाद का नाम';
+
+  @override
+  String get storiesVideoTitle => 'सफलता की कहानी का वीडियो';
+
+  @override
+  String get storiesVideoError => 'यह वीडियो नहीं चल सका।';
+
+  @override
   String get date => 'तारीख';
 
   @override

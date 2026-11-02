@@ -57,7 +57,10 @@ class _PlotFinanceScreenState extends State<PlotFinanceScreen>
   AppLocalizations get l10n => AppLocalizations.of(context)!;
   NumberFormat get currencyFormat =>
       NumberFormat.decimalPattern(l10n.localeName);
-  DateFormat get dateFormat => DateFormat.yMd(l10n.localeName);
+  // DateFormat get dateFormat => DateFormat.yMd(l10n.localeName);
+  DateFormat get dateFormat => DateFormat('dd/MM/yyyy', l10n.localeName);
+  //  DateFormat get dateFormat =>
+  //   DateFormat('dd MMM yyyy', l10n.localeName);
 
   // Live transaction lists loaded from GetPlotFinanceEvent.
   final List<PlotTransaction> expenses = [];
