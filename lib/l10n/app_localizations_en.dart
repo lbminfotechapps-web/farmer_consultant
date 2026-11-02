@@ -1058,4 +1058,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scheduleCompleted => 'Completed';
+
+  @override
+  String get successStories => 'Success Stories';
+
+  @override
+  String get successStoriesEyebrow => 'Growing together';
+
+  @override
+  String get successStoriesDescription => 'Discover the journeys and ideas behind thriving farms.';
+
+  @override
+  String get exploreStories => 'Explore stories';
+
+  @override
+  String get successStoriesEmptyTitle => 'New stories are on the way';
+
+  @override
+  String get successStoriesEmptyMessage => 'Farmer success stories will appear here when available.';
 }

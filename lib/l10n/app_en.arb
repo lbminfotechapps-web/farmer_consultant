@@ -348,5 +348,11 @@
                                                                   }
                                                    }
                               },
-  "scheduleCompleted": "Completed"
+  "scheduleCompleted": "Completed",
+  "successStories": "Success Stories",
+  "successStoriesEyebrow": "Growing together",
+  "successStoriesDescription": "Discover the journeys and ideas behind thriving farms.",
+  "exploreStories": "Explore stories",
+  "successStoriesEmptyTitle": "New stories are on the way",
+  "successStoriesEmptyMessage": "Farmer success stories will appear here when available."
 }

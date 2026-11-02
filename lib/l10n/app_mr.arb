@@ -327,5 +327,11 @@
                                                                   }
                                                    }
                               },
-  "scheduleCompleted": "पूर्ण झाले"
+  "scheduleCompleted": "पूर्ण झाले",
+  "successStories": "यशोगाथा",
+  "successStoriesEyebrow": "एकत्र प्रगती करूया",
+  "successStoriesDescription": "यशस्वी शेतकऱ्यांचा प्रवास आणि शेतीतील नव्या कल्पना जाणून घ्या.",
+  "exploreStories": "यशोगाथा पाहा",
+  "successStoriesEmptyTitle": "नवीन यशोगाथा लवकरच येतील",
+  "successStoriesEmptyMessage": "शेतकऱ्यांच्या यशोगाथा उपलब्ध झाल्यावर येथे दिसतील."
 }

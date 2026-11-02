@@ -22,6 +22,7 @@ import 'package:intl/intl.dart';
 import 'package:farmer_consultant/l10n/app_localizations.dart';
 
 import '../widgets/dashboard_activity_card.dart';
+import '../widgets/success_stories_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String userName;
@@ -37,6 +38,7 @@ class DashboardScreen extends StatefulWidget {
   final VoidCallback? onMyFieldsTap;
   final VoidCallback? onCropScheduleTap;
   final VoidCallback? onAiDiagnosisTap;
+  final VoidCallback? onSuccessStoriesTap;
 
   const DashboardScreen({
     super.key,
@@ -52,6 +54,7 @@ class DashboardScreen extends StatefulWidget {
     this.onMyFieldsTap,
     this.onCropScheduleTap,
     this.onAiDiagnosisTap,
+    this.onSuccessStoriesTap,
   });
 
   @override
@@ -378,6 +381,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                     context.push(AppRouter.gallery);
                   },
                 ),
+                const SizedBox(height: 24),
+                SuccessStoriesCard(onTap: widget.onSuccessStoriesTap),
               ],
             ),
           ),

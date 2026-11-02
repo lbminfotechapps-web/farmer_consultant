@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/utility/screen_shot.dart';
 import 'package:farmer_consultant/l10n/app_localizations.dart';
 import 'dart:io';
 
@@ -576,6 +577,7 @@ class FullScreenImagePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        actions: [NextScreen.toolbarButton(context)],
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         elevation: 0,

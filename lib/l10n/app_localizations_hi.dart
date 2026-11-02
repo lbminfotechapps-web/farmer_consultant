@@ -1052,4 +1052,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get scheduleCompleted => 'पूर्ण';
+
+  @override
+  String get successStories => 'सफलता की कहानियाँ';
+
+  @override
+  String get successStoriesEyebrow => 'साथ मिलकर आगे बढ़ें';
+
+  @override
+  String get successStoriesDescription => 'सफल किसानों के सफर और खेती के नए विचार जानें।';
+
+  @override
+  String get exploreStories => 'कहानियाँ देखें';
+
+  @override
+  String get successStoriesEmptyTitle => 'नई कहानियाँ जल्द आएँगी';
+
+  @override
+  String get successStoriesEmptyMessage => 'किसानों की सफलता की कहानियाँ उपलब्ध होने पर यहाँ दिखाई देंगी।';
 }

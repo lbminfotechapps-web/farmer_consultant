@@ -327,5 +327,11 @@
                                                                   }
                                                    }
                               },
-  "scheduleCompleted": "पूर्ण"
+  "scheduleCompleted": "पूर्ण",
+  "successStories": "सफलता की कहानियाँ",
+  "successStoriesEyebrow": "साथ मिलकर आगे बढ़ें",
+  "successStoriesDescription": "सफल किसानों के सफर और खेती के नए विचार जानें।",
+  "exploreStories": "कहानियाँ देखें",
+  "successStoriesEmptyTitle": "नई कहानियाँ जल्द आएँगी",
+  "successStoriesEmptyMessage": "किसानों की सफलता की कहानियाँ उपलब्ध होने पर यहाँ दिखाई देंगी।"
 }

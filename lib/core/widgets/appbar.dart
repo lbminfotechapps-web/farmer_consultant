@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/utility/screen_shot.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
 import 'package:farmer_consultant/core/theme/typography/app_typography_extension.dart';
 import 'package:farmer_consultant/core/theme/theme_picker_sheet.dart';
@@ -147,6 +148,7 @@ class CommonDashboardAppBar extends StatelessWidget
         ),
         actions: [
           ...?actions,
+          NextScreen.toolbarButton(context),
           if (showFilterButton)
             _filterButton(context, foreground, isFilterActive)
           else if (showNotification)
@@ -226,6 +228,7 @@ class CommonDashboardAppBar extends StatelessWidget
       ),
       actions: [
         ...?actions,
+        NextScreen.toolbarButton(context),
         if (showNotification)
           _notificationButton(context, foreground, effectiveBackground),
 
