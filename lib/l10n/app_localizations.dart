@@ -1974,6 +1974,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Completed'**
   String get scheduleCompleted;
+
+  /// No description provided for @successStories.
+  ///
+  /// In en, this message translates to:
+  /// **'Success Stories'**
+  String get successStories;
+
+  /// No description provided for @successStoriesEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Growing together'**
+  String get successStoriesEyebrow;
+
+  /// No description provided for @successStoriesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover the journeys and ideas behind thriving farms.'**
+  String get successStoriesDescription;
+
+  /// No description provided for @exploreStories.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore stories'**
+  String get exploreStories;
+
+  /// No description provided for @successStoriesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New stories are on the way'**
+  String get successStoriesEmptyTitle;
+
+  /// No description provided for @successStoriesEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmer success stories will appear here when available.'**
+  String get successStoriesEmptyMessage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

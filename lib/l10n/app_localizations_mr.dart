@@ -1052,4 +1052,22 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get scheduleCompleted => 'पूर्ण झाले';
+
+  @override
+  String get successStories => 'यशोगाथा';
+
+  @override
+  String get successStoriesEyebrow => 'एकत्र प्रगती करूया';
+
+  @override
+  String get successStoriesDescription => 'यशस्वी शेतकऱ्यांचा प्रवास आणि शेतीतील नव्या कल्पना जाणून घ्या.';
+
+  @override
+  String get exploreStories => 'यशोगाथा पाहा';
+
+  @override
+  String get successStoriesEmptyTitle => 'नवीन यशोगाथा लवकरच येतील';
+
+  @override
+  String get successStoriesEmptyMessage => 'शेतकऱ्यांच्या यशोगाथा उपलब्ध झाल्यावर येथे दिसतील.';
 }

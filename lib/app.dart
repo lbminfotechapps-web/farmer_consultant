@@ -1,3 +1,4 @@
+import 'package:farmer_consultant/core/utility/screen_shot.dart';
 import 'package:farmer_consultant/core/di/login_di.dart';
 import 'package:farmer_consultant/core/localization/language_provider.dart';
 import 'package:farmer_consultant/core/notification/notification_navigation_service.dart';
@@ -88,6 +89,8 @@ class MyApp extends StatelessWidget {
                     final appTheme = AppColor.getLightTheme(selectedPalette);
 
                     return MaterialApp.router(
+                      builder: (context, child) =>
+                          NextScreen(child: child ?? const SizedBox.shrink()),
                       // EXISTING THEME
                       theme: appTheme,
 
