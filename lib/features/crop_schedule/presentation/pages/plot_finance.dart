@@ -1100,14 +1100,7 @@ class _PlotFinanceScreenState extends State<PlotFinanceScreen>
                       ),
                       Expanded(
                         flex: 4,
-                        child: Text(
-                          item.remark,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: _compactStyle(
-                            context.appTextStyles.caption,
-                          ).copyWith(color: ink),
-                        ),
+                        child: _buildRemarkPreview(item.remark),
                       ),
                       SizedBox(
                         width: 28,
@@ -1133,6 +1126,77 @@ class _PlotFinanceScreenState extends State<PlotFinanceScreen>
           }),
         ],
       ),
+    );
+  }
+
+  Widget _buildRemarkPreview(String remark) {
+    final style = _compactStyle(
+      context.appTextStyles.caption,
+    ).copyWith(color: ink);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: remark, style: style),
+          maxLines: 3,
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          locale: Localizations.localeOf(context),
+        )..layout(maxWidth: constraints.maxWidth);
+        final isTruncated = painter.didExceedMaxLines;
+        painter.dispose();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              remark,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: style,
+            ),
+            if (isTruncated)
+              TextButton(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  textStyle: style.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  alignment: AlignmentDirectional.centerStart,
+                ),
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(l10n.financeRemark),
+                    scrollable: true,
+                    content: SelectableText(remark),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(l10n.close),
+                      ),
+                    ],
+                  ),
+                ),
+                child: Text(
+                  style: _compactStyle(
+                            context.appTextStyles.caption,
+                          ).copyWith(color: blue,fontWeight: FontWeight.bold),
+                  switch (Localizations.localeOf(
+                  context,
+                ).languageCode) {
+                  'hi' => 'और देखें',
+                  'mr' => 'अधिक पहा',
+                  _ => 'View more',
+                }),
+              ),
+          ],
+        );
+      },
     );
   }
 

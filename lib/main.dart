@@ -51,5 +51,8 @@ Future<void> main() async {
 
 
   // 5. Start application
-  runApp( MyApp(languageProvider: languageProvider));
+  runApp( 
+    
+    MyApp(languageProvider: languageProvider)
+    );
 }

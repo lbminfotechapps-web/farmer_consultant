@@ -445,7 +445,12 @@ class _FarmerSuccessStoriesState extends State<FarmerSuccessStories> {
           InkWell(
             onTap: canPlay ? openVideo : null,
             child: Padding(
-              padding: const EdgeInsets.only(left: 14, right: 14, top: 14, bottom: 0),
+              padding: const EdgeInsets.only(
+                left: 14,
+                right: 14,
+                top: 14,
+                bottom: 0,
+              ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final narrow = constraints.maxWidth < 260;
