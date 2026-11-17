@@ -26,15 +26,18 @@ class DashboardActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: context.cardBackgroundColor,
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.12),
+      surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: context.borderColor.withValues(alpha: 0.6)),
+        side: BorderSide(color: context.borderColor),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
               Container(

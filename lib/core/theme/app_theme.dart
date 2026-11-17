@@ -68,7 +68,9 @@ class AppColor {
       // MAIN COLORS
       // ========================================================
       primaryColor: palette.primary,
-      scaffoldBackgroundColor: isDark ? Colors.black : Colors.white,
+      scaffoldBackgroundColor: isDark
+          ? const Color(0xFF111418)
+          : palette.background,
 
       canvasColor: isDark ? Colors.black : Colors.white,
       dividerColor: palette.border,
@@ -99,60 +101,59 @@ class AppColor {
       cardTheme: CardThemeData(
         color: palette.cardBackground,
         surfaceTintColor: Colors.transparent,
-        elevation: 2,
+        elevation: 4,
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          side: BorderSide(color: palette.border, width: 0.5),
+          borderRadius: BorderRadius.circular(18.r),
+          side: BorderSide(color: palette.border, width: 1),
         ),
       ),
 
       // ========================================================
       // ELEVATED BUTTONS
       // ========================================================
-     elevatedButtonTheme: ElevatedButtonThemeData(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: palette.primary,
-    foregroundColor: palette.onPrimary,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: palette.primary,
+          foregroundColor: palette.onPrimary,
 
-    textStyle: AppTextStyles.button,
+          textStyle: AppTextStyles.button,
 
-    disabledBackgroundColor:
-        palette.primary.withValues(alpha: 0.35),
+          disabledBackgroundColor: palette.primary.withValues(alpha: 0.35),
 
-    disabledForegroundColor:
-        palette.onPrimary.withValues(alpha: 0.7),
+          disabledForegroundColor: palette.onPrimary.withValues(alpha: 0.7),
 
-    elevation: 2,
+          elevation: 2,
 
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8.r),
-    ),
-  ),
-),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+      ),
 
       // ========================================================
       // TEXT BUTTONS
       // ========================================================
       textButtonTheme: TextButtonThemeData(
-  style: TextButton.styleFrom(
-    foregroundColor: palette.primary,
-    textStyle: AppTextStyles.button,
-  ),
-),
+        style: TextButton.styleFrom(
+          foregroundColor: palette.primary,
+          textStyle: AppTextStyles.button,
+        ),
+      ),
 
       // ========================================================
       // OUTLINED BUTTONS
       // ========================================================
- outlinedButtonTheme: OutlinedButtonThemeData(
-  style: OutlinedButton.styleFrom(
-    foregroundColor: palette.primary,
-    textStyle: AppTextStyles.button,
-    side: BorderSide(color: palette.primary),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8.r),
-    ),
-  ),
-),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: palette.primary,
+          textStyle: AppTextStyles.button,
+          side: BorderSide(color: palette.primary),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+      ),
 
       // ========================================================
       // FLOATING ACTION BUTTON
@@ -169,21 +170,19 @@ class AppColor {
         filled: true,
         fillColor: palette.inputBackground,
 
-  hintStyle: AppTextStyles.inputHint.copyWith(
-  color: palette.textSecondary,
-),
+        hintStyle: AppTextStyles.inputHint.copyWith(
+          color: palette.textSecondary,
+        ),
 
-      labelStyle: AppTextStyles.inputLabel.copyWith(
-  color: palette.textSecondary,
-),
+        labelStyle: AppTextStyles.inputLabel.copyWith(
+          color: palette.textSecondary,
+        ),
 
-      floatingLabelStyle: AppTextStyles.inputLabel.copyWith(
-  color: palette.primary,
-),
+        floatingLabelStyle: AppTextStyles.inputLabel.copyWith(
+          color: palette.primary,
+        ),
 
-errorStyle: AppTextStyles.inputError.copyWith(
-  color: colorScheme.error,
-),
+        errorStyle: AppTextStyles.inputError.copyWith(color: colorScheme.error),
 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
@@ -357,17 +356,17 @@ errorStyle: AppTextStyles.inputError.copyWith(
       // ========================================================
       // DIALOGS AND BOTTOM SHEETS
       // ========================================================
-    dialogTheme: DialogThemeData(
-  backgroundColor: palette.surface,
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.surface,
 
-  titleTextStyle: AppTextStyles.dialogTitle.copyWith(
-    color: palette.onSurface,
-  ),
+        titleTextStyle: AppTextStyles.dialogTitle.copyWith(
+          color: palette.onSurface,
+        ),
 
-  contentTextStyle: AppTextStyles.dialogBody.copyWith(
-    color: palette.onSurface,
-  ),
-),
+        contentTextStyle: AppTextStyles.dialogBody.copyWith(
+          color: palette.onSurface,
+        ),
+      ),
 
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: palette.surface,
