@@ -189,7 +189,10 @@ class _FarmerSuccessStoriesState extends State<FarmerSuccessStories> {
   Widget build(BuildContext context) {
     final colors = _colors;
     return Scaffold(
-      backgroundColor: colors.surfaceContainerLow,
+      backgroundColor: Color.alphaBlend(
+        colors.primary.withValues(alpha: 0.05),
+        colors.surfaceContainerLowest,
+      ),
       appBar: CommonDashboardAppBar(
         title: AppLocalizations.of(context)!.successStories,
         showProfile: false,
@@ -205,29 +208,6 @@ class _FarmerSuccessStoriesState extends State<FarmerSuccessStories> {
         listener: (context, state) => _handleState(state),
         child: Column(
           children: [
-            // Padding(
-            //   padding: const EdgeInsets.fromLTRB(18, 4, 10, 4),
-            //   child: Row(
-            //     children: [
-            //       Expanded(
-            //         child: Text(
-            //           _appliedFromDate.isEmpty && _appliedToDate.isEmpty
-            //               ? 'Farmer experiences'
-            //               : '${_appliedFromDate.isEmpty ? 'Any date' : _appliedFromDate} – ${_appliedToDate.isEmpty ? 'Today' : _appliedToDate}',
-            //           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            //             color: colors.onSurfaceVariant,
-            //           ),
-            //         ),
-            //       ),
-            //       TextButton.icon(
-            //         onPressed: () =>
-            //             setState(() => _showFilters = !_showFilters),
-            //         icon: const Icon(Icons.tune_rounded, size: 18),
-            //         label: Text(_showFilters ? 'Hide filters' : 'Filter dates'),
-            //       ),
-            //     ],
-            //   ),
-            // ),
             if (_showFilters) _buildFilterPanel(),
             Expanded(
               child: RefreshIndicator(onRefresh: _refresh, child: _buildList()),
@@ -386,7 +366,7 @@ class _FarmerSuccessStoriesState extends State<FarmerSuccessStories> {
     return ListView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       itemCount: _stories.length + (_loadingMore || _error != null ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == _stories.length) {
@@ -396,144 +376,172 @@ class _FarmerSuccessStoriesState extends State<FarmerSuccessStories> {
               child: Center(child: CircularProgressIndicator()),
             );
           }
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: TextButton.icon(
-                onPressed: _loadMore,
-                icon: const Icon(Icons.refresh),
-                label: Text(_error ?? AppLocalizations.of(context)!.retry),
-              ),
+
+          return Center(
+            child: TextButton.icon(
+              onPressed: _loadMore,
+              icon: const Icon(Icons.refresh),
+              label: Text(_error ?? AppLocalizations.of(context)!.retry),
             ),
           );
         }
+
         return _storyCard(_stories[index]);
       },
     );
   }
 
   Widget _storyCard(SuccessStoryItemEntity story) {
-    final colors = _colors;
+    final colors = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+
     final url = story.videoUrl.trim();
     final uri = Uri.tryParse(url);
+
     final canPlay =
         uri != null &&
         uri.host.isNotEmpty &&
         (uri.scheme == 'http' || uri.scheme == 'https');
+
     final crops = story.cropNames
         .split(',')
         .map((name) => name.trim())
         .where((name) => name.isNotEmpty)
         .toList();
-    void openVideo() => Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => SuccessStoryVideoPage(url: url)));
+
+    final farmerName = story.farmerName.trim().isEmpty
+        ? AppLocalizations.of(context)!.storiesFarmer
+        : story.farmerName.trim();
+
+    void openVideo() {
+      if (!canPlay) return;
+
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => SuccessStoryVideoPage(url: url)),
+      );
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
-      elevation: 0,
+      elevation: 5,
+      shadowColor: Colors.black.withValues(alpha: 0.18),
+      surfaceTintColor: Colors.transparent,
       color: colors.surfaceContainerLowest,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.45)),
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: colors.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // LARGE VIDEO PREVIEW
           InkWell(
             onTap: canPlay ? openVideo : null,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 14,
-                right: 14,
-                top: 14,
-                bottom: 0,
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final narrow = constraints.maxWidth < 260;
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: narrow ? 84 : 108,
-                        height: narrow ? 76 : 86,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: _StoryVideoPreview(
-                            key: ValueKey(url),
-                            url: canPlay ? url : '',
-                          ),
+            child: SizedBox(
+              height: 156,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _StoryVideoPreview(
+                    key: ValueKey(url),
+                    url: canPlay ? url : '',
+                  ),
+
+                  if (canPlay)
+                    Positioned(
+                      bottom: 12,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
+                            Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
                             Text(
-                              story.farmerName.trim().isEmpty
-                                  ? AppLocalizations.of(context)!.storiesFarmer
-                                  : story.farmerName.trim(),
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                height: 1.2,
+                              'Watch Story',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            if (story.createdDate.trim().isNotEmpty) ...[
-                              const SizedBox(height: 5),
-                              Text(
-                                story.createdDate.trim(),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colors.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 8),
-                            // Row(
-                            //   children: [
-                            //     // Flexible(
-                            //     //   child: Text(
-                            //     //     canPlay
-                            //     //         ? 'Watch story'
-                            //     //         : 'Video unavailable',
-                            //     //     style: theme.textTheme.labelMedium
-                            //     //         ?.copyWith(
-                            //     //           color: canPlay
-                            //     //               ? colors.primary
-                            //     //               : colors.onSurfaceVariant,
-                            //     //           fontWeight: FontWeight.w700,
-                            //     //         ),
-                            //     //   ),
-                            //     // ),
-                            //     if (canPlay) ...[
-                            //       const SizedBox(width: 4),
-                            //       Icon(
-                            //         Icons.arrow_forward_rounded,
-                            //         size: 14,
-                            //         color: colors.primary,
-                            //       ),
-                            //     ],
-                            //   ],
-                            // ),
                           ],
                         ),
                       ),
-                    ],
-                  );
-                },
+                    ),
+                ],
               ),
             ),
           ),
+
+          // FARMER INFORMATION
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 2,
+            ),
+            leading: CircleAvatar(
+              backgroundColor: colors.primaryContainer,
+              child: Icon(
+                Icons.person_outline_rounded,
+                color: colors.onPrimaryContainer,
+              ),
+            ),
+            title: Text(
+              farmerName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: story.createdDate.trim().isEmpty
+                ? null
+                : Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      story.createdDate.trim(),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+            trailing: canPlay
+                ? Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: colors.primary,
+                    size: 18,
+                  )
+                : null,
+            onTap: canPlay ? openVideo : null,
+          ),
+
+          // CROP AND PRODUCT DETAILS
           if (crops.isNotEmpty || story.usedProduct.trim().isNotEmpty)
             Container(
-              margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: colors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
+                color: Color.alphaBlend(
+                  colors.primary.withValues(alpha: 0.06),
+                  colors.surfaceContainerLowest,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: colors.outlineVariant),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,53 +551,72 @@ class _FarmerSuccessStoriesState extends State<FarmerSuccessStories> {
                       Icons.eco_outlined,
                       AppLocalizations.of(context)!.storiesCropName,
                     ),
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 8),
+
                     Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        for (final crop in crops)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 5,
+                      spacing: 7,
+                      runSpacing: 7,
+                      children: crops.map((crop) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 11,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.primaryContainer.withValues(
+                              alpha: 0.55,
                             ),
-                            decoration: BoxDecoration(
-                              color: colors.surfaceContainerLowest,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: colors.outlineVariant.withValues(
-                                  alpha: 0.5,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              crop,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                height: 1.4,
-                              ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            crop,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.onSurface,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                      ],
+                        );
+                      }).toList(),
                     ),
                   ],
+
                   if (story.usedProduct.trim().isNotEmpty) ...[
-                    if (crops.isNotEmpty) const SizedBox(height: 12),
+                    if (crops.isNotEmpty) const SizedBox(height: 8),
+
                     _fieldLabel(
                       Icons.inventory_2_outlined,
                       AppLocalizations.of(context)!.storiesProductName,
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
+
                     Text(
                       story.usedProduct.trim(),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
-                        height: 1.35,
                       ),
                     ),
                   ],
                 ],
+              ),
+            ),
+
+          // WATCH VIDEO BUTTON
+          if (canPlay)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: openVideo,
+                  icon: const Icon(Icons.play_circle_outline_rounded),
+                  label: const Text('Watch Success Story'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
             ),
         ],

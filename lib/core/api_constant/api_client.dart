@@ -1,6 +1,7 @@
 class ApiClient {
   static const String baseUrl =
-      "https://agroaicrm.com/solufine_agritech/mobileapi/Mobile_app_for_businessplus_kotlin_new";
+    //   "http://192.168.1.253:85/solufine_agritech/mobileapi/Mobile_app_for_businessplus_kotlin_new";
+  "https://agroaicrm.com/solufine_agritech/mobileapi/Mobile_app_for_businessplus_kotlin_new";
 
   static const String imageBaseUrl =
       "https://agroaicrm.com/solufine_agritech/uploads/";

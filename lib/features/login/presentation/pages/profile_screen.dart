@@ -8,6 +8,7 @@ import 'package:farmer_consultant/core/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // Add your existing imports for:
 // SecureStorage
@@ -27,7 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _address = '';
   String _taluka = '';
   String _state = '';
-
+String _appVersion = '';
+String _buildNumber = '';
   bool _isLoading = true;
   bool _addressExpanded = false;
   bool _savingLanguage = false;
@@ -49,7 +51,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) setState(() => _isLoggingOut = false);
     }
   }
+@override
+void initState() {
+  super.initState();
+  _loadProfile();
+  _loadAppVersion();
+}
 
+Future<void> _loadAppVersion() async {
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    if (!mounted) return;
+
+    setState(() {
+      _appVersion = packageInfo.version;
+      _buildNumber = packageInfo.buildNumber;
+    });
+
+    debugPrint('APP VERSION: $_appVersion');
+    debugPrint('BUILD NUMBER: $_buildNumber');
+  } catch (e) {
+    debugPrint('APP VERSION ERROR: $e');
+  }
+}
   static const _languages = [
     (code: 'en', name: 'English', subtitle: 'English'),
     (code: 'mr', name: 'मराठी', subtitle: 'Marathi'),
@@ -182,11 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-  }
+
 
   Future<void> _loadProfile() async {
     if (mounted) {
@@ -450,6 +471,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             },
           ),
+
+          _divider(),
+
+_profileItem(
+  Icons.info_outline_rounded,
+  'App Version',
+  _appVersion.isEmpty ? '' : '$_appVersion ($_buildNumber)',
+),
         ],
       ),
     );
