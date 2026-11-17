@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
+
+import 'package:audioplayers/audioplayers.dart';
+import 'package:path_provider/path_provider.dart';
+
 class VoiceRemarkField extends StatefulWidget {
   final TextEditingController remarkController;
   final bool isLoading;
