@@ -1,13 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
+import 'package:farmer_consultant/core/api_constant/api_client.dart';
 import 'package:farmer_consultant/core/secure_storage/secure_storage.dart';
+import 'package:farmer_consultant/core/utility/voice_remark_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Use NextScreen inside a MaterialApp route.
+/// If wrapping MaterialApp for app-wide screenshots, call toolbarButton
+/// from a context inside the Navigator so the dialog can open.
 class NextScreen extends StatefulWidget {
   final Widget? child;
 
@@ -16,11 +22,10 @@ class NextScreen extends StatefulWidget {
   static Widget toolbarButton(BuildContext context) {
     final state = context.findAncestorStateOfType<_NextScreenState>();
     if (state == null) return const SizedBox.shrink();
+
     return IconButton(
       tooltip: 'Take Screenshot',
-      onPressed: state.isCapturing
-          ? null
-          : () => state.captureScreenshot(context),
+      onPressed: state.isCapturing ? null : () => state.captureScreenshot(context),
       icon: const Icon(Icons.screenshot_rounded),
     );
   }
@@ -30,361 +35,101 @@ class NextScreen extends StatefulWidget {
 }
 
 class _NextScreenState extends State<NextScreen> {
+  // Create the key ONCE, never inside build().
   final GlobalKey _screenshotKey = GlobalKey();
-
   bool isCapturing = false;
-  static const String sendScreenShotApi =
-      'https://agroaicrm.com/solufine_agritech/mobileapi/Mobile_app_for_businessplus_kotlin_new/add_screenshot';
 
-  // CAPTURE SCREENSHOT
   Future<void> captureScreenshot([BuildContext? sourceContext]) async {
-    final captureContext = sourceContext ?? context;
-    if (isCapturing) return;
+    if (isCapturing || !mounted) return;
 
-    setState(() {
-      isCapturing = true;
-    });
+    // The wrapper's own context may be ABOVE MaterialApp/Navigator.
+    // Prefer the triggering button context (which lives inside a route).
+    final navigator = Navigator.maybeOf(sourceContext ?? context) ??
+        Navigator.maybeOf(context);
+    if (navigator == null) {
+      debugPrint('SCREENSHOT ERROR: No Navigator found. Pass a button '
+          'context inside MaterialApp, or place NextScreen inside a route.');
+      return;
+    }
+
+    isCapturing = true;
 
     try {
-      // Wait until the loading state is rendered.
+      // Wait until layout and paint have finished before reading the boundary.
       await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
 
-      final boundary =
-          _screenshotKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-
-      if (boundary == null) {
-        throw Exception('Screenshot boundary not found');
+      final renderObject =
+          _screenshotKey.currentContext?.findRenderObject();
+      if (renderObject is! RenderRepaintBoundary || !renderObject.attached) {
+        throw StateError('Screenshot boundary is not ready');
       }
 
-      final ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+      if (renderObject.debugNeedsPaint) {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted) return;
+      }
 
-      final ByteData? byteData = await image.toByteData(
-        format: ui.ImageByteFormat.png,
+      final currentObject =
+          _screenshotKey.currentContext?.findRenderObject();
+      if (currentObject is! RenderRepaintBoundary ||
+          !currentObject.attached ||
+          currentObject.debugNeedsPaint) {
+        throw StateError('Screenshot is still being painted. Try again.');
+      }
+
+      final ui.Image image = await currentObject.toImage(pixelRatio: 2.0);
+      Uint8List bytes;
+      try {
+        final ByteData? data =
+            await image.toByteData(format: ui.ImageByteFormat.png);
+        if (data == null) throw StateError('Could not encode screenshot');
+        bytes = data.buffer.asUint8List();
+      } finally {
+        image.dispose();
+      }
+
+      if (!mounted || !navigator.mounted) return;
+
+      // Navigator context is guaranteed to be within the Navigator's tree.
+      await showDialog<void>(
+        context: navigator.context,
+        barrierDismissible: false,
+        builder: (_) => _ScreenshotDialog(
+          screenshotBytes: bytes,
+          upload: uploadScreenshot,
+        ),
       );
-
-      image.dispose();
-
-      if (byteData == null) {
-        throw Exception('Unable to capture screenshot');
+    } catch (e, stack) {
+      debugPrint('SCREENSHOT ERROR: $e\n$stack');
+      if (mounted && navigator.mounted) {
+        ScaffoldMessenger.maybeOf(navigator.context)?.showSnackBar(
+          SnackBar(content: Text('Screenshot failed: $e')),
+        );
       }
-
-      final Uint8List screenshotBytes = byteData.buffer.asUint8List();
-
-      if (!mounted || !captureContext.mounted) return;
-
-      setState(() {
-        isCapturing = false;
-      });
-
-      showScreenshotDialog(screenshotBytes, captureContext);
-    } catch (e) {
-      if (!mounted || !captureContext.mounted) return;
-
-      setState(() {
-        isCapturing = false;
-      });
-
-      ScaffoldMessenger.of(
-        captureContext,
-      ).showSnackBar(SnackBar(content: Text('Screenshot failed: $e')));
+    } finally {
+      isCapturing = false;
     }
   }
 
-  // SHOW SCREENSHOT POPUP
-
-  void showScreenshotDialog(
+  // Preserved for existing callers that invoke this method directly.
+  Future<void> showScreenshotDialog(
     Uint8List screenshotBytes,
     BuildContext sourceContext,
-  ) {
-    final TextEditingController remarkController = TextEditingController();
-
-    bool isLoading = false;
-
-    showDialog<void>(
-      context: sourceContext,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            // COMMON API CALL FOR SUBMIT AND SHARE
-            Future<void> handleScreenshot({
-              required bool shareAfterUpload,
-            }) async {
-              if (isLoading) return;
-
-              final String remark = remarkController.text.trim();
-
-              // VALIDATE REMARK
-              if (remark.isEmpty) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  const SnackBar(content: Text('Please enter remark')),
-                );
-                return;
-              }
-
-              /*if (widget.userId.trim().isEmpty) {
-                ScaffoldMessenger.of(dialogContext)
-                    .showSnackBar(
-                  const SnackBar(
-                    content: Text('User ID is missing'),
-                  ),
-                );
-                return;
-              }*/
-
-              setDialogState(() {
-                isLoading = true;
-              });
-
-              try {
-                // STEP 1: CALL MULTIPART API
-                final bool isSuccess = await uploadScreenshot(
-                  remark: remark,
-                  userId: await SecureStorage.instance.getFarmerId(),
-                  screenshotBytes: screenshotBytes,
-                );
-
-                if (!dialogContext.mounted) return;
-
-                // STEP 2: CHECK API RESPONSE
-                if (!isSuccess) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Screenshot upload failed. Please try again.',
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                // STEP 3: SUBMIT ONLY
-                if (!shareAfterUpload) {
-                  Navigator.pop(dialogContext);
-
-                  if (sourceContext.mounted) {
-                    ScaffoldMessenger.of(sourceContext).showSnackBar(
-                      const SnackBar(
-                        content: Text('Screenshot uploaded successfully'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                  return;
-                }
-
-                // STEP 4: SHARE AFTER API SUCCESS
-                debugPrint('API SUCCESS - OPENING SHARE SHEET');
-
-                final String fileName =
-                    'screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
-
-                await SharePlus.instance.share(
-                  ShareParams(
-                    text: remark,
-                    files: [
-                      XFile.fromData(screenshotBytes, mimeType: 'image/png'),
-                    ],
-                    fileNameOverrides: [fileName],
-                  ),
-                );
-
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-              } catch (e) {
-                debugPrint('SCREENSHOT UPLOAD / SHARE ERROR: $e');
-
-                if (dialogContext.mounted) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(
-                      content: Text('Something went wrong: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              } finally {
-                if (dialogContext.mounted) {
-                  setDialogState(() {
-                    isLoading = false;
-                  });
-                }
-              }
-            }
-
-            return Dialog(
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 20,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: SizedBox(
-                  height: MediaQuery.sizeOf(dialogContext).height * 0.80,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // HEADER
-                      const Center(
-                        child: Text(
-                          'Screenshot Preview',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // SCREENSHOT PREVIEW
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.memory(
-                              screenshotBytes,
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.contain,
-                              filterQuality: FilterQuality.high,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // REMARK LABEL
-                      const Text(
-                        'Remark',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1E293B),
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // REMARK TEXT FIELD
-                      TextField(
-                        controller: remarkController,
-                        enabled: !isLoading,
-                        textCapitalization: TextCapitalization.sentences,
-                        minLines: 2,
-                        maxLines: 3,
-                        maxLength: 500,
-                        decoration: InputDecoration(
-                          hintText: 'Enter your remark here...',
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 13,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.edit_note_rounded,
-                            color: Colors.blue,
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.blue,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // SUBMIT AND SHARE BUTTONS
-                      Row(
-                        children: [
-                          // SUBMIT BUTTON
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () => handleScreenshot(
-                                      shareAfterUpload: false,
-                                    ),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 13,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text('Submit'),
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          // SHARE BUTTON
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: isLoading
-                                  ? null
-                                  : () => handleScreenshot(
-                                      shareAfterUpload: true,
-                                    ),
-                              icon: const Icon(Icons.share_rounded, size: 18),
-                              label: const Text('Share'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 13,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+  ) async {
+    if (!mounted) return;
+    final navigator = Navigator.maybeOf(sourceContext) ?? Navigator.maybeOf(context);
+    if (navigator == null || !navigator.mounted) {
+      debugPrint('Cannot show screenshot dialog: Navigator not found');
+      return;
+    }
+    await showDialog<void>(
+      context: navigator.context,
+      barrierDismissible: false,
+      builder: (_) => _ScreenshotDialog(
+        screenshotBytes: screenshotBytes,
+        upload: uploadScreenshot,
+      ),
     );
   }
 
@@ -392,12 +137,14 @@ class _NextScreenState extends State<NextScreen> {
     required String remark,
     required String userId,
     required Uint8List screenshotBytes,
+    String? voiceRemarkPath,
   }) async {
-    const String apiUrl =
-        'https://agroaicrm.com/solufine_agritech/mobileapi/'
-        'Mobile_app_for_businessplus_kotlin_new/add_screenshot';
+    // Keep your current development endpoint. Switch to HTTPS public endpoint
+    // for production and verify backend support for the voice_remark field.
+    const apiUrl =
+        ApiClient.baseUrl;
 
-    final Dio dio = Dio(
+    final dio = Dio(
       BaseOptions(
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 60),
@@ -407,97 +154,86 @@ class _NextScreenState extends State<NextScreen> {
 
     try {
       if (userId.trim().isEmpty) {
-        debugPrint('User ID is missing');
+        debugPrint('UPLOAD: userId missing');
         return false;
       }
 
-      final String fileName =
-          'screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
-
-      // CREATE MULTIPART REQUEST
-      final FormData formData = FormData.fromMap({
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final screenshotFileName = 'screenshot_$now.png';
+      final values = <String, dynamic>{
         'remark': remark,
         'userId': userId,
         'screenshot_photo': MultipartFile.fromBytes(
           screenshotBytes,
-          filename: fileName,
+          filename: screenshotFileName,
           contentType: DioMediaType('image', 'png'),
         ),
-      });
+      };
 
-      debugPrint('======================================');
-      debugPrint('ADD SCREENSHOT API PARAMETERS');
+      if (voiceRemarkPath != null && voiceRemarkPath.trim().isNotEmpty) {
+        final audioFile = File(voiceRemarkPath);
+        if (!await audioFile.exists() || await audioFile.length() == 0) {
+          debugPrint('UPLOAD: missing or empty audio: $voiceRemarkPath');
+          return false;
+        }
+        values['voice_remark'] = await MultipartFile.fromFile(
+          voiceRemarkPath,
+          filename: 'voice_remark_$now.m4a',
+          contentType: DioMediaType('audio', 'mp4'),
+        );
+      }
+
+      debugPrint('==== ADD SCREENSHOT REQUEST ====');
       debugPrint('remark: $remark');
       debugPrint('userId: $userId');
-      debugPrint('screenshot_photo: $fileName');
-      debugPrint('Screenshot size: ${screenshotBytes.length} bytes');
-      debugPrint('======================================');
+      debugPrint('screenshot_photo: $screenshotFileName');
+      debugPrint('screenshotBytes: ${screenshotBytes.length}');
+      debugPrint('voice_remark: ${voiceRemarkPath ?? 'none'}');
 
-      // CALL API
-      final Response response = await dio.post(
-        apiUrl,
-        data: formData,
+      final response = await dio.post(
+        apiUrl+"addScreenshot",
+        data: FormData.fromMap(values),
         options: Options(
           contentType: Headers.multipartFormDataContentType,
           responseType: ResponseType.json,
         ),
       );
 
-      debugPrint('======================================');
-      debugPrint('ADD SCREENSHOT API RESPONSE');
-      debugPrint('HTTP STATUS: ${response.statusCode}');
-      debugPrint('RESPONSE: ${response.data}');
-      debugPrint('RESPONSE TYPE: ${response.data.runtimeType}');
-      debugPrint('======================================');
+      debugPrint('==== ADD SCREENSHOT RESPONSE ====');
+      debugPrint('HTTP: ${response.statusCode}');
+      debugPrint('Response: ${response.data}');
 
-      // HANDLE STRING AND MAP RESPONSE
-      dynamic data = response.data;
-
-      if (data is String) {
-        data = jsonDecode(data);
-      }
-
-      if (data is Map) {
-        final dynamic status = data['status'];
-        final String message = data['message']?.toString() ?? '';
-
-        debugPrint('API STATUS: $status');
-        debugPrint('API MESSAGE: $message');
-
-        if (status == true ||
-            status == 1 ||
-            status.toString().toLowerCase() == 'true') {
-          debugPrint('SCREENSHOT UPLOADED SUCCESSFULLY');
-          return true;
-        }
-
-        debugPrint('SCREENSHOT UPLOAD FAILED: $message');
-        return false;
-      }
-
-      debugPrint('Unexpected API response format: ${data.runtimeType}');
-
-      return false;
+      dynamic body = response.data;
+      if (body is String) body = jsonDecode(body);
+      if (body is! Map) return false;
+      final status = body['status'];
+      debugPrint('API message: ${body['message']}');
+      return status == true ||
+          status == 1 ||
+          status.toString().toLowerCase() == 'true' ||
+          status.toString() == '1';
     } on DioException catch (e) {
-      debugPrint('DIO ERROR: ${e.message}');
-      debugPrint('STATUS CODE: ${e.response?.statusCode}');
-      debugPrint('ERROR RESPONSE: ${e.response?.data}');
+      debugPrint('Dio error: ${e.message}');
+      debugPrint('HTTP status: ${e.response?.statusCode}');
+      debugPrint('Error response: ${e.response?.data}');
       return false;
-    } catch (e) {
-      debugPrint('SCREENSHOT UPLOAD ERROR: $e');
+    } catch (e, stack) {
+      debugPrint('Upload error: $e\n$stack');
       return false;
+    } finally {
+      dio.close();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Keep the boundary mounted and keyed across captures/dialog changes.
+    // Important: widget.child must be a normal screen/subtree, NOT MaterialApp.
     return RepaintBoundary(
       key: _screenshotKey,
-      child:
-          widget.child ??
+      child: widget.child ??
           Scaffold(
             backgroundColor: const Color(0xFFF5F7FB),
-
             appBar: AppBar(
               title: const Text('Next Screen'),
               backgroundColor: Colors.blue,
@@ -505,20 +241,249 @@ class _NextScreenState extends State<NextScreen> {
               actions: [
                 IconButton(
                   tooltip: 'Take Screenshot',
-                  onPressed: isCapturing ? null : captureScreenshot,
-                  icon: const Icon(Icons.camera_alt_outlined, size: 24),
+                  onPressed: isCapturing ? null : () => captureScreenshot(context),
+                  icon: const Icon(Icons.camera_alt_outlined),
                 ),
-                const SizedBox(width: 8),
               ],
             ),
-
             body: const Center(
-              child: Text(
-                'Welcome to Next Screen',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
+              child: Text('Welcome to Next Screen'),
             ),
           ),
+    );
+  }
+}
+
+typedef _ScreenshotUpload = Future<bool> Function({
+  required String remark,
+  required String userId,
+  required Uint8List screenshotBytes,
+  String? voiceRemarkPath,
+});
+
+class _ScreenshotDialog extends StatefulWidget {
+  final Uint8List screenshotBytes;
+  final _ScreenshotUpload upload;
+
+  const _ScreenshotDialog({
+    required this.screenshotBytes,
+    required this.upload,
+  });
+
+  @override
+  State<_ScreenshotDialog> createState() => _ScreenshotDialogState();
+}
+
+class _ScreenshotDialogState extends State<_ScreenshotDialog> {
+  final TextEditingController _remarkController = TextEditingController();
+  bool _isLoading = false;
+  String? _voiceRemarkPath;
+
+  void _showMessage(String message, {bool success = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+  }
+
+  Future<void> _handleScreenshot({required bool shareAfterUpload}) async {
+    if (_isLoading) return;
+    final remark = _remarkController.text.trim();
+    final audioPath = _voiceRemarkPath;
+
+    if (remark.isEmpty && audioPath == null) {
+      _showMessage('Please enter remark or record voice');
+      return;
+    }
+
+    // If recording has started but not stopped, audioPath is still null.
+    // The user must stop recording before submitting.
+    if (audioPath != null && !await File(audioPath).exists()) {
+      _showMessage('Voice recording file not found');
+      return;
+    }
+    if (!mounted) return;
+
+    setState(() => _isLoading = true);
+    bool shouldClose = false;
+    String? successMessage;
+
+    try {
+      final userId = await SecureStorage.instance.getFarmerId();
+      if (!mounted) return;
+      if (userId.trim().isEmpty) {
+        _showMessage('User ID is missing');
+        return;
+      }
+
+      final uploaded = await widget.upload(
+        remark: remark,
+        userId: userId,
+        screenshotBytes: widget.screenshotBytes,
+        voiceRemarkPath: audioPath,
+      );
+      if (!mounted) return;
+
+      if (!uploaded) {
+        _showMessage('Screenshot upload failed. Please try again.');
+        return;
+      }
+
+      if (shareAfterUpload) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final files = <XFile>[
+          XFile.fromData(widget.screenshotBytes, mimeType: 'image/png'),
+        ];
+        final names = <String>['screenshot_$now.png'];
+
+        if (audioPath != null && await File(audioPath).exists()) {
+          files.add(XFile(audioPath, mimeType: 'audio/mp4'));
+          names.add('voice_remark_$now.m4a');
+        }
+        if (!mounted) return;
+        await SharePlus.instance.share(
+          ShareParams(
+            text: remark.isEmpty ? null : remark,
+            files: files,
+            fileNameOverrides: names,
+          ),
+        );
+        if (!mounted) return;
+      } else {
+        successMessage = 'Screenshot and remark uploaded successfully';
+      }
+
+      shouldClose = true;
+    } catch (e, stack) {
+      debugPrint('SCREENSHOT / SHARE ERROR: $e\n$stack');
+      _showMessage('Something went wrong: $e');
+    } finally {
+      if (mounted) {
+        // One update while mounted; NEVER update State after Navigator.pop.
+        setState(() => _isLoading = false);
+      }
+    }
+
+    if (shouldClose && mounted) {
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      Navigator.of(context).pop();
+      if (successMessage != null) {
+        messenger?.showSnackBar(
+          SnackBar(
+            content: Text(successMessage),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _remarkController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final availableHeight = MediaQuery.sizeOf(context).height -
+        MediaQuery.viewInsetsOf(context).bottom - 40;
+
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: availableHeight.clamp(1.0, double.infinity)),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: Text(
+                  'Screenshot Preview',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                height: 210,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    widget.screenshotBytes,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Remark',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+              const SizedBox(height: 8),
+              VoiceRemarkField(
+                remarkController: _remarkController,
+                isLoading: _isLoading,
+                onAudioChanged: (path) {
+                  if (!mounted) return;
+                  setState(() => _voiceRemarkPath = path);
+                  debugPrint('Voice remark: ${path ?? 'removed'}');
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () => _handleScreenshot(shareAfterUpload: false),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Submit'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading
+                          ? null
+                          : () => _handleScreenshot(shareAfterUpload: true),
+                      icon: const Icon(Icons.share_rounded, size: 18),
+                      label: const Text('Share'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
